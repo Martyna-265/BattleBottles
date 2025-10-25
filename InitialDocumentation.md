@@ -1,5 +1,4 @@
 ﻿# Battle Bottles -  Initial documentation
----
 
 ## Project description
 _Battle Bottles_ is a Flutter application inspired by the classic battleships game, where players take command of miniature crews navigating tiny bottles across dynamic battlefields. Players can compete against the computer or challenge friends in multiplayer mode. I'm hoping to offer some rules changes according to the chosen difficulty level of the game.
