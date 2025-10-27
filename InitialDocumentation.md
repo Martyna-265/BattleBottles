@@ -8,14 +8,13 @@ _Battle Bottles_ is a Flutter application inspired by the classic battleships ga
 - Adding a strategic aspect to the story mode of the game, when you have to choose how many "ships" to send into battle, which can have consequences affecting future games.
 - New rules, obstacles and power-ups.
 - Tracking statistics including wins, losses, and other gameplay metrics.
-- Money and shopping system.
 - Support for web or desktop.
 
 ## User stories
 - As a user, I want to play a game against the computer or friends so that I can enjoy single-player and multiplayer experiences.
 - As a user, I want to place my ships strategically on the grid so that I can plan my attacks effectively.
-- As a user, I want to receive feedback when I hit or miss an opponent’s ship so that I can adjust my strategy.
-- As a user, I want to have different types of ships with unique sizes and abilities so that gameplay is more varied.
+- As a user, I want to receive information when I hit or miss an opponent’s ship so that I can adjust my strategy.
+- As a user, I want to have different types of ships with unique sizes so that gameplay is more varied.
 - As a user, I want to know the status of my ships (intact, damaged, sunk) so that I can track the progress of the game.
 - As a user, I want to play on grids of different sizes so that I can have short and long matches.
 - As a user, I want ot sign in and save my progress so that I can continue my game later.
