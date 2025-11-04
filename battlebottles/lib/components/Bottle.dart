@@ -1,17 +1,19 @@
 import 'dart:ui';
-import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:battlebottles/components/GridElement.dart';
 
-class Bottle extends PositionComponent{
+class Bottle extends GridElement{
 
-  Bottle(int intSize)
+  Bottle(super.gridX, super.gridY, int intSize, bool opponent)
       : //condition = Condition.fromInt(intCondition),
-        condition = Condition.fromInt(0),
-        super(size: BattleShipsGame.bottleSize);
+        opponent = opponent,
+        super(condition: Condition.fromInt(0));
 
   //final Size/Level size;
-  final Condition condition;
+  final bool opponent;
+  late Sprite? sprite = opponent ? Condition.fromInt(3).sprite : condition.sprite;
 
   @override
   String toString() {
@@ -19,16 +21,11 @@ class Bottle extends PositionComponent{
   }
 
   @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-
-    final Sprite sprite = condition.sprite;
-    sprite.render(
-        canvas,
-        position: size / 2,
-        anchor: Anchor.center,
-        size: size,
-      );
+  void onTapUp(TapUpEvent event) {
+    if (condition.value < 2) {
+      condition = Condition.fromInt(condition.value + 1);
+      sprite = condition.sprite;
+    }
   }
 
 }

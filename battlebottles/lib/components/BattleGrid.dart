@@ -1,17 +1,20 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flutter/rendering.dart';
 import '../BattleShipsGame.dart';
+import 'Bottle.dart';
+import 'Water.dart';
 
 class BattleGrid extends PositionComponent {
 
-  BattleGrid()
+  BattleGrid(bool opponent)
         : squaresInGrid = BattleShipsGame.squaresInGrid,
+        opponent = opponent,
         super(size: Vector2(BattleShipsGame.battleGridWidth, BattleShipsGame.battleGridHeight));
 
   final int squaresInGrid;
-
-  @override
-  bool get debugMode => false;
+  final bool opponent;
 
   static final Paint blueBackgroundPaint = Paint()
     ..color = const Color(0xff7aa3cc);
@@ -19,6 +22,24 @@ class BattleGrid extends PositionComponent {
     ..color = const Color(0xff000000)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 0.08;
+
+  @override
+  Future<void> onLoad() async {
+    final random = Random();
+
+    for (int y = 0; y < squaresInGrid; y++) {
+      for (int x = 0; x < squaresInGrid; x++) {
+        final bool isBottle = random.nextDouble() < 0.1;
+
+        final square = isBottle ? Bottle(x, y, 0, opponent) : Water(x, y);
+        square.position = Vector2(
+          x * BattleShipsGame.squareLength,
+          y * BattleShipsGame.squareLength,
+        );
+        add(square);
+      }
+    }
+  }
 
   @override
   void render(Canvas canvas) {
