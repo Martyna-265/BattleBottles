@@ -1,12 +1,12 @@
-import 'dart:math';
 import 'dart:ui';
 
+import 'package:battlebottles/TurnManager.dart';
 import 'package:battlebottles/components/BattleGrid.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
 
-import 'components/Bottle.dart';
+import 'components/Buttons/StartButton.dart';
 
 class BattleShipsGame extends FlameGame {
 
@@ -18,37 +18,39 @@ class BattleShipsGame extends FlameGame {
   static final Vector2 battleGridSize = Vector2(battleGridWidth, battleGridHeight);
   static const double gap = 10.0;
 
+  static const bottleCount = 10;
+
+  late TurnManager turnManager;
+  late BattleGrid playersGrid;
+  late BattleGrid opponentsGrid;
+
   @override
   Color backgroundColor() => const Color(0xff84afdb);
-
 
   @override
   Future<void> onLoad() async {
     await Flame.images.load('Bottle1x1.png');
+    turnManager = TurnManager(2, this);
 
-    final BattleGrid playersGrid = BattleGrid(false)
+    playersGrid = BattleGrid(false, bottleCount)
     ..size = battleGridSize
     ..position = Vector2(gap, gap);
-    final BattleGrid opponentsGrid = BattleGrid(true)
+    opponentsGrid = BattleGrid(true, bottleCount)
       ..size = battleGridSize
       ..position = Vector2(gap + battleGridWidth + gap, gap);
 
     world.add(playersGrid);
     world.add(opponentsGrid);
 
+    final startButton = StartButton()
+      ..position = Vector2(battleGridWidth + gap, gap / 2)
+      ..anchor = Anchor.center;
+    world.add(startButton);
+
     camera.viewfinder.visibleGameSize =
         Vector2(battleGridWidth + 2 * gap, battleGridHeight + 2 * gap);
     camera.viewfinder.position = Vector2(battleGridWidth + gap + gap/2, 0);
     camera.viewfinder.anchor = Anchor.topCenter;
-
-    // final random = Random();
-    // for (var i = 0; i < 7; i++) {
-    //     final bottle = Bottle(1)
-    //       ..position = opponentsGrid.position +
-    //           Vector2(random.nextInt(squaresInGrid) * squareLength, random.nextInt(squaresInGrid) * squareLength)
-    //       ..addToParent(world);
-    //     print(bottle.position);
-    // }
 
   }
 

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:battlebottles/components/GridElement.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/rendering.dart';
 import '../BattleShipsGame.dart';
@@ -8,13 +9,16 @@ import 'Water.dart';
 
 class BattleGrid extends PositionComponent {
 
-  BattleGrid(bool opponent)
+  BattleGrid(bool opponent, int bottleCount)
         : squaresInGrid = BattleShipsGame.squaresInGrid,
         opponent = opponent,
+        bottleCount = bottleCount,
         super(size: Vector2(BattleShipsGame.battleGridWidth, BattleShipsGame.battleGridHeight));
 
   final int squaresInGrid;
   final bool opponent;
+  late List<List<GridElement?>> grid;
+  final int bottleCount;
 
   static final Paint blueBackgroundPaint = Paint()
     ..color = const Color(0xff7aa3cc);
@@ -25,17 +29,35 @@ class BattleGrid extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
+    grid = List.generate(
+      squaresInGrid,
+          (_) => List.filled(squaresInGrid, null, growable: false),
+      growable: false,
+    );
+
     final random = Random();
+    final Set<Point<int>> bottlePositions = {};
+
+    while (bottlePositions.length < bottleCount) {
+      final x = random.nextInt(squaresInGrid);
+      final y = random.nextInt(squaresInGrid);
+      bottlePositions.add(Point(x, y));
+    }
 
     for (int y = 0; y < squaresInGrid; y++) {
       for (int x = 0; x < squaresInGrid; x++) {
-        final bool isBottle = random.nextDouble() < 0.1;
+        final bool isBottle = bottlePositions.contains(Point(x, y));
 
-        final square = isBottle ? Bottle(x, y, 0, opponent) : Water(x, y);
+        final GridElement square = isBottle
+            ? Bottle(x, y, 0, opponent)
+            : Water(x, y, opponent);
+
         square.position = Vector2(
           x * BattleShipsGame.squareLength,
           y * BattleShipsGame.squareLength,
         );
+
+        grid[y][x] = square;
         add(square);
       }
     }

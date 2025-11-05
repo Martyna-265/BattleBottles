@@ -4,14 +4,16 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import '../BattleShipsGame.dart';
 
-abstract class GridElement extends PositionComponent with TapCallbacks{
+abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks{
   final int gridX;
   final int gridY;
   Condition condition;
   Sprite? sprite;
+  bool bombable;
 
   GridElement(this.gridX, this.gridY, {required Condition condition})
       : condition = condition,
+        bombable = (condition.label == 'down' || condition.label == 'water_down') ? false : true,
         super(size: BattleShipsGame.squareSize);
 
   @override
@@ -22,8 +24,19 @@ abstract class GridElement extends PositionComponent with TapCallbacks{
       canvas,
       position: size / 2,
       anchor: Anchor.center,
-      size: size * 0.99,
+      size: size * 0.95,
     );
+  }
+
+  void bomb() {
+    if (bombable) {
+      condition = Condition.fromInt(condition.value + 1);
+      if (condition.label == 'down' || condition.label == 'water_down') {
+        bombable = false;
+      }
+      sprite = condition.sprite;
+      game.turnManager.nextTurn();
+    }
   }
 
 }
