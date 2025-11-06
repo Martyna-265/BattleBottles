@@ -1,5 +1,3 @@
-import 'dart:ui';
-import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';

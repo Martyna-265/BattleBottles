@@ -122,5 +122,4 @@ class BattleGrid extends PositionComponent {
     }
   }
 
-
 }
