@@ -1,4 +1,4 @@
-import 'package:battlebottles/BattleShipsGame.dart';
+import 'package:battlebottles/screens/BattleShipsGame.dart';
 import 'package:battlebottles/components/BattleGrid.dart';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';

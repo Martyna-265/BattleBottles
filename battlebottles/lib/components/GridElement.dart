@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import '../BattleShipsGame.dart';
+import '../screens/BattleShipsGame.dart';
 
 abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks{
   final int gridX;

@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 
-import '../../BattleShipsGame.dart';
+import '../../screens/BattleShipsGame.dart';
 
 class StartButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   StartButton()
@@ -15,6 +15,7 @@ class StartButton extends PositionComponent with HasGameReference<BattleShipsGam
     style: TextStyle(
       fontSize: 1.0,
       fontFamily: 'Awesome Font',
+      color: Color(0xFFFFFFFF),
     ),
   );
 

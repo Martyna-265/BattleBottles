@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:battlebottles/components/GridElement.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/rendering.dart';
-import '../BattleShipsGame.dart';
+import '../screens/BattleShipsGame.dart';
 import 'Bottle.dart';
 import 'Water.dart';
 
@@ -29,12 +29,23 @@ class BattleGrid extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
+    // onLoad wywoła teraz naszą nową funkcję
+    regenerateGrid();
+  }
+
+  // Nowa funkcja, którą można wywołać przy restarcie
+  void regenerateGrid() {
+    // 1. Usuń wszystkie stare butelki i wodę z ekranu
+    removeAll(children);
+
+    // 2. Zresetuj tablicę grida
     grid = List.generate(
       squaresInGrid,
           (_) => List.filled(squaresInGrid, null, growable: false),
       growable: false,
     );
 
+    // 3. Losowanie pozycji (to samo co miałaś w onLoad)
     final random = Random();
     final Set<Point<int>> bottlePositions = {};
 
@@ -44,6 +55,7 @@ class BattleGrid extends PositionComponent {
       bottlePositions.add(Point(x, y));
     }
 
+    // 4. Tworzenie nowych elementów
     for (int y = 0; y < squaresInGrid; y++) {
       for (int x = 0; x < squaresInGrid; x++) {
         final bool isBottle = bottlePositions.contains(Point(x, y));

@@ -11,7 +11,16 @@ dependencies:
   flutter:
     sdk: flutter
   flame: ^1.33.0
+  firebase_core: ^4.3.0
+  firebase_auth: ^6.1.3
+  cloud_firestore: ^6.1.1
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/images/
+
+flutter_launcher_icons:
+  image_path: assets/images/Icon.png
+  android: true
