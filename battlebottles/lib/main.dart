@@ -24,19 +24,16 @@ Future<void> main() async {
           builder: (context, constraints) {
             return GameWidget(
               game: game,
-              // --- DODAJEMY MAPĘ NAKŁADEK (OVERLAYS) ---
               overlayBuilderMap: {
                 'MultiplayerLobby': (BuildContext context, BattleShipsGame game) {
                   return MultiplayerLobby(
                     game: game,
                     onClose: () {
-                      // Funkcja zamykająca lobby
                       game.overlays.remove('MultiplayerLobby');
                     },
                   );
                 },
               },
-              // -----------------------------------------
             );
           },
         ),

@@ -7,13 +7,11 @@ import 'package:battlebottles/components/GridElement.dart';
 
 class Bottle extends GridElement with DragCallbacks{
 
-  Bottle(super.gridX, super.gridY, int intSize, bool opponent)
+  Bottle(super.gridX, super.gridY, int intSize, super.opponent)
       : //condition = Condition.fromInt(intCondition),
-        opponent = opponent,
         super(condition: Condition.fromInt(0));
 
   //final Size/Level size;
-  final bool opponent;
   late final BattleGrid battleGrid = opponent ? game.opponentsGrid : game.playersGrid;
   late Sprite? sprite = opponent ? Condition.fromInt(3).sprite : condition.sprite;
   late Vector2 _positionDelta = Vector2(0, 0);
@@ -22,13 +20,6 @@ class Bottle extends GridElement with DragCallbacks{
   @override
   String toString() {
     return "Bottle with condition " + condition.label;
-  }
-
-  @override
-  void onTapUp(TapUpEvent event) {
-    if(opponent && game.turnManager.currentPlayer == 1) {
-      bomb();
-    }
   }
 
   @override

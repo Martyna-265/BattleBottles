@@ -93,7 +93,7 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
       final user = _auth.currentUser;
 
       if (user == null) {
-        // --- NOT LOGGED IN ---
+        // NOT LOGGED IN
         add(DropdownOption('Login', () {
           _toggleMenu();
           if (game.buildContext != null) {
@@ -103,7 +103,6 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
                 onSubmit: (email, pass, username) async {
                   await _auth.login(email, pass);
                 }
-              // -----------------------------
             );
           }
         })..position = Vector2(0, 30));
@@ -117,6 +116,12 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
                 isRegister: true,
                 onSubmit: (email, pass, username) async {
                   await _auth.register(email, pass, username ?? 'Player');
+
+                  final updatedUser = _auth.currentUser;
+                  if (updatedUser != null) {
+                    String labelText = updatedUser.displayName ?? updatedUser.email ?? 'User';
+                    _updateLabel(labelText);
+                  }
                 }
             );
           }
@@ -154,35 +159,37 @@ Future<void> showAuthDialog({
         builder: (context, setState) {
           return AlertDialog(
             title: Text(isRegister ? 'Register' : 'Login'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 14),
-                      textAlign: TextAlign.center,
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
 
-                if (isRegister)
+                  if (isRegister)
+                    TextField(
+                      controller: usernameController,
+                      decoration: const InputDecoration(labelText: 'Username'),
+                    ),
+
                   TextField(
-                    controller: usernameController,
-                    decoration: const InputDecoration(labelText: 'Username'),
+                    controller: emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
                   ),
-
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                ),
-                TextField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                ),
-              ],
+                  TextField(
+                    controller: passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(

@@ -25,8 +25,6 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
 
   @override
   void render(Canvas canvas) {
-    // Sprawdzamy stan logowania w każdej klatce rysowania
-    // Dzięki temu przycisk zmieni kolor natychmiast po zalogowaniu w tle
     final bool isLoggedIn = _auth.currentUser != null;
 
     RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(10));
@@ -45,7 +43,6 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
     final bool isLoggedIn = _auth.currentUser != null;
 
     if (!isLoggedIn) {
-      // --- NIEZALOGOWANY: Pokaż informację ---
       if (game.buildContext != null) {
         showDialog(
           context: game.buildContext!,
@@ -64,7 +61,6 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
         );
       }
     } else {
-      // --- ZALOGOWANY: Przejdź do lobby ---
       game.openMultiplayerLobby();
     }
   }

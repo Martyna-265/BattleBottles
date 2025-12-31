@@ -5,7 +5,7 @@ import '../screens/BattleShipsGame.dart';
 
 class MultiplayerLobby extends StatelessWidget {
   final BattleShipsGame game;
-  final VoidCallback onClose; // Funkcja do zamykania lobby
+  final VoidCallback onClose;
 
   MultiplayerLobby({Key? key, required this.game, required this.onClose}) : super(key: key);
 
@@ -14,13 +14,13 @@ class MultiplayerLobby extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xAA000000), // Półprzezroczyste tło
+      backgroundColor: const Color(0xAA000000),
       body: Center(
         child: Container(
           width: 400,
           height: 600,
           decoration: BoxDecoration(
-            color: const Color(0xff003366), // Granatowe tło
+            color: const Color(0xff003366),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white, width: 2),
           ),
@@ -38,7 +38,7 @@ class MultiplayerLobby extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Awesome Font', // Twoja czcionka
+                        fontFamily: 'Awesome Font',
                       ),
                     ),
                     IconButton(
@@ -51,7 +51,6 @@ class MultiplayerLobby extends StatelessWidget {
 
               const Divider(color: Colors.white),
 
-              // --- LISTA GIER (STREAM) ---
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _firestoreService.getAvailableGames(),
@@ -92,17 +91,18 @@ class MultiplayerLobby extends StatelessWidget {
                               style: const TextStyle(color: Colors.white),
                             ),
                             subtitle: const Text(
-                              'Waiting for your opponent...',
+                              'Waiting...',
                               style: TextStyle(color: Colors.white70, fontSize: 12),
                             ),
                             trailing: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                               onPressed: () async {
-                                // DOŁĄCZANIE DO GRY
-                                await _firestoreService.joinGame(doc.id);
-                                // Tutaj w przyszłości: Przejście do ekranu gry online
-                                onClose(); // Zamykamy lobby
-                                print("Joined game: ${doc.id}");
+                                try {
+                                  await _firestoreService.joinGame(doc.id);
+                                  game.startMultiplayerGame(doc.id);
+                                } catch (e) {
+                                  print("Error: $e");
+                                }
                               },
                               child: const Text('PLAY'),
                             ),
@@ -114,7 +114,7 @@ class MultiplayerLobby extends StatelessWidget {
                 ),
               ),
 
-              // --- PRZYCISK CREATE ---
+              // PRZYCISK CREATE
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: SizedBox(
@@ -123,10 +123,13 @@ class MultiplayerLobby extends StatelessWidget {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                     onPressed: () async {
-                      // TWORZENIE GRY
-                      String gameId = await _firestoreService.createGame();
-                      // Tutaj w przyszłości: Przejście do ekranu "Waiting Room"
-                      print("Game created: $gameId");
+                      try {
+                        String gameId = await _firestoreService.createGame();
+                        // Host od razu startuje grę (do zmiany)
+                        game.startMultiplayerGame(gameId);
+                      } catch (e) {
+                        print("Error: $e");
+                      }
                     },
                     child: const Text(
                       'CREATE A NEW GAME',

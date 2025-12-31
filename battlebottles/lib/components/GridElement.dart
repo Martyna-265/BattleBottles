@@ -4,16 +4,18 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import '../screens/BattleShipsGame.dart';
 
-abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks{
+abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   final int gridX;
   final int gridY;
   Condition condition;
   Sprite? sprite;
   bool bombable;
+  final bool opponent;
 
-  GridElement(this.gridX, this.gridY, {required Condition condition})
+  GridElement(this.gridX, this.gridY, this.opponent, {required Condition condition})
       : condition = condition,
-        bombable = (condition.label == 'down' || condition.label == 'water_down') ? false : true,
+        //bombable = (condition.label == 'down' || condition.label == 'water_down') ? false : true,
+        bombable = (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') ? false : true,
         super(size: BattleShipsGame.squareSize);
 
   @override
@@ -28,15 +30,37 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
     );
   }
 
-  void bomb() {
-    if (bombable) {
-      condition = Condition.fromInt(condition.value + 1);
-      if (condition.label == 'down' || condition.label == 'water_down') {
-        bombable = false;
+  @override
+  void onTapUp(TapUpEvent event) {
+    // Blokada, gdy nie jest to tura gracza
+    if (game.turnManager.currentPlayer != 1) return;
+
+    if (opponent) { // Strzelamy tylko w grid przeciwnika
+      if (!bombable) return;
+
+      if (game.isMultiplayer) {
+        int index = gridY * BattleShipsGame.squaresInGrid + gridX;
+        game.sendMoveToFirebase(index);
+      } else {
+        bomb();
       }
-      sprite = condition.sprite;
-      game.turnManager.nextTurn();
     }
   }
 
+  void bomb() {
+    if (bombable) {
+      condition = Condition.fromInt(condition.value + 1);
+
+      //if (condition.label == 'down' || condition.label == 'water_down') {
+      if (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') {
+        bombable = false;
+      }
+
+      sprite = condition.sprite;
+
+      if (!game.isMultiplayer) {
+        game.turnManager.nextTurn();
+      }
+    }
+  }
 }

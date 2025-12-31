@@ -5,7 +5,6 @@ class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Strumień dostępnych gier (tylko te ze statusem 'waiting')
   Stream<QuerySnapshot> getAvailableGames() {
     return _db
         .collection('battles')
@@ -14,26 +13,25 @@ class FirestoreService {
         .snapshots();
   }
 
-  // Funkcja: Stwórz nową grę
   Future<String> createGame() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception("You're not logged in!");
 
-    // Tworzymy dokument gry
     final docRef = await _db.collection('battles').add({
       'player1Id': user.uid,
       'player1Name': user.displayName ?? 'Player 1',
-      'player2Id': null, // Na razie brak przeciwnika
+      'player2Id': null,
       'player2Name': null,
-      'status': 'waiting', // Oczekujemy na gracza
+      'status': 'waiting',
       'createdAt': FieldValue.serverTimestamp(),
-      'currentTurn': user.uid, // Zaczyna ten, kto stworzył (można zmienić na losowe)
+      'currentTurn': user.uid, // Domyślnie zaczyna Host
+      'player1Ready': false,
+      'player2Ready': false,
     });
 
-    return docRef.id; // Zwracamy ID gry, żeby wiedzieć, czego nasłuchiwać
+    return docRef.id;
   }
 
-  // Funkcja: Dołącz do istniejącej gry
   Future<void> joinGame(String gameId) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception("You're not logged in!");
@@ -41,11 +39,10 @@ class FirestoreService {
     await _db.collection('battles').doc(gameId).update({
       'player2Id': user.uid,
       'player2Name': user.displayName ?? 'Player 2',
-      'status': 'playing', // Zmieniamy status na 'gra w toku'
+      'status': 'playing',
     });
   }
 
-  // Funkcja do czyszczenia gier (opcjonalnie, do testów)
   Future<void> deleteGame(String gameId) async {
     await _db.collection('battles').doc(gameId).delete();
   }

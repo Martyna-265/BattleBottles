@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import 'package:flutter/material.dart'; // Potrzebne do Colors (opcjonalnie)
 import '../../screens/BattleShipsGame.dart';
 
 class RoundInfo extends PositionComponent with HasGameReference<BattleShipsGame> {
@@ -25,14 +24,17 @@ class RoundInfo extends PositionComponent with HasGameReference<BattleShipsGame>
     String label = '';
 
     switch (game.visibleCurrentPlayer) {
+      case -1:
+        label = 'Waiting for opponent...';
+        break;
       case 0:
-        label = 'Set your bottles'; // Faza ustawiania statków
+        label = 'Set your bottles';
         break;
       case 1:
-        label = 'Your move';    // Tura gracza
+        label = 'Your move!';
         break;
       case 2:
-        label = 'Wait for your opponent';  // Tura komputera
+        label = 'Opponent\'s move';
         break;
       default:
         label = '';

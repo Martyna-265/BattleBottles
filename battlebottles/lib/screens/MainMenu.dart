@@ -36,22 +36,19 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
   }
 
   @override
+  void onMount() {
+    super.onMount();
+    onGameResize(game.size);
+  }
+
+  @override
   void onGameResize(Vector2 newSize) {
     super.onGameResize(newSize);
     size = newSize;
 
-    if (playButton.isMounted) {
-      playButton.position = Vector2(size.x / 2, size.y / 2 - 20);
-    }
-
-    if (multiplayerButton.isMounted) {
-      multiplayerButton.position = Vector2(size.x / 2, size.y / 2 + 80);
-    }
-
-    if (accountDropdown.isMounted) {
-      accountDropdown.position = Vector2(size.x - 20, 20);
-    }
-
+    playButton.position = Vector2(size.x / 2, size.y / 2 - 20);
+    multiplayerButton.position = Vector2(size.x / 2, size.y / 2 + 80);
+    accountDropdown.position = Vector2(size.x - 20, 20);
   }
 
   @override
