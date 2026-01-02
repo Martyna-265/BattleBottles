@@ -26,7 +26,7 @@ class MultiplayerLobby extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // --- NAGŁÓWEK ---
+              // Nagłówek
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
@@ -114,7 +114,7 @@ class MultiplayerLobby extends StatelessWidget {
                 ),
               ),
 
-              // PRZYCISK CREATE
+              // Przycisk Create
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: SizedBox(

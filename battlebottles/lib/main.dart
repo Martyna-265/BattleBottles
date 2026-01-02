@@ -1,4 +1,5 @@
 import 'package:battlebottles/screens/BattleShipsGame.dart';
+import 'package:battlebottles/screens/GameOverMenu.dart';
 import 'package:battlebottles/screens/MultiplayerLobby.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ Future<void> main() async {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
+        backgroundColor: const Color(0xff7aa3cc),
         body: LayoutBuilder(
           builder: (context, constraints) {
             return GameWidget(
@@ -31,6 +33,13 @@ Future<void> main() async {
                     onClose: () {
                       game.overlays.remove('MultiplayerLobby');
                     },
+                  );
+                },
+
+                'GameOverMenu': (BuildContext context, BattleShipsGame game) {
+                  return GameOverMenu(
+                    game: game,
+                    overlayId: 'GameOverMenu',
                   );
                 },
               },

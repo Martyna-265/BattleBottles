@@ -1,7 +1,7 @@
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:battlebottles/components/GridElement.dart';
+import 'package:battlebottles/components/gridElements/GridElement.dart';
 
 class Water extends GridElement {
 
@@ -9,5 +9,15 @@ class Water extends GridElement {
       : super(condition: Condition.fromInt(3));
 
   late Sprite? sprite = condition.sprite;
+
+  @override
+  void bomb() {
+    if (bombable) {
+      bool isMyTurn = (game.turnManager.currentPlayer == 1);
+      game.actionFeedback.setMessage(isMyTurn ? "Miss..." : "Opponent missed!");
+
+      super.bomb();
+    }
+  }
 
 }

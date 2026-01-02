@@ -1,11 +1,13 @@
 import 'dart:math';
-import 'package:battlebottles/components/GridElement.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/rendering.dart';
 import '../screens/BattleShipsGame.dart';
-import 'Bottle.dart';
-import 'Water.dart';
 import 'bottleElements/Condition.dart';
+import 'bottleElements/ShipType.dart';
+import 'gridElements/Bottle.dart';
+import 'gridElements/GridElement.dart';
+import 'gridElements/Ship.dart';
+import 'gridElements/Water.dart';
 
 class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame> {
 
@@ -13,12 +15,18 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
       : squaresInGrid = BattleShipsGame.squaresInGrid,
         opponent = opponent,
         bottleCount = bottleCount,
-        super(size: Vector2(BattleShipsGame.battleGridWidth, BattleShipsGame.battleGridHeight));
+        super(size: Vector2(BattleShipsGame.battleGridWidth, BattleShipsGame.battleGridHeight)) {
+    regenerateGrid();
+  }
 
   final int squaresInGrid;
   final bool opponent;
   late List<List<GridElement?>> grid;
   final int bottleCount;
+
+  List<Ship> ships = [];
+  List<Ship> shipsHurt = [];
+  List<Ship> shipsDown = [];
 
   static final Paint blueBackgroundPaint = Paint()..color = const Color(0xff7aa3cc);
   static final Paint blackBorderPaint = Paint()
@@ -26,13 +34,11 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
     ..style = PaintingStyle.stroke
     ..strokeWidth = 0.08;
 
-  @override
-  Future<void> onLoad() async {
-    regenerateGrid();
-  }
-
   void regenerateGrid() {
     removeAll(children);
+    ships.clear();
+    shipsHurt.clear();
+    shipsDown.clear();
 
     grid = List.generate(
       squaresInGrid,
@@ -40,31 +46,211 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
       growable: false,
     );
 
+    // Wybrana flota
+    List<ShipType> fleetToPlace = [
+      ShipType.quadLineV,
+      ShipType.tripleCorner,
+      ShipType.tripleLineH,
+      ShipType.doubleV,
+      ShipType.doubleH,
+      ShipType.single,
+      ShipType.single,
+      ShipType.single,
+    ];
+
     final random = Random();
-    final Set<Point<int>> bottlePositions = {};
 
-    while (bottlePositions.length < bottleCount) {
-      final x = random.nextInt(squaresInGrid);
-      final y = random.nextInt(squaresInGrid);
-      bottlePositions.add(Point(x, y));
+    for (var type in fleetToPlace) {
+      bool placed = false;
+      int attempts = 0;
+
+      ShipType typeToPlace = type;
+      int randomRotations = random.nextInt(25);
+      for(int i=0; i<randomRotations; i++) {
+        typeToPlace = typeToPlace.nextRotation;
+      }
+
+
+      while (!placed && attempts < 200) {
+        int startX = random.nextInt(squaresInGrid);
+        int startY = random.nextInt(squaresInGrid);
+
+        Ship candidate = Ship(type: typeToPlace, x: startX, y: startY);
+        List<Point<int>> points = candidate.getOccupiedPoints();
+
+        bool fits = true;
+        for (var p in points) {
+          if (p.x < 0 || p.x >= squaresInGrid || p.y < 0 || p.y >= squaresInGrid) {
+            fits = false; break;
+          }
+          if (grid[p.y][p.x] != null) {
+            fits = false; break;
+          }
+          List<Point<int>> neighbors = [
+            Point(p.x, p.y - 1), Point(p.x, p.y + 1),
+            Point(p.x - 1, p.y), Point(p.x + 1, p.y),
+          ];
+          for (var n in neighbors) {
+            if (n.x >= 0 && n.x < squaresInGrid && n.y >= 0 && n.y < squaresInGrid) {
+              if (grid[n.y][n.x] is Bottle) {
+                fits = false; break;
+              }
+            }
+          }
+          if (!fits) break;
+        }
+
+        if (fits) {
+          ships.add(candidate);
+          for (var p in points) {
+            final bottle = Bottle(p.x, p.y, 0, opponent, candidate);
+            bottle.position = Vector2(p.x * BattleShipsGame.squareLength, p.y * BattleShipsGame.squareLength);
+            grid[p.y][p.x] = bottle;
+            add(bottle);
+          }
+          placed = true;
+        }
+        attempts++;
+      }
     }
+    _fillEmptyWithWater();
+  }
 
+  void _fillEmptyWithWater() {
     for (int y = 0; y < squaresInGrid; y++) {
       for (int x = 0; x < squaresInGrid; x++) {
-        final bool isBottle = bottlePositions.contains(Point(x, y));
-
-        final GridElement square = isBottle
-            ? Bottle(x, y, 0, opponent)
-            : Water(x, y, opponent);
-
-        square.position = Vector2(
-          x * BattleShipsGame.squareLength,
-          y * BattleShipsGame.squareLength,
-        );
-
-        grid[y][x] = square;
-        add(square);
+        if (grid[y][x] == null) {
+          final water = Water(x, y, opponent);
+          water.position = Vector2(x * BattleShipsGame.squareLength, y * BattleShipsGame.squareLength);
+          grid[y][x] = water;
+          add(water);
+        }
       }
+    }
+  }
+
+  void setEnemyShips(List<dynamic> shipsData) {
+    removeAll(children);
+    ships.clear();
+    shipsHurt.clear();
+    shipsDown.clear();
+
+    grid = List.generate(
+      squaresInGrid,
+          (_) => List.filled(squaresInGrid, null, growable: false),
+      growable: false,
+    );
+
+    for (var shipJson in shipsData) {
+      if (shipJson is Map) {
+        final safeMap = Map<String, dynamic>.from(shipJson);
+        try {
+          Ship enemyShip = Ship.fromJson(safeMap);
+          ships.add(enemyShip);
+
+          List<Point<int>> points = enemyShip.getOccupiedPoints();
+
+          for (var p in points) {
+            if (p.x >= 0 && p.x < squaresInGrid && p.y >= 0 && p.y < squaresInGrid) {
+              final bottle = Bottle(p.x, p.y, 0, opponent, enemyShip);
+              bottle.condition = Condition.fromInt(0);
+              bottle.sprite = Condition.fromInt(3).sprite;
+              bottle.bombable = true;
+              bottle.position = Vector2(p.x * BattleShipsGame.squareLength, p.y * BattleShipsGame.squareLength);
+              grid[p.y][p.x] = bottle;
+              add(bottle);
+            }
+          }
+        } catch (e) {
+          print("Error parsing ship: $e");
+        }
+      }
+    }
+    _fillEmptyWithWater();
+  }
+
+  void rotateShip(Ship ship) {
+    ShipType nextType = ship.type.nextRotation;
+    for (int radius = 0; radius <= squaresInGrid; radius++) {
+      for (int dx = -radius; dx <= radius; dx++) {
+        for (int dy = -radius; dy <= radius; dy++) {
+          if (max(dx.abs(), dy.abs()) != radius) continue;
+          int testX = ship.x + dx;
+          int testY = ship.y + dy;
+          if (_tryPlaceRotatedShip(ship, nextType, testX, testY)) return;
+        }
+      }
+    }
+    for (int y = 0; y < squaresInGrid; y++) {
+      for (int x = 0; x < squaresInGrid; x++) {
+        if (_tryPlaceRotatedShip(ship, nextType, x, y)) return;
+      }
+    }
+  }
+
+  bool _tryPlaceRotatedShip(Ship ship, ShipType newType, int newHeadX, int newHeadY) {
+    List<Point<int>> newPoints = newType.relativePositions.map((p) => Point(newHeadX + p.x, newHeadY + p.y)).toList();
+    for (var p in newPoints) {
+      if (p.x < 0 || p.x >= squaresInGrid || p.y < 0 || p.y >= squaresInGrid) return false;
+      if (!_isValidCell(p.x, p.y, ship)) return false;
+      List<Point<int>> neighbors = [
+        Point(p.x, p.y - 1), Point(p.x, p.y + 1),
+        Point(p.x - 1, p.y), Point(p.x + 1, p.y),
+      ];
+      for (var n in neighbors) {
+        if (n.x >= 0 && n.x < squaresInGrid && n.y >= 0 && n.y < squaresInGrid) {
+          if (!_isValidCell(n.x, n.y, ship)) return false;
+        }
+      }
+    }
+    List<Point<int>> oldPoints = ship.getOccupiedPoints();
+    for (var p in oldPoints) {
+      var element = grid[p.y][p.x];
+      if (element is Bottle && element.parentShip == ship) {
+        remove(element);
+        Water water = Water(p.x, p.y, opponent)..position = element.position;
+        add(water);
+        grid[p.y][p.x] = water;
+      }
+    }
+
+    ship.typeChange();
+    ship.type = newType;
+    ship.x = newHeadX;
+    ship.y = newHeadY;
+
+    for (var p in newPoints) {
+      var target = grid[p.y][p.x];
+      if (target != null) remove(target);
+      final bottle = Bottle(p.x, p.y, 0, opponent, ship);
+      bottle.position = Vector2(p.x * BattleShipsGame.squareLength, p.y * BattleShipsGame.squareLength);
+      grid[p.y][p.x] = bottle;
+      add(bottle);
+    }
+    return true;
+  }
+
+  bool _isValidCell(int x, int y, Ship shipToIgnore) {
+    var element = grid[y][x];
+    if (element == null) return true;
+    if (element is Water) return true;
+    if (element is Bottle) {
+      if (element.parentShip == shipToIgnore) return true;
+      return false;
+    }
+    return true;
+  }
+
+  List<Map<String, dynamic>> getShipsData() {
+    return ships.map((s) => s.toJson()).toList();
+  }
+
+  void visualizeHit(int index) {
+    int y = index ~/ squaresInGrid;
+    int x = index % squaresInGrid;
+    if (y < squaresInGrid && x < squaresInGrid) {
+      final element = grid[y][x];
+      if (element != null && element.bombable) element.bomb();
     }
   }
 
@@ -72,10 +258,8 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
   void render(Canvas canvas) {
     super.render(canvas);
     canvas.drawRect(size.toRect(), blueBackgroundPaint);
-
     final double cellWidth = size.x / squaresInGrid;
     final double cellHeight = size.y / squaresInGrid;
-
     for (int i = 0; i <= squaresInGrid; i++) {
       final x = i * cellWidth;
       canvas.drawLine(Offset(x, 0), Offset(x, size.y), blackBorderPaint);
@@ -85,10 +269,8 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
       canvas.drawLine(Offset(0, y), Offset(size.x, y), blackBorderPaint);
     }
     canvas.drawRect(size.toRect(), blackBorderPaint);
-
     final textPainter = TextPainter(textAlign: TextAlign.center, textDirection: TextDirection.ltr);
     final textStyle = TextStyle(color: const Color(0xFF000000), fontSize: cellHeight * 0.4);
-
     for (int i = 0; i < squaresInGrid; i++) {
       final letter = String.fromCharCode(65 + i);
       textPainter.text = TextSpan(text: letter, style: textStyle);
@@ -100,62 +282,6 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
       textPainter.text = TextSpan(text: number, style: textStyle);
       textPainter.layout();
       textPainter.paint(canvas, Offset(-cellWidth * 0.8, j * cellHeight + cellHeight / 2 - textPainter.height / 2));
-    }
-  }
-
-  List<int> getShipPositions() {
-    List<int> positions = [];
-    for (int y = 0; y < squaresInGrid; y++) {
-      for (int x = 0; x < squaresInGrid; x++) {
-        final element = grid[y][x];
-        if (element != null && element.condition.value == 0) {
-          int index = y * squaresInGrid + x;
-          positions.add(index);
-        }
-      }
-    }
-    return positions;
-  }
-
-  void setEnemyShips(List<dynamic> indices) {
-    for (int y = 0; y < squaresInGrid; y++) {
-      for (int x = 0; x < squaresInGrid; x++) {
-        final element = grid[y][x];
-        if (element != null && element.condition.value != 1 && element.condition.value != 2 && element.condition.value != 4) {
-          element.condition = Condition.fromInt(3); // Water
-          element.sprite = element.condition.sprite;
-          element.bombable = true;
-        }
-      }
-    }
-
-    for (var index in indices) {
-      if (index is int) {
-        int y = index ~/ squaresInGrid;
-        int x = index % squaresInGrid;
-
-        if (y < squaresInGrid && x < squaresInGrid) {
-          final element = grid[y][x];
-          if (element != null) {
-            element.condition = Condition.fromInt(0);
-
-            element.sprite = opponent ? Condition.fromInt(3).sprite : element.condition.sprite;
-            element.bombable = true;
-          }
-        }
-      }
-    }
-  }
-
-  void visualizeHit(int index) {
-    int y = index ~/ squaresInGrid;
-    int x = index % squaresInGrid;
-
-    if (y < squaresInGrid && x < squaresInGrid) {
-      final element = grid[y][x];
-      if (element != null && element.bombable) {
-        element.bomb();
-      }
     }
   }
 }

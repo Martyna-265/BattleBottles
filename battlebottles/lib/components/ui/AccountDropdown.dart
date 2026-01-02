@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
@@ -128,7 +127,7 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
         })..position = Vector2(0, 60));
 
       } else {
-        // --- LOGGED IN ---
+        // LOGGED IN
         add(DropdownOption('Logout', () {
           _auth.logout();
           _toggleMenu();
@@ -147,6 +146,7 @@ Future<void> showAuthDialog({
 }) {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   final usernameController = TextEditingController();
 
   return showDialog(
@@ -188,6 +188,13 @@ Future<void> showAuthDialog({
                     decoration: const InputDecoration(labelText: 'Password'),
                     obscureText: true,
                   ),
+
+                  if (isRegister)
+                    TextField(
+                      controller: confirmPasswordController,
+                      decoration: const InputDecoration(labelText: 'Confirm Password'),
+                      obscureText: true,
+                    ),
                 ],
               ),
             ),
@@ -203,6 +210,16 @@ Future<void> showAuthDialog({
                     isLoading = true;
                     errorMessage = null;
                   });
+
+                  if (isRegister) {
+                    if (passwordController.text != confirmPasswordController.text) {
+                      setState(() {
+                        isLoading = false;
+                        errorMessage = "Passwords do not match.";
+                      });
+                      return;
+                    }
+                  }
 
                   try {
                     await onSubmit(

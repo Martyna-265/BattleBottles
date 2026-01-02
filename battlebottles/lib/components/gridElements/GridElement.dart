@@ -2,11 +2,12 @@ import 'dart:ui';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import '../screens/BattleShipsGame.dart';
+import '../../screens/BattleShipsGame.dart';
+import 'Water.dart';
 
 abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
-  final int gridX;
-  final int gridY;
+  int gridX;
+  int gridY;
   Condition condition;
   Sprite? sprite;
   bool bombable;
@@ -14,7 +15,6 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
 
   GridElement(this.gridX, this.gridY, this.opponent, {required Condition condition})
       : condition = condition,
-        //bombable = (condition.label == 'down' || condition.label == 'water_down') ? false : true,
         bombable = (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') ? false : true,
         super(size: BattleShipsGame.squareSize);
 
@@ -50,16 +50,15 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   void bomb() {
     if (bombable) {
       condition = Condition.fromInt(condition.value + 1);
-
-      //if (condition.label == 'down' || condition.label == 'water_down') {
       if (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') {
         bombable = false;
       }
-
       sprite = condition.sprite;
 
       if (!game.isMultiplayer) {
-        game.turnManager.nextTurn();
+        if (this is Water) {
+          game.turnManager.nextTurn();
+        }
       }
     }
   }
