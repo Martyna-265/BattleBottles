@@ -1,6 +1,5 @@
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
 
 class Water extends GridElement {

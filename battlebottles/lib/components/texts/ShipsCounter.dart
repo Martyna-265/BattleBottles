@@ -92,14 +92,14 @@ class ShipsCounter extends PositionComponent {
       } else {
         paintToUse = TextPaint(
           style: _textPaint.style.copyWith(
-            fontWeight: FontWeight.w200,
+            fontWeight: FontWeight.normal,
             color: const Color(0xEE003366),
           ),
         );
       }
 
       String label = " x$count";
-      _textPaint.render(canvas, label, Vector2(currentX, startY));
+      paintToUse.render(canvas, label, Vector2(currentX, startY));
 
       currentX += 1.5 + groupGap;
     }
