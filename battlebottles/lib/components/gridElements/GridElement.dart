@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 import 'Water.dart';
 
 abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
@@ -38,7 +38,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       if (!bombable) return;
 
       if (game.isMultiplayer) {
-        int index = gridY * BattleShipsGame.squaresInGrid + gridX;
+        int index = gridY * game.squaresInGrid + gridX;
         game.sendMoveToFirebase(index);
       } else {
         bomb();

@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class ActionFeedback extends PositionComponent with HasGameReference<BattleShipsGame> {
   ActionFeedback() : super(size: Vector2(BattleShipsGame.squareLength * 7, BattleShipsGame.squareLength));

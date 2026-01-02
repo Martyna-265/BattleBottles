@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class RoundInfo extends PositionComponent with HasGameReference<BattleShipsGame> {
   RoundInfo()

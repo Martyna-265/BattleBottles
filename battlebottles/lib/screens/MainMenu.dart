@@ -5,7 +5,7 @@ import '../components/buttons/MultiplayerButton.dart';
 import '../components/ui/AccountDropdown.dart';
 import '../components/buttons/SingleplayerButton.dart';
 import '../services/FirestoreService.dart';
-import './BattleShipsGame.dart';
+import '../BattleShipsGame.dart';
 
 class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> {
 

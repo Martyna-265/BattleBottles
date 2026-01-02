@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/FirestoreService.dart';
-import '../screens/BattleShipsGame.dart';
+import '../BattleShipsGame.dart';
 
 class MultiplayerLobby extends StatelessWidget {
   final BattleShipsGame game;
@@ -117,11 +117,14 @@ class MultiplayerLobby extends StatelessWidget {
                                   style: TextStyle(color: Colors.greenAccent, fontSize: 12),
                                 ),
                                 trailing: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+                                  ),
                                   onPressed: () async {
                                     try {
                                       await _firestoreService.joinGame(doc.id);
-                                      game.startMultiplayerGame(doc.id);
+                                      game.openGameOptions(isMultiplayer: true, gameId: doc.id);
                                     } catch (e) {
                                       debugPrint("Error: $e");
                                     }
@@ -149,8 +152,7 @@ class MultiplayerLobby extends StatelessWidget {
                     onPressed: () async {
                       try {
                         String gameId = await _firestoreService.createGame();
-                        // Host od razu startuje grę (do zmiany)
-                        game.startMultiplayerGame(gameId);
+                        game.openGameOptions(isMultiplayer: true, gameId: gameId);
                       } catch (e) {
                         debugPrint("Error: $e");
                       }

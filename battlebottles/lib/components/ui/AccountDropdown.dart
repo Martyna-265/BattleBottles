@@ -4,7 +4,7 @@ import 'package:flame/text.dart';
 import 'package:flutter/material.dart' hide Image;
 import '../../screens/FriendsScreen.dart';
 import '../../services/AuthService.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class DropdownOption extends PositionComponent with TapCallbacks {
   final String text;

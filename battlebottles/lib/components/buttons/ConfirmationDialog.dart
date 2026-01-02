@@ -3,7 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/text.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class DialogButton extends PositionComponent with TapCallbacks {
   final String text;

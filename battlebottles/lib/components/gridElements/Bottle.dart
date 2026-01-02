@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:battlebottles/components/gridElements/Ship.dart';
-import 'package:battlebottles/screens/BattleShipsGame.dart';
+import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/components/BattleGrid.dart';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
@@ -80,7 +80,7 @@ class Bottle extends GridElement with DragCallbacks {
     List<Point<int>> newPoints = parentShip.type.relativePositions.map((p) => Point(newHeadX + p.x, newHeadY + p.y)).toList();
 
     for (var p in newPoints) {
-      if (p.x < 0 || p.x >= BattleShipsGame.squaresInGrid || p.y < 0 || p.y >= BattleShipsGame.squaresInGrid) {
+      if (p.x < 0 || p.x >= game.squaresInGrid || p.y < 0 || p.y >= game.squaresInGrid) {
         canMove = false;
         break;
       }
@@ -103,7 +103,7 @@ class Bottle extends GridElement with DragCallbacks {
       ];
 
       for (var n in neighbors) {
-        if (n.x >= 0 && n.x < BattleShipsGame.squaresInGrid && n.y >= 0 && n.y < BattleShipsGame.squaresInGrid) {
+        if (n.x >= 0 && n.x < game.squaresInGrid && n.y >= 0 && n.y < game.squaresInGrid) {
           var neighbor = battleGrid.grid[n.y][n.x];
           if (neighbor is Bottle && neighbor.parentShip != parentShip) {
             canMove = false;
@@ -223,7 +223,7 @@ class Bottle extends GridElement with DragCallbacks {
         element.bombable = false;
 
         void markWaterAsHit(int x, int y) {
-          if (x >= 0 && x < BattleShipsGame.squaresInGrid && y >= 0 && y < BattleShipsGame.squaresInGrid) {
+          if (x >= 0 && x < game.squaresInGrid && y >= 0 && y < game.squaresInGrid) {
             var target = battleGrid.grid[y][x];
             if (target is Water && target.bombable) {
               target.condition = Condition.fromInt(4);

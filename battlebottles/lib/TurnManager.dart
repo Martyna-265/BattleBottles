@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:battlebottles/screens/BattleShipsGame.dart';
+import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
 
 import 'components/gridElements/Bottle.dart';
@@ -15,14 +15,16 @@ class TurnManager {
 
   final List<Point<int>> _availableMoves = [];
 
+  int _sessionId = 0;
+
   TurnManager(this.totalPlayers, this.game) {
     _resetAvailableMoves();
   }
 
   void _resetAvailableMoves() {
     _availableMoves.clear();
-    for (int y = 0; y < BattleShipsGame.squaresInGrid; y++) {
-      for (int x = 0; x < BattleShipsGame.squaresInGrid; x++) {
+    for (int y = 0; y < game.squaresInGrid; y++) {
+      for (int x = 0; x < game.squaresInGrid; x++) {
         _availableMoves.add(Point(x, y));
       }
     }
@@ -31,12 +33,15 @@ class TurnManager {
   Future<void> nextTurn() async {
     if (game.isMultiplayer) return;
 
-    int nextPlayer = (currentPlayer == 1) ? 2 : 1;
+    int mySession = _sessionId;
 
+    int nextPlayer = (currentPlayer == 1) ? 2 : 1;
     currentPlayer = -1;
 
     await Future.delayed(const Duration(seconds: BattleShipsGame.delay));
 
+    // Czy gra została zrestartowana w międzyczasie?
+    if (_sessionId != mySession) return;
     if (!game.isGameRunning) return;
 
     currentPlayer = nextPlayer;
@@ -48,12 +53,16 @@ class TurnManager {
   }
 
   Future<void> _opponentsTurn() async {
+    int mySession = _sessionId;
+
     await Future.delayed(const Duration(seconds: 1));
 
+    if (_sessionId != mySession) return;
     if (!game.isGameRunning) return;
+    if (currentPlayer != 2) return;
 
     List<List<GridElement?>> grid = game.playersGrid.grid;
-    int n = BattleShipsGame.squaresInGrid;
+    int n = game.squaresInGrid;
     Random random = Random();
 
     List<Ship> shipsHurt = game.playersGrid.shipsHurt;
@@ -61,7 +70,7 @@ class TurnManager {
     int targetX = -1;
     int targetY = -1;
 
-    // Gdy jest jakiś zraniony statek
+    // Logika celowania w zranione statki
     if (shipsHurt.isNotEmpty) {
       Ship ship = shipsHurt.first;
       List<Point<int>> hitParts = [];
@@ -100,7 +109,7 @@ class TurnManager {
       }
     }
 
-    // Gdy nie ma zranionego statku - losujemy
+    // Losowanie, jeśli brak celu
     if (targetX == -1) {
       while (targetX == -1 && _availableMoves.isNotEmpty) {
         int index = random.nextInt(_availableMoves.length);
@@ -124,6 +133,9 @@ class TurnManager {
 
       if (targetElement is Bottle) {
         await Future.delayed(const Duration(milliseconds: 500));
+
+        if (_sessionId != mySession) return;
+
         if (game.isGameRunning && currentPlayer == 2) {
           _opponentsTurn();
         }
@@ -134,6 +146,7 @@ class TurnManager {
   }
 
   void reset() {
+    _sessionId++;
     currentPlayer = 0;
     hasShipsSynced = false;
     _resetAvailableMoves();

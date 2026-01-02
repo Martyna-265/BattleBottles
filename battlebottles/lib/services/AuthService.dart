@@ -14,16 +14,15 @@ class AuthService {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found' || e.code == 'invalid-email') {
-        throw 'User not found.';
-      } else if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
-        throw 'Wrong password.';
+      if (e.code == 'user-not-found' || e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
+        throw 'Invalid email or password.';
+      } else if (e.code == 'invalid-email') {
+        throw 'Invalid email format.';
       } else if (e.code == 'too-many-requests') {
         throw 'Too many attempts. Try again later.';
       }
       throw 'Login failed: ${e.message}';
-    } catch (e) {
-      throw 'An unknown error occurred.';
     }
   }
 

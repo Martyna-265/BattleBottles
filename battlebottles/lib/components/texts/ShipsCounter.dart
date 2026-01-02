@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 import '../BattleGrid.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class ShipsCounter extends PositionComponent {
   final BattleGrid linkedGrid;

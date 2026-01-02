@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'BattleShipsGame.dart';
+import '../BattleShipsGame.dart';
 
 class GameOverMenu extends StatelessWidget {
   final BattleShipsGame game;

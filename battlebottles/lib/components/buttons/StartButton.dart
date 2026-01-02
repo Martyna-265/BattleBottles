@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class StartButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   StartButton()
@@ -28,7 +28,7 @@ class StartButton extends PositionComponent with HasGameReference<BattleShipsGam
     if (game.turnManager.currentPlayer != 0) return;
 
     if (game.isMultiplayer){
-      game.startGame();
+      game.confirmMultiplayerShips();
     }
     else {
       game.startSingleplayerGame();

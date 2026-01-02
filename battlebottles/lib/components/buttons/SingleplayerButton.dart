@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 
 class PlaySingleButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   PlaySingleButton() : super(size: Vector2(200, 60));
@@ -31,6 +31,6 @@ class PlaySingleButton extends PositionComponent with HasGameReference<BattleShi
 
   @override
   void onTapDown(TapDownEvent event) {
-    game.startGame();
+    game.openGameOptions(isMultiplayer: false);
   }
 }

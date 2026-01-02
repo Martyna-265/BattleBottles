@@ -49,6 +49,11 @@ class FirestoreService {
     await _db.collection('battles').doc(gameId).update({
       'player2Id': user.uid,
       'player2Name': user.displayName ?? 'Player 2',
+    });
+  }
+
+  Future<void> startGameFromLobby(String gameId) async {
+    await _db.collection('battles').doc(gameId).update({
       'status': 'playing',
     });
   }
@@ -170,6 +175,39 @@ class FirestoreService {
     } catch (e) {
       debugPrint("CLEANUP ERROR: $e");
     }
+  }
+
+  Future<void> exitLobby(String gameId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final docRef = _db.collection('battles').doc(gameId);
+    final snapshot = await docRef.get();
+
+    if (!snapshot.exists) return;
+
+    final data = snapshot.data() as Map<String, dynamic>;
+    final String p1Id = data['player1Id'];
+
+    if (p1Id == user.uid) {
+      // JESTEŚ HOSTEM -> Usuń całą grę
+      await deleteGame(gameId);
+    } else {
+      // JESTEŚ GOŚCIEM -> Opuść grę (wyczyść pola playera 2)
+      await docRef.update({
+        'player2Id': null,
+        'player2Name': null,
+        'player2Ready': false,
+        'status': 'waiting',
+      });
+    }
+  }
+
+  Future<void> updateGameSettings(String gameId, int gridSize, Map<String, int> fleetCounts) async {
+    await _db.collection('battles').doc(gameId).update({
+      'gridSize': gridSize,
+      'fleetCounts': fleetCounts,
+    });
   }
 
 }

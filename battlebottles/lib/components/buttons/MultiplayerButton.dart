@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart' hide Image, Draggable;
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 import '../../services/AuthService.dart';
 
 class MultiplayerButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {

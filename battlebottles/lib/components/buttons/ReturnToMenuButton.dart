@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 
-import '../../screens/BattleShipsGame.dart';
+import '../../BattleShipsGame.dart';
 import 'ConfirmationDialog.dart';
 
 class ReturnToMenuButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {

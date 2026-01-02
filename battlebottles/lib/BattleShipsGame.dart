@@ -23,13 +23,14 @@ class BattleShipsGame extends FlameGame {
 
   static const double squareLength = 2.0;
   static final Vector2 squareSize = Vector2(squareLength, squareLength);
-  static const int squaresInGrid = 9;
-  static const double battleGridWidth = squaresInGrid * squareLength;
-  static const double battleGridHeight = squaresInGrid * squareLength;
-  static final Vector2 battleGridSize = Vector2(battleGridWidth, battleGridHeight);
   static const double gap = 10.0;
   static const int delay = 2;
   static const int bottleCount = 10;
+
+  int squaresInGrid = 10;
+  double battleGridWidth = 20.0;
+  double battleGridHeight = 20.0;
+  static final Vector2 battleGridSize = Vector2(20.0, 20.0);
 
   late TurnManager turnManager;
   late BattleGrid playersGrid;
@@ -65,19 +66,30 @@ class BattleShipsGame extends FlameGame {
 
   bool isInMenu = true;
 
+  bool tempIsMultiplayer = false;
+  String? tempGameId;
+
   bool get isNarrow => size.x < size.y;
 
   @override
   Color backgroundColor() => const Color(0xff84afdb);
 
+  void _updateGridDimensions(int gridSize) {
+    squaresInGrid = gridSize;
+    battleGridWidth = squaresInGrid * squareLength;
+    battleGridHeight = squaresInGrid * squareLength;
+  }
+
   @override
   Future<void> onLoad() async {
     await Flame.images.load('Bottle1x1.png');
 
+    _updateGridDimensions(10);
+
     turnManager = TurnManager(2, this);
 
-    playersGrid = BattleGrid(false, bottleCount)..size = battleGridSize;
-    opponentsGrid = BattleGrid(true, bottleCount)..size = battleGridSize;
+    playersGrid = BattleGrid(false, {'1': 1})..size = Vector2(battleGridWidth, battleGridHeight);
+    opponentsGrid = BattleGrid(true, {'1': 1})..size = Vector2(battleGridWidth, battleGridHeight);
 
     playerCounter = ShipsCounter(playersGrid);
     opponentCounter = ShipsCounter(opponentsGrid);
@@ -86,10 +98,8 @@ class BattleShipsGame extends FlameGame {
     restartButton = RestartButton()..position = Vector2(gap + 4 * squareLength, gap / 2)..anchor = Anchor.center;
     returnToMenuButton = ReturnToMenuButton()..position = Vector2(gap + 8 * squareLength, gap / 2)..anchor = Anchor.center;
 
-    roundInfo = RoundInfo()..position = Vector2(2 * gap, 2 * gap + battleGridHeight)..anchor = Anchor.center;
-    actionFeedback = ActionFeedback()
-      ..position = Vector2(2 * gap, 2 * gap + battleGridHeight + 3.0)
-      ..anchor = Anchor.center;
+    roundInfo = RoundInfo()..anchor = Anchor.center;
+    actionFeedback = ActionFeedback()..anchor = Anchor.center;
 
     final labelStyle = TextPaint(
       style: const TextStyle(fontSize: 1.2, color: Color(0xff003366), fontFamily: 'Awesome Font', fontWeight: FontWeight.bold),
@@ -107,57 +117,153 @@ class BattleShipsGame extends FlameGame {
     camera.viewfinder.anchor = Anchor.topLeft;
   }
 
-  void startGame() async {
+  void openGameOptions({required bool isMultiplayer, String? gameId}) {
+    tempIsMultiplayer = isMultiplayer;
+    tempGameId = gameId;
+    overlays.add('GameOptionsScreen');
+  }
+
+  void startGame({int gridSize = 10, Map<String, int>? fleetCounts}) async {
     if (isGameRunning && !isMultiplayer) return;
 
-    if (isMultiplayer) {
-      if (multiplayerGameId == null) return;
+    _updateGridDimensions(gridSize);
 
-      List<Map<String, dynamic>> myShipsData = playersGrid.getShipsData();
-      if (myShipsData.isEmpty) return;
+    if (playersGrid.isMounted) world.remove(playersGrid);
+    if (opponentsGrid.isMounted) world.remove(opponentsGrid);
+    if (playerCounter.isMounted) world.remove(playerCounter);
+    if (opponentCounter.isMounted) world.remove(opponentCounter);
 
-      String readyField = amIHost ? 'player1Ready' : 'player2Ready';
-      String shipsField = amIHost ? 'ships_p1' : 'ships_p2';
+    final fleet = fleetCounts ?? {'4':1, '3':2, '2':3, '1':4};
+    playersGrid = BattleGrid(false, fleet)..size = Vector2(battleGridWidth, battleGridHeight);
+    opponentsGrid = BattleGrid(true, fleet)..size = Vector2(battleGridWidth, battleGridHeight);
+    playerCounter = ShipsCounter(playersGrid);
+    opponentCounter = ShipsCounter(opponentsGrid);
 
-      await FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).update({
-        readyField: true,
-        shipsField: myShipsData,
-      });
+    turnManager.reset();
+    turnManager.currentPlayer = 0;
+    lastProcessedP1Shots = 0;
+    lastProcessedP2Shots = 0;
+    winnerMessage = '';
+    if (actionFeedback.isMounted) actionFeedback.reset();
 
-      if (turnManager.currentPlayer == 1 || turnManager.currentPlayer == 2) {
-        return;
-      }
+    if (mainMenu.isMounted) world.remove(mainMenu);
+    isInMenu = false;
+    isMultiplayer = false;
 
-      turnManager.currentPlayer = -1;
-      if (startButton.isMounted) world.remove(startButton);
-      updateView();
+    world.add(playersGrid);
+    world.add(playerLabel); playerLabel.text = "You";
+    world.add(playerCounter);
 
-    } else {
-      // SINGLEPLAYER START
-      world.remove(mainMenu);
-      isInMenu = false;
-
-      world.add(playersGrid);
-      world.add(playerLabel); playerLabel.text = "You";
-      if (!isNarrow) { world.add(opponentsGrid); world.add(opponentLabel); opponentLabel.text = "Pirate"; }
-
-      turnManager.currentPlayer = 0;
-      world.add(startButton);
-      world.add(restartButton);
-      world.add(returnToMenuButton);
-      world.add(roundInfo);
-
-      isGameRunning = true;
-      updateView();
+    if (!isNarrow) {
+      world.add(opponentsGrid);
+      world.add(opponentLabel); opponentLabel.text = "Pirate";
+      world.add(opponentCounter);
     }
+
+    world.add(startButton);
+    world.add(restartButton);
+    world.add(returnToMenuButton);
+    world.add(roundInfo);
+
+    isGameRunning = true;
+
+    _updateUiPositions();
+    onGameResize(size);
+    updateView();
   }
 
   void startSingleplayerGame() {
     if (turnManager.currentPlayer != 0) return;
-
     if (startButton.isMounted) world.remove(startButton);
+    if (!restartButton.isMounted) world.add(restartButton);
+
     turnManager.nextTurn();
     updateView();
+  }
+
+  void startMultiplayerGame(String gameId, {
+    int gridSize = 10,
+    Map<String, int>? fleetCounts,
+    required String p1Name,
+    required String? p2Name,
+    required String p1Id
+  }) {
+    if (isGameRunning) return;
+
+    overlays.remove('MultiplayerLobby');
+    overlays.remove('GameOptionsScreen');
+
+    isMultiplayer = true;
+    multiplayerGameId = gameId;
+    myUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    amIHost = (myUserId == p1Id);
+
+    _updateGridDimensions(gridSize);
+
+    if (playersGrid.isMounted) world.remove(playersGrid);
+    if (opponentsGrid.isMounted) world.remove(opponentsGrid);
+    if (playerCounter.isMounted) world.remove(playerCounter);
+    if (opponentCounter.isMounted) world.remove(opponentCounter);
+    if (playerLabel.isMounted) world.remove(playerLabel);
+    if (opponentLabel.isMounted) world.remove(opponentLabel);
+
+    final fleet = fleetCounts ?? {'4':1, '3':2, '2':3, '1':4};
+    playersGrid = BattleGrid(false, fleet)..size = Vector2(battleGridWidth, battleGridHeight);
+    opponentsGrid = BattleGrid(true, fleet)..size = Vector2(battleGridWidth, battleGridHeight);
+    playerCounter = ShipsCounter(playersGrid);
+    opponentCounter = ShipsCounter(opponentsGrid);
+
+    turnManager.reset();
+    turnManager.currentPlayer = 0;
+    lastProcessedP1Shots = 0;
+    lastProcessedP2Shots = 0;
+    winnerMessage = '';
+    if (actionFeedback.isMounted) actionFeedback.reset();
+
+    if (mainMenu.isMounted) world.remove(mainMenu);
+    isInMenu = false;
+
+    world.add(playersGrid);
+    world.add(playerLabel);
+
+    if (amIHost) {
+      playerLabel.text = "You ($p1Name)";
+      opponentLabel.text = p2Name ?? "Opponent";
+    } else {
+      playerLabel.text = "You (${p2Name ?? 'Guest'})";
+      opponentLabel.text = p1Name;
+    }
+
+    world.add(playerCounter);
+
+    if (!isNarrow) {
+      world.add(opponentsGrid);
+      world.add(opponentLabel);
+      world.add(opponentCounter);
+    }
+
+    world.add(startButton);
+    world.add(returnToMenuButton);
+    world.add(roundInfo);
+
+    _updateUiPositions();
+    onGameResize(size);
+    updateView();
+    _listenToMultiplayerChanges();
+  }
+
+  void _updateUiPositions() {
+    double centerX = playersGrid.position.x + battleGridWidth / 2;
+    double bottomY = playersGrid.position.y + battleGridHeight;
+
+    double counterBuffer = (gap / 4) + 6;
+
+    double infoY = bottomY + counterBuffer;
+    double feedbackY = infoY + 3.0;
+
+    if (roundInfo.isMounted) roundInfo.position = Vector2(centerX, infoY);
+    if (actionFeedback.isMounted) actionFeedback.position = Vector2(centerX, feedbackY);
   }
 
   @override
@@ -170,6 +276,7 @@ class BattleShipsGame extends FlameGame {
       camera.viewfinder.position = Vector2(0,0);
       camera.viewfinder.anchor = Anchor.topLeft;
     } else {
+      _updateUiPositions();
       updateView();
       _updateCamera();
     }
@@ -184,42 +291,53 @@ class BattleShipsGame extends FlameGame {
     void positionLabel(BattleGrid grid, TextComponent label) {
       label.position = Vector2(grid.position.x + battleGridWidth / 2, grid.position.y + battleGridHeight + 0.5);
     }
-
     void positionCounter(BattleGrid grid, ShipsCounter counter) {
       counter.position = Vector2(grid.position.x, grid.position.y + battleGridHeight + gap/4);
     }
 
-    // WĄSKI EKRAN
+    _updateUiPositions();
+
     if (isNarrow) {
+      // WĄSKI EKRAN
       bool showOpponent = (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) || (visibleCurrentPlayer == 1);
 
       if (showOpponent) {
-        // Pokaż Grid Przeciwnika (Strzelanie lub Game Over)
         if (!actionFeedback.isMounted) world.add(actionFeedback);
         if (!opponentsGrid.isMounted) world.add(opponentsGrid);
         if (!opponentLabel.isMounted) world.add(opponentLabel);
         if (!opponentCounter.isMounted) world.add(opponentCounter);
+
         if (playersGrid.isMounted) world.remove(playersGrid);
         if (playerLabel.isMounted) world.remove(playerLabel);
         if (playerCounter.isMounted) world.remove(playerCounter);
+
         opponentsGrid.position = Vector2(gap, gap);
         positionLabel(opponentsGrid, opponentLabel);
         positionCounter(opponentsGrid, opponentCounter);
+
+        // Aktualizacja UI pod przeciwnikiem
+        double centerX = opponentsGrid.position.x + battleGridWidth / 2;
+        double bottomY = opponentsGrid.position.y + battleGridHeight;
+        double counterBuffer = (gap / 4) + 4.5;
+        if (roundInfo.isMounted) roundInfo.position = Vector2(centerX, bottomY + counterBuffer);
+        if (actionFeedback.isMounted) actionFeedback.position = Vector2(centerX, bottomY + counterBuffer + 3.0);
+
       } else {
-        // Pokaż Mój Grid (Tura Wroga, Setup)
         if (!actionFeedback.isMounted) world.add(actionFeedback);
         if (!playersGrid.isMounted) world.add(playersGrid);
         if (!playerLabel.isMounted) world.add(playerLabel);
         if (!playerCounter.isMounted) world.add(playerCounter);
+
         if (opponentsGrid.isMounted) world.remove(opponentsGrid);
         if (opponentLabel.isMounted) world.remove(opponentLabel);
         if (opponentCounter.isMounted) world.remove(opponentCounter);
+
         playersGrid.position = Vector2(gap, gap);
         positionLabel(playersGrid, playerLabel);
         positionCounter(playersGrid, playerCounter);
       }
     } else {
-      // Szeroki ekran - zawsze oba
+      // SZEROKI EKRAN
       if (!actionFeedback.isMounted) world.add(actionFeedback);
       if (!playersGrid.isMounted) world.add(playersGrid);
       if (!playerLabel.isMounted) world.add(playerLabel);
@@ -236,22 +354,26 @@ class BattleShipsGame extends FlameGame {
       positionLabel(opponentsGrid, opponentLabel);
       positionCounter(opponentsGrid, opponentCounter);
     }
-
     _updateCamera();
   }
 
   void _updateCamera() {
-    double totalWidth; double totalHeight;
+    double totalWidth;
+    double totalHeight;
+    double heightBuffer = 15.0;
+
     if (isNarrow) {
       totalWidth = battleGridWidth + 2 * gap;
-      totalHeight = battleGridHeight + 2 * gap + 2.0;
+      totalHeight = battleGridHeight + 2 * gap + heightBuffer;
       camera.viewfinder.visibleGameSize = Vector2(totalWidth, totalHeight);
-      camera.viewfinder.position = Vector2(totalWidth / 2, 0); camera.viewfinder.anchor = Anchor.topCenter;
+      camera.viewfinder.position = Vector2(totalWidth / 2, 0);
+      camera.viewfinder.anchor = Anchor.topCenter;
     } else {
       totalWidth = battleGridWidth * 2 + 3 * gap;
-      totalHeight = battleGridHeight + 2 * gap + 2.0;
+      totalHeight = battleGridHeight + 2 * gap + heightBuffer;
       camera.viewfinder.visibleGameSize = Vector2(totalWidth, totalHeight);
-      camera.viewfinder.position = Vector2(totalWidth / 2, 0); camera.viewfinder.anchor = Anchor.topCenter;
+      camera.viewfinder.position = Vector2(totalWidth / 2, 0);
+      camera.viewfinder.anchor = Anchor.topCenter;
     }
   }
 
@@ -264,6 +386,7 @@ class BattleShipsGame extends FlameGame {
     if (!returnToMenuButton.isMounted) world.add(returnToMenuButton);
     if (!roundInfo.isMounted) world.add(roundInfo);
 
+    _updateUiPositions();
     updateView();
     _updateCamera();
   }
@@ -299,15 +422,14 @@ class BattleShipsGame extends FlameGame {
     camera.viewfinder.visibleGameSize = size;
 
     mainMenu.onGameResize(size);
-
-    restartGameInternalState();
+    turnManager.reset();
   }
 
   void restartGameInternalState() {
     turnManager.reset();
     visibleCurrentPlayer = 0;
-    playersGrid.regenerateGrid();
-    opponentsGrid.regenerateGrid();
+    if (playersGrid.isMounted) playersGrid.regenerateGrid();
+    if (opponentsGrid.isMounted) opponentsGrid.regenerateGrid();
     lastProcessedP1Shots = 0;
     lastProcessedP2Shots = 0;
     if (actionFeedback.isMounted) actionFeedback.reset();
@@ -315,34 +437,91 @@ class BattleShipsGame extends FlameGame {
 
   void openMultiplayerLobby() { overlays.add('MultiplayerLobby'); }
 
-  void startMultiplayerGame(String gameId) {
-    if (isGameRunning) return;
-    overlays.remove('MultiplayerLobby');
-    isMultiplayer = true;
-    multiplayerGameId = gameId;
-    myUserId = FirebaseAuth.instance.currentUser?.uid;
-
-    restartGameInternalState();
-    world.remove(mainMenu);
-    isInMenu = false;
-
-    world.add(playersGrid);
-    world.add(playerLabel);
-    world.add(playerCounter);
-    if (!isNarrow) {
-      world.add(opponentsGrid);
-      world.add(opponentLabel);
-      world.add(opponentCounter);
-    }
-    world.add(startButton);
-    world.add(returnToMenuButton);
-    world.add(roundInfo);
-    updateView();
-    _listenToMultiplayerChanges();
-  }
-
   @override
   void onDetach() { gameStream?.cancel(); super.onDetach(); }
+
+  void confirmMultiplayerShips() async {
+    if (multiplayerGameId == null) return;
+
+    List<Map<String, dynamic>> myShipsData = playersGrid.getShipsData();
+
+    String readyField = amIHost ? 'player1Ready' : 'player2Ready';
+    String shipsField = amIHost ? 'ships_p1' : 'ships_p2';
+
+    await FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).update({
+      readyField: true,
+      shipsField: myShipsData,
+    });
+
+    turnManager.currentPlayer = -1; // Waiting state
+    if (startButton.isMounted) world.remove(startButton);
+    updateView();
+  }
+
+  void _listenToMultiplayerChanges() {
+    if (multiplayerGameId == null) return;
+
+    gameStream = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).snapshots().listen((snapshot) async {
+      if (!snapshot.exists) return;
+      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+      if (data['player1Id'] == myUserId) {
+        amIHost = true;
+      } else {
+        amIHost = false;
+      }
+
+      String p1Name = data['player1Name'] ?? 'Player 1';
+      String p2Name = data['player2Name'] ?? 'Player 2';
+
+      if (playerLabel.isMounted && opponentLabel.isMounted) {
+        if (amIHost) {
+          playerLabel.text = "You ($p1Name)";
+          opponentLabel.text = p2Name;
+        } else {
+          playerLabel.text = "You ($p2Name)";
+          opponentLabel.text = p1Name;
+        }
+      }
+
+      bool p1Ready = data['player1Ready'] ?? false;
+      bool p2Ready = data['player2Ready'] ?? false;
+
+      if (p1Ready && p2Ready) {
+        if (!turnManager.hasShipsSynced) {
+          List<dynamic> enemyShipsPositions = amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
+          if (enemyShipsPositions.isNotEmpty) {
+            opponentsGrid.setEnemyShips(enemyShipsPositions);
+            turnManager.hasShipsSynced = true;
+            isGameRunning = true;
+          }
+        }
+
+        if (startButton.isMounted) world.remove(startButton);
+
+        _syncShots(data);
+
+        String currentTurnUserId = data['currentTurn'];
+        int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
+
+        if (turnManager.currentPlayer != newPlayerState && turnManager.currentPlayer != -1 && isGameRunning) {
+          await Future.delayed(const Duration(seconds: delay));
+        }
+
+        turnManager.currentPlayer = newPlayerState;
+        updateView();
+
+      } else {
+        String myReadyField = amIHost ? 'player1Ready' : 'player2Ready';
+        bool amIReady = data[myReadyField] ?? false;
+
+        if (amIReady && turnManager.currentPlayer == 0) {
+          turnManager.currentPlayer = -1;
+          updateView();
+        }
+      }
+    });
+  }
 
   Future<void> sendMoveToFirebase(int index) async {
     if (multiplayerGameId == null) return;
@@ -366,7 +545,6 @@ class BattleShipsGame extends FlameGame {
       if (!snapshot.exists) return;
       final data = snapshot.data() as Map<String, dynamic>;
 
-      // Zabezpieczenie: strzelaj tylko w swojej turze
       if (data['currentTurn'] != myUserId) return;
 
       String p1 = data['player1Id'];
@@ -397,79 +575,18 @@ class BattleShipsGame extends FlameGame {
 
     if (myShots.length > myCount) {
       for (int i = myCount; i < myShots.length; i++) { if (myShots[i] is int) opponentsGrid.visualizeHit(myShots[i]); }
-      if (amIHost) {
-        lastProcessedP1Shots = myShots.length;
-      } else {
-        lastProcessedP2Shots = myShots.length;
-      }
+      if (amIHost) { lastProcessedP1Shots = myShots.length; }
+      else { lastProcessedP2Shots = myShots.length; }
     }
     if (enemyShots.length > enemyCount) {
       for (int i = enemyCount; i < enemyShots.length; i++) { if (enemyShots[i] is int) playersGrid.visualizeHit(enemyShots[i]); }
-      if (amIHost) {
-        lastProcessedP2Shots = enemyShots.length;
-      } else {
-        lastProcessedP1Shots = enemyShots.length;
-      }
+      if (amIHost) { lastProcessedP2Shots = enemyShots.length; }
+      else { lastProcessedP1Shots = enemyShots.length; }
     }
-  }
-
-  void _listenToMultiplayerChanges() {
-    if (multiplayerGameId == null) return;
-
-    gameStream = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).snapshots().listen((snapshot) async {
-      if (!snapshot.exists) return;
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-
-      if (data['player1Id'] == myUserId) {
-        amIHost = true;
-      } else {
-        amIHost = false;
-
-        String p1Name = data['player1Name'] ?? 'Player 1';
-        String p2Name = data['player2Name'] ?? 'Player 2';
-        if (amIHost) { playerLabel.text = "You ($p1Name)"; opponentLabel.text = p2Name; }
-        else { playerLabel.text = "You ($p2Name)"; opponentLabel.text = p1Name; }
-
-        bool p1Ready = data['player1Ready'] ?? false;
-        bool p2Ready = data['player2Ready'] ?? false;
-
-        if (p1Ready && p2Ready) {
-          if (!turnManager.hasShipsSynced) {
-            List<dynamic> enemyShipsPositions = amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
-            if (enemyShipsPositions.isNotEmpty) {
-              opponentsGrid.setEnemyShips(enemyShipsPositions);
-              turnManager.hasShipsSynced = true;
-              isGameRunning = true;
-            }
-          }
-
-          if (startButton.isMounted) world.remove(startButton);
-
-          _syncShots(data);
-
-          String currentTurnUserId = data['currentTurn'];
-          int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
-
-          if (turnManager.currentPlayer != newPlayerState && turnManager.currentPlayer != -1 && isGameRunning) {
-            await Future.delayed(const Duration(seconds: delay));
-          }
-
-          turnManager.currentPlayer = newPlayerState;
-          updateView();
-
-        } else {
-          if (turnManager.currentPlayer != 0) {
-            turnManager.currentPlayer = -1;
-            updateView();
-          }
-        }
-      }
-    });
   }
 
   void checkWinner() {
     if (playersGrid.ships.isEmpty || opponentsGrid.ships.isEmpty) return;
-
     if (winnerMessage.isNotEmpty && !isGameRunning) return;
 
     bool playerLost = playersGrid.ships.length == playersGrid.shipsDown.length;
@@ -478,13 +595,7 @@ class BattleShipsGame extends FlameGame {
     if (playerLost || enemyLost) {
       isGameRunning = false;
       turnManager.currentPlayer = -1;
-
-      if (playerLost) {
-        winnerMessage = "You Lost!";
-      } else {
-        winnerMessage = "You Won!";
-      }
-
+      winnerMessage = playerLost ? "You Lost!" : "You Won!";
       overlays.add('GameOverMenu');
       updateView();
     }
@@ -498,10 +609,8 @@ class BattleShipsGame extends FlameGame {
         }
       }
     }
-
     if (startButton.isMounted) world.remove(startButton);
     if (roundInfo.isMounted) world.remove(roundInfo);
-
     if (!returnToMenuButton.isMounted) world.add(returnToMenuButton);
   }
 }
