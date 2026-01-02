@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'FirestoreService.dart';
+
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -36,6 +38,11 @@ class AuthService {
       if (cred.user != null) {
         await cred.user!.updateDisplayName(username);
         await cred.user!.reload();
+      }
+
+      if (currentUser != null) {
+        final firestoreService = FirestoreService();
+        await firestoreService.saveUserData(currentUser!, username);
       }
 
     } on FirebaseAuthException catch (e) {

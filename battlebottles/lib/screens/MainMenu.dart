@@ -4,6 +4,7 @@ import 'package:flame/text.dart';
 import '../components/buttons/MultiplayerButton.dart';
 import '../components/ui/AccountDropdown.dart';
 import '../components/buttons/SingleplayerButton.dart';
+import '../services/FirestoreService.dart';
 import './BattleShipsGame.dart';
 
 class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> {
@@ -33,6 +34,8 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
     accountDropdown = AccountDropdown()
       ..anchor = Anchor.topRight;
     add(accountDropdown);
+
+    FirestoreService().cleanupOldGames();
   }
 
   @override

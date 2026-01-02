@@ -54,10 +54,17 @@ class ShipsCounter extends PositionComponent {
     for (var ship in linkedGrid.ships) {
       if (!linkedGrid.shipsDown.contains(ship)) {
         int s = ship.type.size;
-        if (s == 4) size4++;
-        else if (s == 3) size3++;
-        else if (s == 2) size2++;
-        else if (s == 1) size1++;
+        if (s == 4) {
+          size4++;
+        } else if (s == 3) {
+          size3++;
+        }
+        else if (s == 2) {
+          size2++;
+        }
+        else if (s == 1) {
+          size1++;
+        }
       }
     }
 

@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart' hide Image;
+import '../../screens/FriendsScreen.dart';
 import '../../services/AuthService.dart';
 import '../../screens/BattleShipsGame.dart';
 
@@ -57,7 +58,7 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
     });
 
     _label = TextComponent(
-      text: 'My Account',
+      text: 'Sign in',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 12, color: Color(0xFFFFFFFF), fontWeight: FontWeight.bold),
       ),
@@ -128,10 +129,22 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
 
       } else {
         // LOGGED IN
+        add(DropdownOption('Friends', () {
+          _toggleMenu(); // Zamknij dropdown
+          if (game.buildContext != null) {
+            // Pokaż FriendsScreen jako Dialog/Overlay
+            showDialog(
+              context: game.buildContext!,
+              builder: (context) => FriendsScreen(
+                onClose: () => Navigator.of(context).pop(),
+              ),
+            );
+          }
+        })..position = Vector2(0, 30));
         add(DropdownOption('Logout', () {
           _auth.logout();
           _toggleMenu();
-        })..position = Vector2(0, 30));
+        })..position = Vector2(0, 60));
       }
     }
 

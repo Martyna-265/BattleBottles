@@ -35,7 +35,7 @@ class TurnManager {
 
     currentPlayer = -1;
 
-    await Future.delayed(Duration(seconds: BattleShipsGame.delay));
+    await Future.delayed(const Duration(seconds: BattleShipsGame.delay));
 
     if (!game.isGameRunning) return;
 

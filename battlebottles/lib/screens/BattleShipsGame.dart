@@ -161,12 +161,12 @@ class BattleShipsGame extends FlameGame {
   }
 
   @override
-  void onGameResize(Vector2 newSize) {
-    super.onGameResize(newSize);
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
     if (!_isLoaded) return;
 
     if (isInMenu) {
-      camera.viewfinder.visibleGameSize = newSize;
+      camera.viewfinder.visibleGameSize = size;
       camera.viewfinder.position = Vector2(0,0);
       camera.viewfinder.anchor = Anchor.topLeft;
     } else {
@@ -397,11 +397,19 @@ class BattleShipsGame extends FlameGame {
 
     if (myShots.length > myCount) {
       for (int i = myCount; i < myShots.length; i++) { if (myShots[i] is int) opponentsGrid.visualizeHit(myShots[i]); }
-      if (amIHost) lastProcessedP1Shots = myShots.length; else lastProcessedP2Shots = myShots.length;
+      if (amIHost) {
+        lastProcessedP1Shots = myShots.length;
+      } else {
+        lastProcessedP2Shots = myShots.length;
+      }
     }
     if (enemyShots.length > enemyCount) {
       for (int i = enemyCount; i < enemyShots.length; i++) { if (enemyShots[i] is int) playersGrid.visualizeHit(enemyShots[i]); }
-      if (amIHost) lastProcessedP2Shots = enemyShots.length; else lastProcessedP1Shots = enemyShots.length;
+      if (amIHost) {
+        lastProcessedP2Shots = enemyShots.length;
+      } else {
+        lastProcessedP1Shots = enemyShots.length;
+      }
     }
   }
 
@@ -412,44 +420,48 @@ class BattleShipsGame extends FlameGame {
       if (!snapshot.exists) return;
       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-      if (data['player1Id'] == myUserId) amIHost = true; else amIHost = false;
-
-      String p1Name = data['player1Name'] ?? 'Player 1';
-      String p2Name = data['player2Name'] ?? 'Player 2';
-      if (amIHost) { playerLabel.text = "You ($p1Name)"; opponentLabel.text = p2Name; }
-      else { playerLabel.text = "You ($p2Name)"; opponentLabel.text = p1Name; }
-
-      bool p1Ready = data['player1Ready'] ?? false;
-      bool p2Ready = data['player2Ready'] ?? false;
-
-      if (p1Ready && p2Ready) {
-        if (!turnManager.hasShipsSynced) {
-          List<dynamic> enemyShipsPositions = amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
-          if (enemyShipsPositions.isNotEmpty) {
-            opponentsGrid.setEnemyShips(enemyShipsPositions);
-            turnManager.hasShipsSynced = true;
-            isGameRunning = true;
-          }
-        }
-
-        if (startButton.isMounted) world.remove(startButton);
-
-        _syncShots(data);
-
-        String currentTurnUserId = data['currentTurn'];
-        int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
-
-        if (turnManager.currentPlayer != newPlayerState && turnManager.currentPlayer != -1 && isGameRunning) {
-          await Future.delayed(const Duration(seconds: delay));
-        }
-
-        turnManager.currentPlayer = newPlayerState;
-        updateView();
-
+      if (data['player1Id'] == myUserId) {
+        amIHost = true;
       } else {
-        if (turnManager.currentPlayer != 0) {
-          turnManager.currentPlayer = -1;
+        amIHost = false;
+
+        String p1Name = data['player1Name'] ?? 'Player 1';
+        String p2Name = data['player2Name'] ?? 'Player 2';
+        if (amIHost) { playerLabel.text = "You ($p1Name)"; opponentLabel.text = p2Name; }
+        else { playerLabel.text = "You ($p2Name)"; opponentLabel.text = p1Name; }
+
+        bool p1Ready = data['player1Ready'] ?? false;
+        bool p2Ready = data['player2Ready'] ?? false;
+
+        if (p1Ready && p2Ready) {
+          if (!turnManager.hasShipsSynced) {
+            List<dynamic> enemyShipsPositions = amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
+            if (enemyShipsPositions.isNotEmpty) {
+              opponentsGrid.setEnemyShips(enemyShipsPositions);
+              turnManager.hasShipsSynced = true;
+              isGameRunning = true;
+            }
+          }
+
+          if (startButton.isMounted) world.remove(startButton);
+
+          _syncShots(data);
+
+          String currentTurnUserId = data['currentTurn'];
+          int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
+
+          if (turnManager.currentPlayer != newPlayerState && turnManager.currentPlayer != -1 && isGameRunning) {
+            await Future.delayed(const Duration(seconds: delay));
+          }
+
+          turnManager.currentPlayer = newPlayerState;
           updateView();
+
+        } else {
+          if (turnManager.currentPlayer != 0) {
+            turnManager.currentPlayer = -1;
+            updateView();
+          }
         }
       }
     });

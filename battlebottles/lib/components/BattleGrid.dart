@@ -160,7 +160,7 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
             }
           }
         } catch (e) {
-          print("Error parsing ship: $e");
+          debugPrint("Error parsing ship: $e");
         }
       }
     }

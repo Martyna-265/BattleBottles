@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
+
 import '../bottleElements/ShipType.dart';
 
 class Ship {
@@ -36,7 +38,7 @@ class Ship {
           return Point<int>(px, py);
         }).toList();
       } catch (e) {
-        print("Point loading error: $e");
+        debugPrint("Point loading error: $e");
       }
     }
     return Ship(

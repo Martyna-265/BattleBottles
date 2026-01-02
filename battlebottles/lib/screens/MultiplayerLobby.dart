@@ -53,60 +53,84 @@ class MultiplayerLobby extends StatelessWidget {
 
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: _firestoreService.getAvailableGames(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const Center(child: Text('Database error', style: TextStyle(color: Colors.red)));
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                  stream: _firestoreService.getFriends(), // 1. Pobieramy znajomych
+                  builder: (context, friendsSnapshot) {
+                    // Jeśli ładuje znajomych, czekamy (opcjonalnie można pominąć loader)
+                    if (friendsSnapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    final games = snapshot.data!.docs;
+                    // Tworzymy listę ID naszych znajomych
+                    final List<String> friendIds = friendsSnapshot.data?.docs
+                        .map((doc) => doc.id) // Zakładamy, że ID dokumentu to UID znajomego
+                        .toList() ?? [];
 
-                    if (games.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No available games.\nCreate a new one!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      );
-                    }
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: _firestoreService.getAvailableGames(), // 2. Pobieramy gry
+                      builder: (context, gamesSnapshot) {
+                        if (gamesSnapshot.hasError) {
+                          return const Center(child: Text('Error loading games', style: TextStyle(color: Colors.red)));
+                        }
+                        if (gamesSnapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
 
-                    return ListView.builder(
-                      itemCount: games.length,
-                      itemBuilder: (context, index) {
-                        final doc = games[index];
-                        final data = doc.data() as Map<String, dynamic>;
-                        final hostName = data['player1Name'] ?? 'Unknown';
+                        final allGames = gamesSnapshot.data!.docs;
 
-                        return Card(
-                          color: Colors.blue[900],
-                          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          child: ListTile(
-                            leading: const Icon(Icons.person, color: Colors.white),
-                            title: Text(
-                              hostName,
-                              style: const TextStyle(color: Colors.white),
+                        // 3. FILTROWANIE: Pokaż tylko gry, gdzie host jest moim znajomym
+                        final friendGames = allGames.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final hostId = data['player1Id'];
+                          // Gra musi być stworzona przez kogoś z friendIds
+                          return friendIds.contains(hostId);
+                        }).toList();
+
+                        if (friendGames.isEmpty) {
+                          return Center(
+                            child: Text(
+                              friendIds.isEmpty
+                                  ? 'Add friends to see their games!'
+                                  : 'No active games from your friends.\nCreate one!',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white70),
                             ),
-                            subtitle: const Text(
-                              'Waiting...',
-                              style: TextStyle(color: Colors.white70, fontSize: 12),
-                            ),
-                            trailing: ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                              onPressed: () async {
-                                try {
-                                  await _firestoreService.joinGame(doc.id);
-                                  game.startMultiplayerGame(doc.id);
-                                } catch (e) {
-                                  print("Error: $e");
-                                }
-                              },
-                              child: const Text('PLAY'),
-                            ),
-                          ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          itemCount: friendGames.length,
+                          itemBuilder: (context, index) {
+                            final doc = friendGames[index];
+                            final data = doc.data() as Map<String, dynamic>;
+                            final hostName = data['player1Name'] ?? 'Unknown';
+
+                            return Card(
+                              color: Colors.blue[900],
+                              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              child: ListTile(
+                                title: Text(
+                                  hostName,
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: const Text(
+                                  'Friend\'s Lobby',
+                                  style: TextStyle(color: Colors.greenAccent, fontSize: 12),
+                                ),
+                                trailing: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                  onPressed: () async {
+                                    try {
+                                      await _firestoreService.joinGame(doc.id);
+                                      game.startMultiplayerGame(doc.id);
+                                    } catch (e) {
+                                      debugPrint("Error: $e");
+                                    }
+                                  },
+                                  child: const Text('JOIN'),
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
@@ -128,7 +152,7 @@ class MultiplayerLobby extends StatelessWidget {
                         // Host od razu startuje grę (do zmiany)
                         game.startMultiplayerGame(gameId);
                       } catch (e) {
-                        print("Error: $e");
+                        debugPrint("Error: $e");
                       }
                     },
                     child: const Text(

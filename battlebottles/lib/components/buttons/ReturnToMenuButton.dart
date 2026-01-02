@@ -13,7 +13,7 @@ class ReturnToMenuButton extends PositionComponent with HasGameReference<BattleS
 
   final _backgroundPaint = Paint()..color = const Color(0xff003366);
   final _text = TextPaint(
-    style: TextStyle(
+    style: const TextStyle(
       fontSize: 1.0,
       fontFamily: 'Awesome Font',
       color: Color(0xFFFFFFFF),
