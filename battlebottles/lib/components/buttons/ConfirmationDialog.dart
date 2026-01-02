@@ -78,7 +78,7 @@ class ConfirmationDialog extends PositionComponent with HasGameReference<BattleS
     final boxHalfHeight = _boxSize.y / 2;
 
     final buttonY = center.y + boxHalfHeight - 2.5;
-    final buttonOffsetX = 4.5;
+    const buttonOffsetX = 4.5;
 
     add(DialogButton('YES', const Color(0xFF4CAF50), () {
       onConfirm();

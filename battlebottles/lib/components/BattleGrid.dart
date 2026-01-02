@@ -11,10 +11,8 @@ import 'gridElements/Water.dart';
 
 class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame> {
 
-  BattleGrid(bool opponent, int bottleCount)
+  BattleGrid(this.opponent, this.bottleCount)
       : squaresInGrid = BattleShipsGame.squaresInGrid,
-        opponent = opponent,
-        bottleCount = bottleCount,
         super(size: Vector2(BattleShipsGame.battleGridWidth, BattleShipsGame.battleGridHeight)) {
     regenerateGrid();
   }

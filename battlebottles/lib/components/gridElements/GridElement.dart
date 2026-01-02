@@ -13,9 +13,8 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   bool bombable;
   final bool opponent;
 
-  GridElement(this.gridX, this.gridY, this.opponent, {required Condition condition})
-      : condition = condition,
-        bombable = (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') ? false : true,
+  GridElement(this.gridX, this.gridY, this.opponent, {required this.condition})
+      : bombable = (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') ? false : true,
         super(size: BattleShipsGame.squareSize);
 
   @override

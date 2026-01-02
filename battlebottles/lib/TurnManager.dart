@@ -6,7 +6,7 @@ import 'components/gridElements/Bottle.dart';
 import 'components/gridElements/Ship.dart';
 
 class TurnManager {
-  int _currentPlayer = 0; // 0=Setup, 1=Player, 2=Enemy, -1=Waiting
+  int currentPlayer = 0; // 0=Setup, 1=Player, 2=Enemy, -1=Waiting
 
   final int totalPlayers;
   final BattleShipsGame game;
@@ -17,12 +17,6 @@ class TurnManager {
 
   TurnManager(this.totalPlayers, this.game) {
     _resetAvailableMoves();
-  }
-
-  int get currentPlayer => _currentPlayer;
-
-  set currentPlayer(int value) {
-    _currentPlayer = value;
   }
 
   void _resetAvailableMoves() {
@@ -37,18 +31,18 @@ class TurnManager {
   Future<void> nextTurn() async {
     if (game.isMultiplayer) return;
 
-    int nextPlayer = (_currentPlayer == 1) ? 2 : 1;
+    int nextPlayer = (currentPlayer == 1) ? 2 : 1;
 
-    _currentPlayer = -1;
+    currentPlayer = -1;
 
     await Future.delayed(Duration(seconds: BattleShipsGame.delay));
 
     if (!game.isGameRunning) return;
 
-    _currentPlayer = nextPlayer;
+    currentPlayer = nextPlayer;
     game.updateView();
 
-    if (_currentPlayer == 2) {
+    if (currentPlayer == 2) {
       _opponentsTurn();
     }
   }
@@ -130,7 +124,7 @@ class TurnManager {
 
       if (targetElement is Bottle) {
         await Future.delayed(const Duration(milliseconds: 500));
-        if (game.isGameRunning && _currentPlayer == 2) {
+        if (game.isGameRunning && currentPlayer == 2) {
           _opponentsTurn();
         }
       }
@@ -140,7 +134,7 @@ class TurnManager {
   }
 
   void reset() {
-    _currentPlayer = 0;
+    currentPlayer = 0;
     hasShipsSynced = false;
     _resetAvailableMoves();
   }

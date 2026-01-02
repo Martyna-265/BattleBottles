@@ -13,16 +13,17 @@ import 'Water.dart';
 class Bottle extends GridElement with DragCallbacks {
 
   Bottle(super.gridX, super.gridY, int intSize, super.opponent, this.parentShip)
-      : super(condition: Condition.fromInt(0));
+      : super(condition: Condition.fromInt(0)) {
+    sprite = opponent ? Condition.fromInt(3).sprite : condition.sprite;
+  }
 
   final Ship parentShip;
   late final BattleGrid battleGrid = opponent ? game.opponentsGrid : game.playersGrid;
-  late Sprite? sprite = opponent ? Condition.fromInt(3).sprite : condition.sprite;
 
   late Vector2 _positionDelta = Vector2(0, 0);
   late Vector2 _startPosition;
-  List<Bottle> _squad = [];
-  List<Vector2> _squadOriginalPositions = [];
+  final List<Bottle> _squad = [];
+  final List<Vector2> _squadOriginalPositions = [];
 
   @override
   String toString() {

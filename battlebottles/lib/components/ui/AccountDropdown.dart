@@ -14,7 +14,7 @@ class DropdownOption extends PositionComponent with TapCallbacks {
 
   final _bgPaint = Paint()..color = const Color(0xFF004488);
   final _hoverPaint = Paint()..color = const Color(0xFF0055AA);
-  bool _isHovered = false;
+  final bool _isHovered = false;
 
   @override
   void render(Canvas canvas) {
