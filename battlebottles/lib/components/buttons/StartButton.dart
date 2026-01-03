@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../../services/AudioManager.dart';
 
 class StartButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   StartButton() : super(size: Vector2(6, 2.5));
@@ -35,6 +36,7 @@ class StartButton extends PositionComponent with HasGameReference<BattleShipsGam
 
   @override
   void onTapDown(TapDownEvent event) {
+    AudioManager.playClick();
     if (game.turnManager.currentPlayer != 0) return;
     if (game.isMultiplayer){
       game.confirmMultiplayerShips();

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
+import 'package:battlebottles/services/AudioManager.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
@@ -136,6 +137,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   }
 
   void _handleOctopus() {
+    AudioManager.playMonster();
     Random random = Random();
 
     List<Point<int>> directions = [
@@ -203,6 +205,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   }
 
   void _handleShark() {
+    AudioManager.playMonster();
     int n = game.squaresInGrid;
 
     var enemyGrid = game.opponentsGrid.grid;

@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../../services/AudioManager.dart';
 import 'ConfirmationDialog.dart';
 
 class RestartButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
@@ -35,6 +36,7 @@ class RestartButton extends PositionComponent with HasGameReference<BattleShipsG
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
+    AudioManager.playClick();
     game.world.add(ConfirmationDialog(
       message: 'Restart game?',
       onConfirm: () { game.restartGame(); },

@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../../services/AudioManager.dart';
 
 class HelpButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
 
@@ -52,5 +53,6 @@ class HelpButton extends PositionComponent with HasGameReference<BattleShipsGame
   @override
   void onTapDown(TapDownEvent event) {
     game.overlays.add('HelpScreen');
+    AudioManager.playClick();
   }
 }

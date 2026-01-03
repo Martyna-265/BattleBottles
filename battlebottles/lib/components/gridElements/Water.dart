@@ -1,6 +1,8 @@
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
 
+import '../../services/AudioManager.dart';
+
 class Water extends GridElement {
 
   Water(super.gridX, super.gridY, super.opponent)
@@ -13,6 +15,7 @@ class Water extends GridElement {
     if (bombable) {
       bool isMyTurn = (game.turnManager.currentPlayer == 1);
       game.actionFeedback.setMessage("miss", !isMyTurn);
+      AudioManager.playSplash();
 
       super.bomb();
     }

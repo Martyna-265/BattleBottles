@@ -1,13 +1,15 @@
-import 'dart:ui';
 import 'package:battlebottles/TurnManager.dart';
 import 'package:battlebottles/components/BattleGrid.dart';
 import 'package:battlebottles/components/buttons/ReturnToMenuButton.dart';
 import 'package:battlebottles/screens/MainMenu.dart';
+import 'package:battlebottles/services/AudioManager.dart';
 import 'package:battlebottles/services/StatsService.dart';
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/text.dart';
+import 'package:flutter/widgets.dart';
 import 'dart:math' as math;
 import '../components/buttons/RestartButton.dart';
 import '../components/buttons/StartButton.dart';
@@ -23,8 +25,9 @@ import '../components/texts/ShipsCounter.dart';
 import 'components/buttons/HelpButton.dart';
 import 'components/buttons/PowerUpButton.dart';
 import 'components/bottleElements/PowerUpType.dart';
+import 'components/buttons/SoundButton.dart';
 
-class BattleShipsGame extends FlameGame {
+class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserver{
 
   static const double squareLength = 2.0;
   static final Vector2 squareSize = Vector2(squareLength, squareLength);
@@ -59,6 +62,7 @@ class BattleShipsGame extends FlameGame {
   late RestartButton restartButton;
   late ReturnToMenuButton returnToMenuButton;
   late HelpButton helpButton;
+  late SoundButton soundButton;
   late RoundInfo roundInfo;
   late ActionFeedback actionFeedback;
 
@@ -110,6 +114,8 @@ class BattleShipsGame extends FlameGame {
   Future<void> onLoad() async {
     await Flame.images.loadAll(['Bottle1x1.png', 'Octopus.png', 'Bombs.png', 'Shark.png']);
 
+    WidgetsBinding.instance.addObserver(this);
+
     _updateGridDimensions(10);
 
     turnManager = TurnManager(2, this);
@@ -124,8 +130,8 @@ class BattleShipsGame extends FlameGame {
     restartButton = RestartButton()..anchor = Anchor.center;
     returnToMenuButton = ReturnToMenuButton()..anchor = Anchor.center;
 
-    helpButton = HelpButton(sideLength: squareLength * 1.2)..anchor = Anchor.topLeft;
-
+    helpButton = HelpButton(sideLength: squareLength)..anchor = Anchor.topLeft;
+    soundButton = SoundButton(sideLength: squareLength)..anchor = Anchor.topLeft;
     octopusBtn = PowerUpButton(imageName: 'Octopus.png', type: PowerUpType.octopus, count: limitOctopus);
     tripleBtn = PowerUpButton(imageName: 'Bombs.png', type: PowerUpType.triple, count: limitTriple);
     sharkBtn = PowerUpButton(imageName: 'Shark.png', type: PowerUpType.shark, count: limitShark);
@@ -160,6 +166,19 @@ class BattleShipsGame extends FlameGame {
       octopusBtn.count = limitOctopus;
       tripleBtn.count = limitTriple;
       sharkBtn.count = limitShark;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      // Aplikacja w tle -> Pauza muzyki
+      AudioManager.pauseBgm();
+    } else if (state == AppLifecycleState.resumed) {
+      // Powrót do aplikacji -> Wznowienie muzyki
+      AudioManager.resumeBgm();
     }
   }
 
@@ -207,6 +226,7 @@ class BattleShipsGame extends FlameGame {
 
   void startGame({int gridSize = 10, Map<String, int>? fleetCounts}) async {
     if (isGameRunning && !isMultiplayer) return;
+    AudioManager.playStart();
 
     _updateGridDimensions(gridSize);
     _clearWorldForGame();
@@ -252,6 +272,7 @@ class BattleShipsGame extends FlameGame {
     world.add(sharkBtn);
 
     if (!helpButton.isMounted) world.add(helpButton);
+    if (!soundButton.isMounted) world.add(soundButton);
 
     isGameRunning = true;
 
@@ -264,6 +285,7 @@ class BattleShipsGame extends FlameGame {
     if (turnManager.currentPlayer != 0) return;
     if (startButton.isMounted) world.remove(startButton);
     if (!restartButton.isMounted) world.add(restartButton);
+    AudioManager.playStart();
 
     turnManager.nextTurn();
     updateView();
@@ -279,6 +301,7 @@ class BattleShipsGame extends FlameGame {
         required String p1Id
       }) {
     if (isGameRunning) return;
+    AudioManager.playStart();
     overlays.remove('MultiplayerLobby');
     overlays.remove('GameOptionsScreen');
 
@@ -347,6 +370,7 @@ class BattleShipsGame extends FlameGame {
     world.add(sharkBtn);
 
     if (!helpButton.isMounted) world.add(helpButton);
+    if (!soundButton.isMounted) world.add(soundButton);
 
     _updateUiPositions();
     onGameResize(size);
@@ -378,7 +402,24 @@ class BattleShipsGame extends FlameGame {
     roundInfo.position = Vector2(uiCenterX, roundInfoY);
     actionFeedback.position = Vector2(uiCenterX, feedbackY);
 
-    if (helpButton.isMounted) {
+    if (helpButton.isMounted && soundButton.isMounted) {
+      double roundInfoWidth = 7 * squareLength;
+      double roundInfoLeftEdge = uiCenterX - (roundInfoWidth / 2);
+
+      double buttonSize = helpButton.size.x;
+      double padding = 0.5;
+
+      soundButton.position = Vector2(
+          roundInfoLeftEdge - padding - buttonSize,
+          roundInfoY - (buttonSize / 2)
+      );
+
+      helpButton.position = Vector2(
+          soundButton.position.x - padding - buttonSize,
+          roundInfoY - (buttonSize / 2)
+      );
+    }
+    else if (helpButton.isMounted) {
       double roundInfoWidth = 7 * squareLength;
       double roundInfoLeftEdge = uiCenterX - (roundInfoWidth / 2);
       double padding = 1.5;
@@ -562,8 +603,17 @@ class BattleShipsGame extends FlameGame {
     if (actionFeedback.isMounted) actionFeedback.reset();
   }
 
-  void openMultiplayerLobby() { overlays.add('MultiplayerLobby'); }
-  @override void onDetach() { gameStream?.cancel(); super.onDetach(); }
+  void openMultiplayerLobby() {
+    overlays.add('MultiplayerLobby');
+  }
+
+  @override
+  void onDetach() {
+    WidgetsBinding.instance.removeObserver(this);
+    AudioManager.stopBgm();
+    gameStream?.cancel();
+    super.onDetach();
+  }
 
   void confirmMultiplayerShips() async {
     if (multiplayerGameId == null) return;
@@ -712,20 +762,30 @@ class BattleShipsGame extends FlameGame {
 
   void checkWinner() {
     if (playersGrid.ships.isEmpty || opponentsGrid.ships.isEmpty) return;
+
     if (winnerMessage.isNotEmpty && !isGameRunning) return;
+
     bool playerLost = playersGrid.ships.length == playersGrid.shipsDown.length;
     bool enemyLost = opponentsGrid.ships.length == opponentsGrid.shipsDown.length;
+
     if (playerLost || enemyLost) {
       isGameRunning = false;
       turnManager.currentPlayer = -1;
       StatsService().recordGameResult(!playerLost, isMultiplayer);
-      if (playerLost) { winnerMessage = "You Lost!"; } else { winnerMessage = "You Won!"; }
-      overlays.add('GameOverMenu');
+
+      if (playerLost) {
+        winnerMessage = "You Lost!";
+        AudioManager.playLoss();
+      } else {
+        winnerMessage = "You Won!";
+        AudioManager.playWin();
+      }      overlays.add('GameOverMenu');
       updateView();
     }
   }
 
   void revealAllShips() {
+    AudioManager.playBgm();
     for (var row in opponentsGrid.grid) {
       for (GridElement? element in row) {
         if (element is Bottle && element.condition.value == 0) {
@@ -769,4 +829,8 @@ class BattleShipsGame extends FlameGame {
     });
   }
 
+  @override
+  void onTapDown(TapDownEvent event) {
+    AudioManager.playBgm();
+  }
 }

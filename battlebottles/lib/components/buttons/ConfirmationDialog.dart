@@ -4,6 +4,7 @@ import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../../services/AudioManager.dart';
 
 class DialogButton extends PositionComponent with TapCallbacks {
   final String text;
@@ -121,5 +122,6 @@ class ConfirmationDialog extends PositionComponent with HasGameReference<BattleS
   @override
   void onTapDown(TapDownEvent event) {
     event.handled = true;
+    AudioManager.playClick();
   }
 }

@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import '../components/buttons/HelpButton.dart';
 import '../components/buttons/MultiplayerButton.dart';
+import '../components/buttons/SoundButton.dart';
 import 'AccountDropdown.dart';
 import '../components/buttons/SingleplayerButton.dart';
 import '../services/FirestoreService.dart';
@@ -16,6 +17,7 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
   late MultiplayerButton multiplayerButton;
   late AccountDropdown accountDropdown;
   late HelpButton helpButton;
+  late SoundButton soundButton;
 
   final _titlePaint = TextPaint(
     style: const TextStyle(
@@ -39,6 +41,9 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
     helpButton = HelpButton(sideLength: 30)..anchor = Anchor.topLeft;
     add(helpButton);
 
+    soundButton = SoundButton(sideLength: 30)..anchor = Anchor.topLeft;
+    add(soundButton);
+
     FirestoreService().cleanupOldGames();
   }
 
@@ -56,8 +61,9 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
     playButton.position = Vector2(size.x / 2, size.y / 2 - 20);
     multiplayerButton.position = Vector2(size.x / 2, size.y / 2 + 80);
     accountDropdown.position = Vector2(size.x - 20, 20);
-    helpButton.position = Vector2(20, 20);
 
+    helpButton.position = Vector2(20, 20);
+    soundButton.position = Vector2(60, 20);
   }
 
   @override

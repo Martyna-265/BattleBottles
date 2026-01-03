@@ -3,6 +3,7 @@ import 'package:battlebottles/screens/GameOverMenu.dart';
 import 'package:battlebottles/screens/HelpScreen.dart';
 import 'package:battlebottles/screens/MultiplayerLobby.dart';
 import 'package:battlebottles/screens/GameOptionsScreen.dart';
+import 'package:battlebottles/services/AudioManager.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,6 +15,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await AudioManager.init();
 
   final game = BattleShipsGame();
 

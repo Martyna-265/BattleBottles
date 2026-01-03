@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../../services/AudioManager.dart';
 
 class PlaySingleButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   PlaySingleButton() : super(size: Vector2(200, 60));
@@ -31,6 +32,9 @@ class PlaySingleButton extends PositionComponent with HasGameReference<BattleShi
 
   @override
   void onTapDown(TapDownEvent event) {
+    AudioManager.playClick();
+    AudioManager.playBgm();
+
     game.openGameOptions(isMultiplayer: false);
   }
 }

@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../../services/AudioManager.dart';
 import '../bottleElements/PowerUpType.dart';
 
 class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
@@ -81,6 +82,7 @@ class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsG
   void onTapDown(TapDownEvent event) {
     if (count > 0 || game.activePowerUp == type) {
       game.togglePowerUp(type);
+      AudioManager.playPowerUp();
     }
   }
 

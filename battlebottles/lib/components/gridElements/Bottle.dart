@@ -8,6 +8,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
 
+import '../../services/AudioManager.dart';
 import '../../services/StatsService.dart';
 import 'Water.dart';
 
@@ -206,8 +207,10 @@ class Bottle extends GridElement with DragCallbacks {
 
       if (isSunk) {
         game.actionFeedback.setMessage("sink", !isMyTurn);
+        AudioManager.playSink();
         sinkShip();
       } else {
+        AudioManager.playExplosion();
         game.actionFeedback.setMessage("hit", !isMyTurn);
       }
     }

@@ -3,6 +3,7 @@ import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/AudioManager.dart';
 import 'FriendsScreen.dart'; //
 import '../services/AuthService.dart';
 import '../BattleShipsGame.dart';
@@ -29,6 +30,7 @@ class DropdownOption extends PositionComponent with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
+    AudioManager.playClick();
     onTapAction();
     event.handled = true;
   }

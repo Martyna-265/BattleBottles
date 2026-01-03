@@ -4,6 +4,7 @@ import 'package:flame/text.dart';
 import 'package:flutter/material.dart' hide Image, Draggable;
 import '../../BattleShipsGame.dart';
 import '../../services/AuthService.dart';
+import '../../services/AudioManager.dart';
 
 class MultiplayerButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
 
@@ -39,6 +40,9 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
 
   @override
   void onTapDown(TapDownEvent event) {
+    AudioManager.playClick();
+    AudioManager.playBgm();
+
     final bool isLoggedIn = _auth.currentUser != null;
 
     if (!isLoggedIn) {
@@ -48,7 +52,7 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
           builder: (context) {
             return AlertDialog(
               title: const Text('Log in'),
-              content: const Text('You need to be logged in to play in multiplayer. Use the \'My Account\' button in the upper right corner.'),
+              content: const Text('You need to be logged in to play in multiplayer.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
