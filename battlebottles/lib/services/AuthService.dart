@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'FirestoreService.dart';
+import 'StatsService.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,6 +14,7 @@ class AuthService {
   Future<void> login(String email, String password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
+      await StatsService().syncLocalStatsToAccount();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found' || e.code == 'wrong-password' ||
           e.code == 'invalid-credential') {
@@ -42,6 +44,7 @@ class AuthService {
       if (currentUser != null) {
         final firestoreService = FirestoreService();
         await firestoreService.saveUserData(currentUser!, username);
+        await StatsService().syncLocalStatsToAccount();
       }
 
     } on FirebaseAuthException catch (e) {

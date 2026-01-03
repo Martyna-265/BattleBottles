@@ -8,6 +8,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
 
+import '../../services/StatsService.dart';
 import 'Water.dart';
 
 class Bottle extends GridElement with DragCallbacks {
@@ -204,10 +205,10 @@ class Bottle extends GridElement with DragCallbacks {
       bool isMyTurn = (game.turnManager.currentPlayer == 1);
 
       if (isSunk) {
-        game.actionFeedback.setMessage(isMyTurn ? "You sunk a ship! Shoot again" : "Opponent sunk your ship! They have another shot");
+        game.actionFeedback.setMessage("sink", !isMyTurn);
         sinkShip();
       } else {
-        game.actionFeedback.setMessage(isMyTurn ? "Hit! Shoot again" : "Opponent hit your ship! They have another shot");
+        game.actionFeedback.setMessage("hit", !isMyTurn);
       }
     }
   }
@@ -246,6 +247,8 @@ class Bottle extends GridElement with DragCallbacks {
     if (!battleGrid.shipsDown.contains(parentShip)) {
       battleGrid.shipsDown.add(parentShip);
     }
+
+    StatsService().recordSinkedShip(battleGrid.opponent);
 
     game.checkWinner();
   }

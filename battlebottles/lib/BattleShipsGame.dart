@@ -3,6 +3,7 @@ import 'package:battlebottles/TurnManager.dart';
 import 'package:battlebottles/components/BattleGrid.dart';
 import 'package:battlebottles/components/buttons/ReturnToMenuButton.dart';
 import 'package:battlebottles/screens/MainMenu.dart';
+import 'package:battlebottles/services/StatsService.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
@@ -18,6 +19,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
 import '../components/texts/ShipsCounter.dart';
+import 'components/buttons/HelpButton.dart';
 
 class BattleShipsGame extends FlameGame {
 
@@ -35,11 +37,14 @@ class BattleShipsGame extends FlameGame {
   late TurnManager turnManager;
   late BattleGrid playersGrid;
   late BattleGrid opponentsGrid;
+
   late StartButton startButton;
   late RestartButton restartButton;
   late ReturnToMenuButton returnToMenuButton;
+  late HelpButton helpButton;
   late RoundInfo roundInfo;
   late ActionFeedback actionFeedback;
+
   late MainMenu mainMenu;
 
   late ShipsCounter playerCounter;
@@ -97,6 +102,8 @@ class BattleShipsGame extends FlameGame {
     startButton = StartButton()..position = Vector2(gap, gap / 2)..anchor = Anchor.center;
     restartButton = RestartButton()..position = Vector2(gap + 4 * squareLength, gap / 2)..anchor = Anchor.center;
     returnToMenuButton = ReturnToMenuButton()..position = Vector2(gap + 8 * squareLength, gap / 2)..anchor = Anchor.center;
+
+    helpButton = HelpButton(sideLength: squareLength * 1.5)..anchor = Anchor.topLeft;
 
     roundInfo = RoundInfo()..anchor = Anchor.center;
     actionFeedback = ActionFeedback()..anchor = Anchor.center;
@@ -164,6 +171,8 @@ class BattleShipsGame extends FlameGame {
     world.add(restartButton);
     world.add(returnToMenuButton);
     world.add(roundInfo);
+
+    if (!helpButton.isMounted) world.add(helpButton);
 
     isGameRunning = true;
 
@@ -247,6 +256,8 @@ class BattleShipsGame extends FlameGame {
     world.add(returnToMenuButton);
     world.add(roundInfo);
 
+    if (!helpButton.isMounted) world.add(helpButton);
+
     _updateUiPositions();
     onGameResize(size);
     updateView();
@@ -264,6 +275,11 @@ class BattleShipsGame extends FlameGame {
 
     if (roundInfo.isMounted) roundInfo.position = Vector2(centerX, infoY);
     if (actionFeedback.isMounted) actionFeedback.position = Vector2(centerX, feedbackY);
+
+    if (helpButton.isMounted) {
+      helpButton.position = Vector2(gap/4, 3);
+    }
+
   }
 
   @override
@@ -315,7 +331,6 @@ class BattleShipsGame extends FlameGame {
         positionLabel(opponentsGrid, opponentLabel);
         positionCounter(opponentsGrid, opponentCounter);
 
-        // Aktualizacja UI pod przeciwnikiem
         double centerX = opponentsGrid.position.x + battleGridWidth / 2;
         double bottomY = opponentsGrid.position.y + battleGridHeight;
         double counterBuffer = (gap / 4) + 4.5;
@@ -406,7 +421,8 @@ class BattleShipsGame extends FlameGame {
       returnToMenuButton,
       roundInfo,
       playerCounter,
-      opponentCounter
+      opponentCounter,
+      helpButton
     ];
 
     world.removeAll(componentsToRemove.where((c) => c.isMounted));
@@ -595,7 +611,12 @@ class BattleShipsGame extends FlameGame {
     if (playerLost || enemyLost) {
       isGameRunning = false;
       turnManager.currentPlayer = -1;
-      winnerMessage = playerLost ? "You Lost!" : "You Won!";
+      StatsService().recordGameResult(!playerLost, isMultiplayer);
+      if (playerLost) {
+        winnerMessage = "You Lost!";
+      } else {
+        winnerMessage = "You Won!";
+      }
       overlays.add('GameOverMenu');
       updateView();
     }

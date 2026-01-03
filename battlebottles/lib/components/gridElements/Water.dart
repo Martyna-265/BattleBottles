@@ -12,7 +12,7 @@ class Water extends GridElement {
   void bomb() {
     if (bombable) {
       bool isMyTurn = (game.turnManager.currentPlayer == 1);
-      game.actionFeedback.setMessage(isMyTurn ? "Miss..." : "Opponent missed!");
+      game.actionFeedback.setMessage("miss", !isMyTurn);
 
       super.bomb();
     }

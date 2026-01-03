@@ -1,5 +1,6 @@
 import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/screens/GameOverMenu.dart';
+import 'package:battlebottles/screens/HelpScreen.dart';
 import 'package:battlebottles/screens/MultiplayerLobby.dart';
 import 'package:battlebottles/screens/GameOptionsScreen.dart';
 import 'package:flame/game.dart';
@@ -50,6 +51,9 @@ Future<void> main() async {
                     game: game,
                     overlayId: 'GameOverMenu',
                   );
+                },
+                'HelpScreen': (BuildContext context, BattleShipsGame game) {
+                  return HelpScreen(game: game);
                 },
               },
             );
