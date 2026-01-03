@@ -8,7 +8,8 @@ import '../../BattleShipsGame.dart';
 class ActionFeedback extends PositionComponent with HasGameReference<BattleShipsGame> {
   ActionFeedback() : super(size: Vector2(BattleShipsGame.squareLength * 7, BattleShipsGame.squareLength));
 
-  String _message = '';
+  String _mainText = '';
+  String _subText = '';
   double _timer = 0;
   final Random _rng = Random();
 
@@ -24,17 +25,17 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
       ],
       'hit': [
         "Hit! Shoot again",
-        "Direct hit! Shoot again",
+        "Direct hit! Keep going",
         "Nice shot! Keep going",
-        "Target damaged! Shoot again",
+        "Target damaged!",
         "Boom! Keep going"
       ],
       'sink': [
-        "You sunk a ship! Shoot again",
-        "Enemy vessel down! Shoot again",
-        "That's a kill! Keep going",
-        "Blub blub blub... Shoot again",
-        "One less problem! Keep going"
+        "You sunk a ship!",
+        "Enemy vessel down!",
+        "That's a kill!",
+        "Blub blub blub...",
+        "One less problem!"
       ]
     },
     // PRZECIWNIK
@@ -63,30 +64,48 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
     }
   };
 
-  final _textPaint = TextPaint(
+  final _mainTextPaint = TextPaint(
     style: const TextStyle(
-      fontSize: 1.2,
+      fontSize: 1.0,
       fontFamily: 'Awesome Font',
       color: Color(0xff003366),
       fontWeight: FontWeight.bold,
     ),
   );
 
-  void setMessage(String condition, bool isOpponent) {
+  final _subTextPaint = TextPaint(
+    style: const TextStyle(
+      fontSize: 0.8,
+      fontFamily: 'Awesome Font',
+      color: Color(0xff4a6fa5),
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  void setMessage(String condition, bool isOpponent, {String? addition}) {
     final actorLibrary = _messageLibrary[isOpponent];
 
-    if (actorLibrary != null) {
+    if (actorLibrary != null && actorLibrary.containsKey(condition)) {
       final texts = actorLibrary[condition];
-
       if (texts != null && texts.isNotEmpty) {
-        _message = texts[_rng.nextInt(texts.length)];
-        _timer = 2.0;
+        _mainText = texts[_rng.nextInt(texts.length)];
       }
+    } else {
+      _mainText = condition;
     }
+
+    if (addition != null && addition.isNotEmpty) {
+      _subText = "($addition)";
+    } else {
+      _subText = '';
+    }
+
+    _timer = 2.0;
   }
 
   void reset() {
-    _message = '';
+    _mainText = '';
+    _subText = '';
     _timer = 0;
   }
 
@@ -96,20 +115,40 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
     if (_timer > 0) {
       _timer -= dt;
       if (_timer <= 0) {
-        _message = '';
+        _mainText = '';
+        _subText = '';
       }
     }
   }
 
   @override
   void render(Canvas canvas) {
-    if (_message.isEmpty) return;
+    if (_mainText.isEmpty) return;
 
-    _textPaint.render(
-      canvas,
-      _message,
-      Vector2(size.x / 2, size.y / 2),
-      anchor: Anchor.center,
-    );
+    double centerX = size.x / 2;
+
+    if (_subText.isEmpty) {
+      _mainTextPaint.render(
+        canvas,
+        _mainText,
+        Vector2(centerX, size.y / 2),
+        anchor: Anchor.center,
+      );
+    } else {
+
+      _mainTextPaint.render(
+        canvas,
+        _mainText,
+        Vector2(centerX, size.y * 0.35),
+        anchor: Anchor.center,
+      );
+
+      _subTextPaint.render(
+        canvas,
+        _subText,
+        Vector2(centerX, size.y * 0.85),
+        anchor: Anchor.center,
+      );
+    }
   }
 }

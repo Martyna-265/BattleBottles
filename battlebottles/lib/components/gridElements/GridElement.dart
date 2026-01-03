@@ -1,8 +1,12 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flutter/material.dart';
 import '../../BattleShipsGame.dart';
+import '../bottleElements/PowerUpType.dart';
+import 'Bottle.dart';
 import 'Water.dart';
 
 abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
@@ -31,10 +35,21 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
 
   @override
   void onTapUp(TapUpEvent event) {
-    // Blokada, gdy nie jest to tura gracza
     if (game.turnManager.currentPlayer != 1) return;
 
-    if (opponent) { // Strzelamy tylko w grid przeciwnika
+    if (opponent) {
+
+      if (game.tripleShotsLeft > 0) {
+        if (!bombable) return;
+        _handleTripleShotExecution();
+        return;
+      }
+
+      if (game.activePowerUp != PowerUpType.none) {
+        _handlePowerUpShot();
+        return;
+      }
+
       if (!bombable) return;
 
       if (game.isMultiplayer) {
@@ -42,6 +57,195 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
         game.sendMoveToFirebase(index);
       } else {
         bomb();
+      }
+    }
+  }
+
+  void _handlePowerUpShot() {
+    switch (game.activePowerUp) {
+      case PowerUpType.octopus:
+        _handleOctopus();
+        game.consumeActivePowerUp();
+        break;
+
+      case PowerUpType.triple:
+        game.tripleShotsLeft = 3;
+        game.consumeActivePowerUp();
+        _handleTripleShotExecution();
+        break;
+
+      case PowerUpType.shark:
+        _handleShark();
+        game.consumeActivePowerUp();
+        break;
+
+      case PowerUpType.none:
+        break;
+    }
+  }
+
+  void _handleTripleShotExecution() {
+    bool wasMultiplayer = game.isMultiplayer;
+    game.isMultiplayer = true;
+
+    bool hitFreshShip = false;
+
+    if (this is Bottle && condition.value == 0) {
+      hitFreshShip = true;
+    }
+
+    bomb();
+
+    game.isMultiplayer = wasMultiplayer;
+
+    int shotIndex = gridY * game.squaresInGrid + gridX;
+
+    if (hitFreshShip) {
+      game.actionFeedback.setMessage('hit', false, addition: "Bonus shot!");
+      game.turnManager.currentPlayer = 1;
+
+      if (wasMultiplayer) {
+        game.sendPowerUpShots([shotIndex], true);
+      }
+
+    } else {
+      game.tripleShotsLeft--;
+
+      if (game.tripleShotsLeft > 0) {
+        String shotsText = game.tripleShotsLeft == 1 ? "shot left" : "shots left";
+        game.actionFeedback.setMessage(
+            'miss',
+            false,
+            addition: "${game.tripleShotsLeft} $shotsText"
+        );
+        game.turnManager.currentPlayer = 1;
+
+        if (wasMultiplayer) {
+          game.sendPowerUpShots([shotIndex], true);
+        }
+      } else {
+        game.actionFeedback.setMessage('miss', false, addition: "Turn over");
+
+        if (wasMultiplayer) {
+          game.sendPowerUpShots([shotIndex], false);
+        } else {
+          game.turnManager.nextTurn();
+        }
+      }
+    }
+  }
+
+  void _handleOctopus() {
+    Random random = Random();
+
+    List<Point<int>> directions = [
+      const Point(-1, -1), const Point(0, -1), const Point(1, -1),
+      const Point(-1, 0),                      const Point(1, 0),
+      const Point(-1, 1),  const Point(0, 1),  const Point(1, 1),
+    ];
+
+    int n = game.squaresInGrid;
+    List<Point<int>> neighbors = [];
+
+    for (var dir in directions) {
+      int nx = gridX + dir.x;
+      int ny = gridY + dir.y;
+      if (nx >= 0 && nx < n && ny >= 0 && ny < n) {
+        neighbors.add(Point(nx, ny));
+      }
+    }
+
+    neighbors.shuffle(random);
+    List<Point<int>> targets = neighbors.take(4).toList();
+    targets.add(Point(gridX, gridY));
+
+    var gridRef = opponent ? game.opponentsGrid.grid : game.playersGrid.grid;
+    bool hitAnyFreshShip = false;
+
+    List<int> hitIndices = [];
+
+    bool wasMultiplayer = game.isMultiplayer;
+    game.isMultiplayer = true;
+
+    for (var p in targets) {
+      var element = gridRef[p.y][p.x];
+
+      hitIndices.add(p.y * n + p.x);
+
+      if (element != null) {
+        if (element.bombable) {
+          if (element is Bottle && element.condition.value == 0) {
+            hitAnyFreshShip = true;
+          }
+          element.bomb();
+        }
+      }
+    }
+
+    game.isMultiplayer = wasMultiplayer;
+
+    if (hitAnyFreshShip) {
+      game.actionFeedback.setMessage("hit", false);
+      game.turnManager.currentPlayer = 1;
+
+      if (wasMultiplayer) {
+        game.sendPowerUpShots(hitIndices, true);
+      }
+    } else {
+      // Nie trafiono nowego statku -> Koniec tury
+
+      if (wasMultiplayer) {
+        game.sendPowerUpShots(hitIndices, false);
+      } else {
+        game.turnManager.nextTurn();
+      }
+    }
+  }
+
+  void _handleShark() {
+    int n = game.squaresInGrid;
+
+    var enemyGrid = game.opponentsGrid.grid;
+    var myGrid = game.playersGrid.grid;
+
+    bool hitAnyFreshOpponentShip = false;
+
+    bool wasMultiplayer = game.isMultiplayer;
+    game.isMultiplayer = true;
+
+    for (int x = 0; x < n; x++) {
+
+      var enemyElement = enemyGrid[gridY][x];
+      if (enemyElement != null && enemyElement.bombable) {
+        if (enemyElement is Bottle && enemyElement.condition.value == 0) {
+          hitAnyFreshOpponentShip = true;
+        }
+        enemyElement.bomb();
+      }
+
+      var myElement = myGrid[gridY][x];
+      if (myElement != null && myElement.bombable) {
+        myElement.bomb();
+      }
+    }
+
+    game.isMultiplayer = wasMultiplayer;
+
+    if (hitAnyFreshOpponentShip) {
+      game.actionFeedback.setMessage("hit", false, addition: "Shark Bonus!");
+      game.turnManager.currentPlayer = 1;
+
+      if (wasMultiplayer) {
+        game.sendSharkAttack(gridY, true);
+      }
+
+    } else {
+      game.actionFeedback.setMessage("miss", false, addition: "Shark attack end");
+
+      if (wasMultiplayer) {
+        game.sendSharkAttack(gridY, false);
+      } else {
+        game.turnManager.nextTurn();
       }
     }
   }

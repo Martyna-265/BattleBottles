@@ -29,10 +29,16 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
 
   int _gridSize = 10;
   Map<String, int> _fleetCounts = {
-    "4": 1,
-    "3": 2,
+    "4": 2,
+    "3": 3,
     "2": 3,
     "1": 4,
+  };
+
+  Map<String, int> _powerUpCounts = {
+    "octopus": 2,
+    "triple": 1,
+    "shark": 1,
   };
 
   bool _isUpdating = false;
@@ -43,7 +49,6 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
       totalOccupied += int.parse(key) * c;
     });
 
-    // Użycie zmiennej zamiast 0.45
     int maxCapacity = (size * size * _maxShipSpace).floor();
     return totalOccupied <= maxCapacity;
   }
@@ -64,12 +69,28 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
 
     setState(() => _isUpdating = true);
     try {
-      await _firestoreService.updateGameSettings(widget.gameId!, _gridSize, _fleetCounts);
+      await _firestoreService.updateGameSettings(widget.gameId!, _gridSize, _fleetCounts, _powerUpCounts);
     } catch (e) {
       debugPrint("Error updating settings: $e");
     } finally {
       if (mounted) setState(() => _isUpdating = false);
     }
+  }
+
+  void _modifyPowerUpCount(String key, int delta) {
+    if (_isUpdating && widget.isMultiplayer) return;
+
+    int current = _powerUpCounts[key] ?? 0;
+    int newCount = current + delta;
+
+    if (newCount < 0) return;
+    if (newCount > 10) return;
+
+    setState(() {
+      _powerUpCounts[key] = newCount;
+    });
+
+    _updateSettings();
   }
 
   void _modifyShipCount(String sizeKey, int delta) {
@@ -127,8 +148,8 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
       backgroundColor: const Color(0xAA000000),
       body: Center(
         child: Container(
-          width: 600,
-          height: 500,
+          width: 700,
+          height: 600,
           decoration: BoxDecoration(
             color: const Color(0xff003366),
             borderRadius: BorderRadius.circular(20),
@@ -167,6 +188,9 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
           if (data['fleetCounts'] != null) {
             _fleetCounts = Map<String, int>.from(data['fleetCounts']);
           }
+          if (data['powerUps'] != null) {
+            _powerUpCounts = Map<String, int>.from(data['powerUps']);
+          }
         }
 
         if (status == 'playing') {
@@ -177,6 +201,7 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
                   widget.gameId!,
                   gridSize: _gridSize,
                   fleetCounts: _fleetCounts,
+                  powerUps: _powerUpCounts,
                   p1Name: p1Name,
                   p2Name: p2Name,
                   p1Id: p1Id
@@ -278,10 +303,18 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
                         const SizedBox(height: 20),
                         const Text("Fleet Composition:", style: TextStyle(color: Colors.white, fontSize: 18)),
                         const SizedBox(height: 10),
-                        _shipCounterRow("Quad (4)", "4", amIHost),
-                        _shipCounterRow("Triple (3)", "3", amIHost),
-                        _shipCounterRow("Double (2)", "2", amIHost),
-                        _shipCounterRow("Single (1)", "1", amIHost),
+                        _counterRow("Quad (4)", "4", _fleetCounts["4"]!, amIHost, (delta) => _modifyShipCount("4", delta)),
+                        _counterRow("Triple (3)", "3", _fleetCounts["3"]!, amIHost, (delta) => _modifyShipCount("3", delta)),
+                        _counterRow("Double (2)", "2", _fleetCounts["2"]!, amIHost, (delta) => _modifyShipCount("2", delta)),
+                        _counterRow("Single (1)", "1", _fleetCounts["1"]!, amIHost, (delta) => _modifyShipCount("1", delta)),
+                        if (widget.isMultiplayer) ...[
+                          const Divider(color: Colors.white24),
+                          const Text("Power-Ups:", style: TextStyle(color: Colors.white, fontSize: 18)),
+                          const SizedBox(height: 5),
+                          _counterRow("Octopus", "octopus", _powerUpCounts["octopus"]!, amIHost, (delta) => _modifyPowerUpCount("octopus", delta)),
+                          _counterRow("Triple Shot", "triple", _powerUpCounts["triple"]!, amIHost, (delta) => _modifyPowerUpCount("triple", delta)),
+                          _counterRow("Shark", "shark", _powerUpCounts["shark"]!, amIHost, (delta) => _modifyPowerUpCount("shark", delta)),
+                        ],
                       ],
                     ),
                   ),
@@ -319,12 +352,11 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
     );
   }
 
-  Widget _shipCounterRow(String label, String key, bool enabled) {
-    int count = _fleetCounts[key] ?? 0;
+  Widget _counterRow(String label, String key, int count, bool enabled, Function(int) onModify) {
     bool isEnabled = enabled && !_isUpdating;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -332,13 +364,19 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.remove_circle, color: Colors.redAccent),
-                onPressed: isEnabled ? () => _modifyShipCount(key, -1) : null,
+                icon: const Icon(Icons.remove_circle, color: Colors.redAccent, size: 20),
+                onPressed: isEnabled ? () => onModify(-1) : null,
               ),
-              Text('$count', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(
+                width: 30,
+                child: Text('$count',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)
+                ),
+              ),
               IconButton(
-                icon: const Icon(Icons.add_circle, color: Colors.greenAccent),
-                onPressed: isEnabled ? () => _modifyShipCount(key, 1) : null,
+                icon: const Icon(Icons.add_circle, color: Colors.greenAccent, size: 20),
+                onPressed: isEnabled ? () => onModify(1) : null,
               ),
             ],
           ),

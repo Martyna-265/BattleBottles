@@ -3,18 +3,17 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
+import '../bottleElements/PowerUpType.dart';
 
 class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   final String imageName;
-  final String typeKey;
+  final PowerUpType type;
   int count;
-  final VoidCallback onTapAction;
 
   PowerUpButton({
     required this.imageName,
-    required this.typeKey,
+    required this.type,
     required this.count,
-    required this.onTapAction,
   }) : super(size: Vector2(3.0, 3.0));
 
   late Sprite _sprite;
@@ -22,6 +21,11 @@ class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsG
     ..color = const Color(0xFFFFFFFF)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 0.1;
+
+  final Paint _activeBorderPaint = Paint()
+    ..color = const Color(0xFF00FF00)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 0.25;
 
   final Paint _bgPaint = Paint()..color = const Color(0x88000000);
   final Paint _badgePaint = Paint()..color = const Color(0xfffad220);
@@ -52,7 +56,14 @@ class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsG
       size: size * 0.7,
     );
 
-    canvas.drawCircle(Offset(radius, radius), radius, _borderPaint);
+    bool isActive = game.activePowerUp == type;
+    bool isOngoingTriple = (type == PowerUpType.triple && game.tripleShotsLeft > 0);
+
+    if (isActive || isOngoingTriple) {
+      canvas.drawCircle(Offset(radius, radius), radius, _activeBorderPaint);
+    } else {
+      canvas.drawCircle(Offset(radius, radius), radius, _borderPaint);
+    }
 
     // Badge
     canvas.drawCircle(Offset(size.x - 0.5, 0.5), 0.7, _badgePaint);
@@ -68,8 +79,8 @@ class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsG
 
   @override
   void onTapDown(TapDownEvent event) {
-    if (count > 0) {
-      onTapAction();
+    if (count > 0 || game.activePowerUp == type) {
+      game.togglePowerUp(type);
     }
   }
 

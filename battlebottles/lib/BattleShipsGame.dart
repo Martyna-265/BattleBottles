@@ -8,7 +8,6 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/text.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 import '../components/buttons/RestartButton.dart';
 import '../components/buttons/StartButton.dart';
@@ -23,22 +22,34 @@ import 'dart:async';
 import '../components/texts/ShipsCounter.dart';
 import 'components/buttons/HelpButton.dart';
 import 'components/buttons/PowerUpButton.dart';
+import 'components/bottleElements/PowerUpType.dart';
 
 class BattleShipsGame extends FlameGame {
 
   static const double squareLength = 2.0;
   static final Vector2 squareSize = Vector2(squareLength, squareLength);
-  static const double gap = 4.0;
+  static const double gap = 15.0;
   static const int delay = 2;
   static const int bottleCount = 10;
 
-  double gridScale = 1.0;
   int squaresInGrid = 10;
   double battleGridWidth = 20.0;
   double battleGridHeight = 20.0;
   static final Vector2 battleGridSize = Vector2(20.0, 20.0);
 
+  double gridScale = 1.0;
+  double get scaledGridWidth => battleGridWidth * gridScale;
+  double get scaledGridHeight => battleGridHeight * gridScale;
+
   int gameSessionId = 0;
+
+  int limitOctopus = 1;
+  int limitTriple = 1;
+  int limitShark = 1;
+  int tripleShotsLeft = 0;
+  PowerUpType activePowerUp = PowerUpType.none;
+
+  String opponentName = "Pirate";
 
   late TurnManager turnManager;
   late BattleGrid playersGrid;
@@ -56,8 +67,10 @@ class BattleShipsGame extends FlameGame {
   late PowerUpButton sharkBtn;
 
   late MainMenu mainMenu;
+
   late ShipsCounter playerCounter;
   late ShipsCounter opponentCounter;
+
   late TextComponent playerLabel;
   late TextComponent opponentLabel;
 
@@ -68,13 +81,16 @@ class BattleShipsGame extends FlameGame {
   String? myUserId;
   bool amIHost = false;
   StreamSubscription? gameStream;
+
   int lastProcessedP1Shots = 0;
   int lastProcessedP2Shots = 0;
-  int visibleCurrentPlayer = 0;
 
+  int visibleCurrentPlayer = 0;
   bool _isLoaded = false;
   bool isGameRunning = false;
+
   bool isInMenu = true;
+
   bool tempIsMultiplayer = false;
   String? tempGameId;
 
@@ -87,17 +103,15 @@ class BattleShipsGame extends FlameGame {
     squaresInGrid = gridSize;
     battleGridWidth = squaresInGrid * squareLength;
     battleGridHeight = squaresInGrid * squareLength;
-
     gridScale = 20.0 / battleGridWidth;
   }
-
-  double get scaledGridWidth => battleGridWidth * gridScale;
-  double get scaledGridHeight => battleGridHeight * gridScale;
 
   @override
   Future<void> onLoad() async {
     await Flame.images.loadAll(['Bottle1x1.png', 'Octopus.png', 'Bombs.png', 'Shark.png']);
+
     _updateGridDimensions(10);
+
     turnManager = TurnManager(2, this);
 
     playersGrid = BattleGrid(false, {'1': 1})..size = Vector2(battleGridWidth, battleGridHeight);
@@ -109,11 +123,12 @@ class BattleShipsGame extends FlameGame {
     startButton = StartButton()..anchor = Anchor.center;
     restartButton = RestartButton()..anchor = Anchor.center;
     returnToMenuButton = ReturnToMenuButton()..anchor = Anchor.center;
+
     helpButton = HelpButton(sideLength: squareLength * 1.2)..anchor = Anchor.topLeft;
 
-    octopusBtn = PowerUpButton(imageName: 'Octopus.png', typeKey: 'octopus', count: 2, onTapAction: () => _usePowerUp('octopus'));
-    tripleBtn = PowerUpButton(imageName: 'Bombs.png', typeKey: 'triple', count: 1, onTapAction: () => _usePowerUp('triple'));
-    sharkBtn = PowerUpButton(imageName: 'Shark.png', typeKey: 'shark', count: 1, onTapAction: () => _usePowerUp('shark'));
+    octopusBtn = PowerUpButton(imageName: 'Octopus.png', type: PowerUpType.octopus, count: limitOctopus);
+    tripleBtn = PowerUpButton(imageName: 'Bombs.png', type: PowerUpType.triple, count: limitTriple);
+    sharkBtn = PowerUpButton(imageName: 'Shark.png', type: PowerUpType.shark, count: limitShark);
 
     octopusBtn.anchor = Anchor.center;
     tripleBtn.anchor = Anchor.center;
@@ -122,7 +137,10 @@ class BattleShipsGame extends FlameGame {
     roundInfo = RoundInfo()..anchor = Anchor.center;
     actionFeedback = ActionFeedback()..anchor = Anchor.center;
 
-    final labelStyle = TextPaint(style: const TextStyle(fontSize: 1.1, color: Color(0xff003366), fontFamily: 'Awesome Font', fontWeight: FontWeight.bold));
+    final labelStyle = TextPaint(
+      style: const TextStyle(fontSize: 1.1, color: Color(0xff003366), fontFamily: 'Awesome Font', fontWeight: FontWeight.bold),
+    );
+
     playerLabel = TextComponent(textRenderer: labelStyle)..anchor = Anchor.center;
     opponentLabel = TextComponent(textRenderer: labelStyle)..anchor = Anchor.center;
 
@@ -135,7 +153,51 @@ class BattleShipsGame extends FlameGame {
     camera.viewfinder.anchor = Anchor.topLeft;
   }
 
-  void _usePowerUp(String type) { debugPrint("Used PowerUp: $type"); }
+  void resetPowerUps() {
+    activePowerUp = PowerUpType.none;
+    tripleShotsLeft = 0;
+    if (_isLoaded) {
+      octopusBtn.count = limitOctopus;
+      tripleBtn.count = limitTriple;
+      sharkBtn.count = limitShark;
+    }
+  }
+
+  void togglePowerUp(PowerUpType type) {
+    if (tripleShotsLeft > 0) return;
+    if (activePowerUp == type) {
+      activePowerUp = PowerUpType.none;
+    } else {
+      activePowerUp = type;
+    }
+  }
+
+  void consumeActivePowerUp() {
+    String? statKey;
+
+    switch (activePowerUp) {
+      case PowerUpType.octopus:
+        octopusBtn.decrement();
+        statKey = 'octopus';
+        break;
+      case PowerUpType.triple:
+        tripleBtn.decrement();
+        statKey = 'triple_shot';
+        break;
+      case PowerUpType.shark:
+        sharkBtn.decrement();
+        statKey = 'shark';
+        break;
+      case PowerUpType.none:
+        break;
+    }
+
+    if (statKey != null) {
+      StatsService().recordPowerUpUse(statKey);
+    }
+
+    activePowerUp = PowerUpType.none;
+  }
 
   void openGameOptions({required bool isMultiplayer, String? gameId}) {
     tempIsMultiplayer = isMultiplayer;
@@ -145,54 +207,52 @@ class BattleShipsGame extends FlameGame {
 
   void startGame({int gridSize = 10, Map<String, int>? fleetCounts}) async {
     if (isGameRunning && !isMultiplayer) return;
+
     _updateGridDimensions(gridSize);
     _clearWorldForGame();
 
+    opponentName = "Pirate";
+
     final fleet = fleetCounts ?? {'4':1, '3':2, '2':3, '1':4};
-
-    playersGrid = BattleGrid(false, fleet)
-      ..size = Vector2(battleGridWidth, battleGridHeight)
-      ..scale = Vector2.all(gridScale);
-
-    opponentsGrid = BattleGrid(true, fleet)
-      ..size = Vector2(battleGridWidth, battleGridHeight)
-      ..scale = Vector2.all(gridScale);
-
+    playersGrid = BattleGrid(false, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
+    opponentsGrid = BattleGrid(true, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
     playerCounter = ShipsCounter(playersGrid);
     opponentCounter = ShipsCounter(opponentsGrid);
 
+    resetPowerUps();
     turnManager.reset();
     turnManager.currentPlayer = 0;
     lastProcessedP1Shots = 0;
     lastProcessedP2Shots = 0;
     winnerMessage = '';
-
     if (actionFeedback.isMounted) actionFeedback.reset();
-    if (mainMenu.isMounted) world.remove(mainMenu);
 
+    if (mainMenu.isMounted) world.remove(mainMenu);
     isInMenu = false;
     isMultiplayer = false;
 
     world.add(playersGrid);
     world.add(playerLabel); playerLabel.text = "You";
     world.add(playerCounter);
+
     if (!isNarrow) {
       world.add(opponentsGrid);
-      world.add(opponentLabel); opponentLabel.text = "Pirate";
+      world.add(opponentLabel); opponentLabel.text = opponentName;
       world.add(opponentCounter);
     }
 
     world.add(startButton);
     world.add(restartButton);
     world.add(returnToMenuButton);
-
     world.add(roundInfo);
     world.add(actionFeedback);
+
     world.add(octopusBtn);
     world.add(tripleBtn);
     world.add(sharkBtn);
 
     if (!helpButton.isMounted) world.add(helpButton);
+
     isGameRunning = true;
 
     _updateUiPositions();
@@ -204,11 +264,20 @@ class BattleShipsGame extends FlameGame {
     if (turnManager.currentPlayer != 0) return;
     if (startButton.isMounted) world.remove(startButton);
     if (!restartButton.isMounted) world.add(restartButton);
+
     turnManager.nextTurn();
     updateView();
   }
 
-  void startMultiplayerGame(String gameId, {int gridSize = 10, Map<String, int>? fleetCounts, required String p1Name, required String? p2Name, required String p1Id}) {
+  void startMultiplayerGame(
+      String gameId, {
+        int gridSize = 10,
+        Map<String, int>? fleetCounts,
+        Map<String, int>? powerUps,
+        required String p1Name,
+        required String? p2Name,
+        required String p1Id
+      }) {
     if (isGameRunning) return;
     overlays.remove('MultiplayerLobby');
     overlays.remove('GameOptionsScreen');
@@ -218,40 +287,45 @@ class BattleShipsGame extends FlameGame {
     myUserId = FirebaseAuth.instance.currentUser?.uid;
     amIHost = (myUserId == p1Id);
 
+    if (amIHost) {
+      opponentName = p2Name ?? "Opponent";
+    } else {
+      opponentName = p1Name;
+    }
+
+    if (powerUps != null) {
+      limitOctopus = powerUps['octopus'] ?? 1;
+      limitTriple = powerUps['triple'] ?? 1;
+      limitShark = powerUps['shark'] ?? 1;
+    }
+
     _updateGridDimensions(gridSize);
     _clearWorldForGame();
+
     final fleet = fleetCounts ?? {'4':1, '3':2, '2':3, '1':4};
-
-    playersGrid = BattleGrid(false, fleet)
-      ..size = Vector2(battleGridWidth, battleGridHeight)
-      ..scale = Vector2.all(gridScale);
-
-    opponentsGrid = BattleGrid(true, fleet)
-      ..size = Vector2(battleGridWidth, battleGridHeight)
-      ..scale = Vector2.all(gridScale);
-
+    playersGrid = BattleGrid(false, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
+    opponentsGrid = BattleGrid(true, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
     playerCounter = ShipsCounter(playersGrid);
     opponentCounter = ShipsCounter(opponentsGrid);
 
+    resetPowerUps();
     turnManager.reset();
     turnManager.currentPlayer = 0;
     lastProcessedP1Shots = 0;
     lastProcessedP2Shots = 0;
     winnerMessage = '';
-
     if (actionFeedback.isMounted) actionFeedback.reset();
-    if (mainMenu.isMounted) world.remove(mainMenu);
 
+    if (mainMenu.isMounted) world.remove(mainMenu);
     isInMenu = false;
+
     world.add(playersGrid);
     world.add(playerLabel);
 
     if (amIHost) {
       playerLabel.text = "You ($p1Name)";
-      opponentLabel.text = p2Name ?? "Opponent";
     } else {
       playerLabel.text = "You (${p2Name ?? 'Guest'})";
-      opponentLabel.text = p1Name;
     }
 
     world.add(playerCounter);
@@ -259,6 +333,7 @@ class BattleShipsGame extends FlameGame {
     if (!isNarrow) {
       world.add(opponentsGrid);
       world.add(opponentLabel);
+      opponentLabel.text = opponentName;
       world.add(opponentCounter);
     }
 
@@ -300,8 +375,8 @@ class BattleShipsGame extends FlameGame {
     double roundInfoY = -7.5;
     double feedbackY = -5.0;
 
-    if (roundInfo.isMounted) roundInfo.position = Vector2(uiCenterX, roundInfoY);
-    if (actionFeedback.isMounted) actionFeedback.position = Vector2(uiCenterX, feedbackY);
+    roundInfo.position = Vector2(uiCenterX, roundInfoY);
+    actionFeedback.position = Vector2(uiCenterX, feedbackY);
 
     if (helpButton.isMounted) {
       double roundInfoWidth = 7 * squareLength;
@@ -314,28 +389,25 @@ class BattleShipsGame extends FlameGame {
     double powerUpY = scaledGridHeight + 7.5;
 
     double spacing = 4.0;
-    if (octopusBtn.isMounted) octopusBtn.position = Vector2(uiCenterX - spacing, powerUpY);
-    if (tripleBtn.isMounted) tripleBtn.position = Vector2(uiCenterX, powerUpY);
-    if (sharkBtn.isMounted) sharkBtn.position = Vector2(uiCenterX + spacing, powerUpY);
+    octopusBtn.position = Vector2(uiCenterX - spacing, powerUpY);
+    tripleBtn.position = Vector2(uiCenterX, powerUpY);
+    sharkBtn.position = Vector2(uiCenterX + spacing, powerUpY);
 
     double buttonsY = powerUpY + 4.5;
     double btnSpacing = 6.5;
 
-    if (returnToMenuButton.isMounted) {
-      returnToMenuButton.position = Vector2(uiCenterX, buttonsY);
-    }
-    if (startButton.isMounted) {
+    returnToMenuButton.position = Vector2(uiCenterX, buttonsY);
+    if (turnManager.currentPlayer == 0) {
       startButton.position = Vector2(uiCenterX - btnSpacing, buttonsY);
     }
-    if (restartButton.isMounted) {
-      restartButton.position = Vector2(uiCenterX + btnSpacing, buttonsY);
-    }
+    restartButton.position = Vector2(uiCenterX + btnSpacing, buttonsY);
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     if (!_isLoaded) return;
+
     if (isInMenu) {
       camera.viewfinder.visibleGameSize = size;
       camera.viewfinder.position = Vector2(0,0);
@@ -363,12 +435,15 @@ class BattleShipsGame extends FlameGame {
     _updateUiPositions();
 
     if (isNarrow) {
-      // NARROW
+      // MOBILE
       bool showOpponent = (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) || (visibleCurrentPlayer == 1);
 
       if (showOpponent) {
         if (!opponentsGrid.isMounted) world.add(opponentsGrid);
-        if (!opponentLabel.isMounted) { world.add(opponentLabel); opponentLabel.text = "Pirate"; }
+
+        if (!opponentLabel.isMounted) world.add(opponentLabel);
+        opponentLabel.text = opponentName;
+
         if (!opponentCounter.isMounted) world.add(opponentCounter);
 
         if (playersGrid.isMounted) world.remove(playersGrid);
@@ -378,6 +453,7 @@ class BattleShipsGame extends FlameGame {
         opponentsGrid.position = Vector2(0, 0);
         positionLabel(opponentsGrid, opponentLabel);
         positionCounter(opponentsGrid, opponentCounter);
+
       } else {
         if (!playersGrid.isMounted) world.add(playersGrid);
         if (!playerLabel.isMounted) world.add(playerLabel);
@@ -394,7 +470,12 @@ class BattleShipsGame extends FlameGame {
     } else {
       // WIDE
       world.add(playersGrid); world.add(playerLabel); world.add(playerCounter);
-      world.add(opponentsGrid); world.add(opponentLabel); world.add(opponentCounter);
+      world.add(opponentsGrid);
+
+      world.add(opponentLabel);
+      opponentLabel.text = opponentName;
+
+      world.add(opponentCounter);
 
       playersGrid.position = Vector2(0, 0);
       positionLabel(playersGrid, playerLabel);
@@ -455,18 +536,14 @@ class BattleShipsGame extends FlameGame {
     isMultiplayer = false;
     isGameRunning = false;
     _clearWorldForGame();
-
     if (helpButton.isMounted) world.remove(helpButton);
     if (actionFeedback.isMounted) actionFeedback.reset();
-
     world.add(mainMenu);
     isInMenu = true;
-
     camera.viewfinder.position = Vector2(0, 0);
     camera.viewfinder.anchor = Anchor.topLeft;
     camera.viewfinder.zoom = 1.0;
     camera.viewfinder.visibleGameSize = size;
-
     mainMenu.onGameResize(size);
     turnManager.reset();
   }
@@ -476,35 +553,27 @@ class BattleShipsGame extends FlameGame {
     turnManager.reset();
     visibleCurrentPlayer = 0;
 
+    resetPowerUps();
+
     if (playersGrid.isMounted) playersGrid.regenerateGrid();
     if (opponentsGrid.isMounted) opponentsGrid.regenerateGrid();
-
     lastProcessedP1Shots = 0;
     lastProcessedP2Shots = 0;
-
     if (actionFeedback.isMounted) actionFeedback.reset();
   }
 
-  void openMultiplayerLobby() {
-    overlays.add('MultiplayerLobby');
-  }
-
-  @override void onDetach() {
-    gameStream?.cancel(); super.onDetach();
-  }
+  void openMultiplayerLobby() { overlays.add('MultiplayerLobby'); }
+  @override void onDetach() { gameStream?.cancel(); super.onDetach(); }
 
   void confirmMultiplayerShips() async {
     if (multiplayerGameId == null) return;
     List<Map<String, dynamic>> myShipsData = playersGrid.getShipsData();
-
     String readyField = amIHost ? 'player1Ready' : 'player2Ready';
     String shipsField = amIHost ? 'ships_p1' : 'ships_p2';
-
     await FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).update({
       readyField: true,
       shipsField: myShipsData,
     });
-
     turnManager.currentPlayer = -1;
     if (startButton.isMounted) world.remove(startButton);
     updateView();
@@ -512,117 +581,125 @@ class BattleShipsGame extends FlameGame {
 
   void _listenToMultiplayerChanges() {
     if (multiplayerGameId == null) return;
-
     gameStream = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).snapshots().listen((snapshot) async {
       if (!snapshot.exists) return;
-
       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-      if (data['player1Id'] == myUserId) {
-        amIHost = true;
-      } else {
-        amIHost = false;
-      }
+      if (data['player1Id'] == myUserId) { amIHost = true; } else { amIHost = false; }
 
       String p1Name = data['player1Name'] ?? 'Player 1';
       String p2Name = data['player2Name'] ?? 'Player 2';
 
-      if (playerLabel.isMounted && opponentLabel.isMounted) {
-        if (amIHost) {
-          playerLabel.text = "You ($p1Name)";
-          opponentLabel.text = p2Name;
-        } else {
-          playerLabel.text = "You ($p2Name)";
-          opponentLabel.text = p1Name;
-        }
+      if (amIHost) {
+        opponentName = p2Name;
+      } else {
+        opponentName = p1Name;
+      }
+
+      if (playerLabel.isMounted) {
+        if (amIHost) { playerLabel.text = "You ($p1Name)"; }
+        else { playerLabel.text = "You ($p2Name)"; }
       }
 
       bool p1Ready = data['player1Ready'] ?? false;
       bool p2Ready = data['player2Ready'] ?? false;
 
       if (p1Ready && p2Ready) {
+
         if (!turnManager.hasShipsSynced) {
           List<dynamic> enemyShipsPositions = amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
-
           if (enemyShipsPositions.isNotEmpty) {
             opponentsGrid.setEnemyShips(enemyShipsPositions);
             turnManager.hasShipsSynced = true;
             isGameRunning = true;
           }
         }
-
         if (startButton.isMounted) world.remove(startButton);
 
         _syncShots(data);
+
         String currentTurnUserId = data['currentTurn'];
         int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
 
         if (turnManager.currentPlayer != newPlayerState && turnManager.currentPlayer != -1 && isGameRunning) {
           await Future.delayed(const Duration(seconds: delay));
         }
-
         turnManager.currentPlayer = newPlayerState;
-        updateView();
+
       } else {
         String myReadyField = amIHost ? 'player1Ready' : 'player2Ready';
         bool amIReady = data[myReadyField] ?? false;
 
         if (amIReady && turnManager.currentPlayer == 0) {
-          turnManager.currentPlayer = -1;
-          updateView();
+          turnManager.currentPlayer = -1; // Waiting state
         }
       }
+
+      updateView();
     });
   }
 
-  Future<void> sendMoveToFirebase(int index) async {
+  Future<void> sendPowerUpShots(List<int> indices, bool keepTurn) async {
     if (multiplayerGameId == null) return;
 
     String fieldToUpdate = amIHost ? 'shots_p1' : 'shots_p2';
-
     final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
 
-    int gridY = index ~/ squaresInGrid;
-    int gridX = index % squaresInGrid;
-    bool isHit = false;
-
-    if (gridY < squaresInGrid && gridX < squaresInGrid) {
-      var element = opponentsGrid.grid[gridY][gridX];
-      if (element is Bottle) { isHit = true; }
-    }
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(gameRef);
-
       if (!snapshot.exists) return;
 
       final data = snapshot.data() as Map<String, dynamic>;
 
       if (data['currentTurn'] != myUserId) return;
 
-      String p1 = data['player1Id'];
-      String p2 = data['player2Id'] ?? '';
+      Map<String, dynamic> updates = {
+        fieldToUpdate: FieldValue.arrayUnion(indices),
+      };
 
-      String nextTurnUser = (myUserId == p1) ? p2 : p1;
-
-      Map<String, dynamic> updates = { fieldToUpdate: FieldValue.arrayUnion([index]), };
-
-      if (!isHit) {
+      if (!keepTurn) {
+        String p1 = data['player1Id'];
+        String p2 = data['player2Id'] ?? '';
+        String nextTurnUser = (myUserId == p1) ? p2 : p1;
         updates['currentTurn'] = nextTurnUser;
       }
 
       transaction.update(gameRef, updates);
     });
   }
+
+  Future<void> sendMoveToFirebase(int index) async {
+    if (multiplayerGameId == null) return;
+    String fieldToUpdate = amIHost ? 'shots_p1' : 'shots_p2';
+    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+    int gridY = index ~/ squaresInGrid;
+    int gridX = index % squaresInGrid;
+    bool isHit = false;
+    if (gridY < squaresInGrid && gridX < squaresInGrid) {
+      var element = opponentsGrid.grid[gridY][gridX];
+      if (element is Bottle) { isHit = true; }
+    }
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(gameRef);
+      if (!snapshot.exists) return;
+      final data = snapshot.data() as Map<String, dynamic>;
+      if (data['currentTurn'] != myUserId) return;
+      String p1 = data['player1Id'];
+      String p2 = data['player2Id'] ?? '';
+      String nextTurnUser = (myUserId == p1) ? p2 : p1;
+      Map<String, dynamic> updates = { fieldToUpdate: FieldValue.arrayUnion([index]), };
+      if (!isHit) { updates['currentTurn'] = nextTurnUser; }
+      transaction.update(gameRef, updates);
+    });
+  }
+
   void _syncShots(Map<String, dynamic> data) {
     List<dynamic> rawShotsP1 = data['shots_p1'] ?? [];
     List<dynamic> rawShotsP2 = data['shots_p2'] ?? [];
-
     List<dynamic> myShots = amIHost ? rawShotsP1 : rawShotsP2;
     List<dynamic> enemyShots = amIHost ? rawShotsP2 : rawShotsP1;
-
     int myCount = amIHost ? lastProcessedP1Shots : lastProcessedP2Shots;
     int enemyCount = amIHost ? lastProcessedP2Shots : lastProcessedP1Shots;
-
     if (myShots.length > myCount) {
       for (int i = myCount; i < myShots.length; i++) { if (myShots[i] is int) opponentsGrid.visualizeHit(myShots[i]); }
       if (amIHost) { lastProcessedP1Shots = myShots.length; } else { lastProcessedP2Shots = myShots.length; }
@@ -632,13 +709,12 @@ class BattleShipsGame extends FlameGame {
       if (amIHost) { lastProcessedP2Shots = enemyShots.length; } else { lastProcessedP1Shots = enemyShots.length; }
     }
   }
+
   void checkWinner() {
     if (playersGrid.ships.isEmpty || opponentsGrid.ships.isEmpty) return;
     if (winnerMessage.isNotEmpty && !isGameRunning) return;
-
     bool playerLost = playersGrid.ships.length == playersGrid.shipsDown.length;
     bool enemyLost = opponentsGrid.ships.length == opponentsGrid.shipsDown.length;
-
     if (playerLost || enemyLost) {
       isGameRunning = false;
       turnManager.currentPlayer = -1;
@@ -648,6 +724,7 @@ class BattleShipsGame extends FlameGame {
       updateView();
     }
   }
+
   void revealAllShips() {
     for (var row in opponentsGrid.grid) {
       for (GridElement? element in row) {
@@ -660,4 +737,36 @@ class BattleShipsGame extends FlameGame {
     if (roundInfo.isMounted) world.remove(roundInfo);
     if (!returnToMenuButton.isMounted) world.add(returnToMenuButton);
   }
+
+  Future<void> sendSharkAttack(int rowY, bool keepTurn) async {
+    if (multiplayerGameId == null) return;
+
+    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+
+    List<int> rowIndices = List.generate(squaresInGrid, (x) => rowY * squaresInGrid + x);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(gameRef);
+      if (!snapshot.exists) return;
+
+      final data = snapshot.data() as Map<String, dynamic>;
+
+      if (data['currentTurn'] != myUserId) return;
+
+      Map<String, dynamic> updates = {
+        'shots_p1': FieldValue.arrayUnion(rowIndices),
+        'shots_p2': FieldValue.arrayUnion(rowIndices),
+      };
+
+      if (!keepTurn) {
+        String p1 = data['player1Id'];
+        String p2 = data['player2Id'] ?? '';
+        String nextTurnUser = (myUserId == p1) ? p2 : p1;
+        updates['currentTurn'] = nextTurnUser;
+      }
+
+      transaction.update(gameRef, updates);
+    });
+  }
+
 }

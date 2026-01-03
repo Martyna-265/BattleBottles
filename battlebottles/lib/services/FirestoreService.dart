@@ -203,10 +203,11 @@ class FirestoreService {
     }
   }
 
-  Future<void> updateGameSettings(String gameId, int gridSize, Map<String, int> fleetCounts) async {
+  Future<void> updateGameSettings(String gameId, int gridSize, Map<String, int> fleetCounts, Map<String, int> powerUps) async {
     await _db.collection('battles').doc(gameId).update({
       'gridSize': gridSize,
       'fleetCounts': fleetCounts,
+      'powerUps': powerUps,
     });
   }
 
