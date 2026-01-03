@@ -1,38 +1,43 @@
 import 'dart:ui';
-
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
-
 import '../../BattleShipsGame.dart';
 import 'ConfirmationDialog.dart';
 
 class RestartButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
-  RestartButton()
-      : super(size: BattleShipsGame.squareSize * 3);
+  RestartButton() : super(size: Vector2(6, 2.5));
 
-  final _backgroundPaint = Paint()..color = const Color(0xff003366);
-  final _text = TextPaint(
+  final Paint _bgPaint = Paint()..color = const Color(0xFFFFA000);
+  final Paint _shadowPaint = Paint()..color = const Color(0xFFEF6C00);
+
+  final _textPaint = TextPaint(
     style: const TextStyle(
       fontSize: 1.0,
       fontFamily: 'Awesome Font',
       color: Color(0xFFFFFFFF),
+      fontWeight: FontWeight.bold,
     ),
   );
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(size.toRect(), _backgroundPaint);
-    _text.render(canvas, 'RESTART', Vector2(0, 0));
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(0, 0.2, size.x, size.y), const Radius.circular(10)),
+        _shadowPaint
+    );
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.x, size.y), const Radius.circular(10)),
+        _bgPaint
+    );
+    _textPaint.render(canvas, 'RESTART', Vector2(size.x / 2, size.y / 2), anchor: Anchor.center);
   }
 
   @override
   Future<void> onTapDown(TapDownEvent event) async {
     game.world.add(ConfirmationDialog(
-      message: 'Are you sure? Your progress will be lost',
-      onConfirm: () {
-        game.restartGame();
-      },
+      message: 'Restart game?',
+      onConfirm: () { game.restartGame(); },
     ));
   }
 }

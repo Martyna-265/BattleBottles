@@ -271,19 +271,22 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
       canvas.drawLine(Offset(0, y), Offset(size.x, y), blackBorderPaint);
     }
     canvas.drawRect(size.toRect(), blackBorderPaint);
+
     final textPainter = TextPainter(textAlign: TextAlign.center, textDirection: TextDirection.ltr);
     final textStyle = TextStyle(color: const Color(0xFF000000), fontSize: cellHeight * 0.4);
+
     for (int i = 0; i < game.squaresInGrid; i++) {
       final letter = String.fromCharCode(65 + i);
       textPainter.text = TextSpan(text: letter, style: textStyle);
       textPainter.layout();
-      textPainter.paint(canvas, Offset(i * cellWidth + cellWidth / 2 - textPainter.width / 2, -cellHeight * 0.8));
+      textPainter.paint(canvas, Offset(i * cellWidth + cellWidth / 2 - textPainter.width / 2, -cellHeight * 0.6));
     }
+
     for (int j = 0; j < game.squaresInGrid; j++) {
       final number = '${j + 1}';
       textPainter.text = TextSpan(text: number, style: textStyle);
       textPainter.layout();
-      textPainter.paint(canvas, Offset(-cellWidth * 0.8, j * cellHeight + cellHeight / 2 - textPainter.height / 2));
+      textPainter.paint(canvas, Offset(-cellWidth * 0.6, j * cellHeight + cellHeight / 2 - textPainter.height / 2));
     }
   }
 }

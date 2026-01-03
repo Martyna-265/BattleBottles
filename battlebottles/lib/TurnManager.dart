@@ -40,7 +40,7 @@ class TurnManager {
 
     await Future.delayed(const Duration(seconds: BattleShipsGame.delay));
 
-    // Czy gra została zrestartowana w międzyczasie?
+    // Czy gra została zrestartowana?
     if (_sessionId != mySession) return;
     if (!game.isGameRunning) return;
 
@@ -55,11 +55,14 @@ class TurnManager {
   Future<void> _opponentsTurn() async {
     int mySession = _sessionId;
 
+    List<List<GridElement?>> capturedGridRef = game.playersGrid.grid;
+
     await Future.delayed(const Duration(seconds: 1));
 
     if (_sessionId != mySession) return;
     if (!game.isGameRunning) return;
     if (currentPlayer != 2) return;
+    if (capturedGridRef != game.playersGrid.grid) return;
 
     List<List<GridElement?>> grid = game.playersGrid.grid;
     int n = game.squaresInGrid;
@@ -109,7 +112,7 @@ class TurnManager {
       }
     }
 
-    // Losowanie, jeśli brak celu
+    // Losowanie
     if (targetX == -1) {
       while (targetX == -1 && _availableMoves.isNotEmpty) {
         int index = random.nextInt(_availableMoves.length);
@@ -129,14 +132,19 @@ class TurnManager {
       _availableMoves.remove(Point(targetX, targetY));
 
       var targetElement = grid[targetY][targetX]!;
+
+      // Ostateczne sprawdzenie czy element nadal należy do aktywnej siatki
+      if (!game.playersGrid.children.contains(targetElement)) return;
+
       targetElement.bomb();
 
       if (targetElement is Bottle) {
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (_sessionId != mySession) return;
+        if (!game.isGameRunning) return;
 
-        if (game.isGameRunning && currentPlayer == 2) {
+        if (currentPlayer == 2) {
           _opponentsTurn();
         }
       }

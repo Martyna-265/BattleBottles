@@ -34,7 +34,7 @@ class HelpButton extends PositionComponent with HasGameReference<BattleShipsGame
     canvas.drawRect(size.toRect(), _bgPaint);
     _borderPaint.strokeWidth = size.x * 0.06;
     canvas.drawRect(size.toRect(), _borderPaint);
-    double scaleFactor = (size.y * 0.6) / _baseFontSize;
+    double scaleFactor = (size.y * 0.55) / _baseFontSize;
     canvas.save();
     canvas.translate(size.x / 2, size.y / 2);
     canvas.scale(scaleFactor);

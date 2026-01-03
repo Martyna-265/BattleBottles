@@ -10,15 +10,14 @@ class ShipsCounter extends PositionComponent {
   ShipsCounter(this.linkedGrid);
 
   final Paint _shipPaint = Paint()..color = const Color(0xff003366);
-
   final Paint _borderPaint = Paint()
     ..color = Colors.white
     ..style = PaintingStyle.stroke
     ..strokeWidth = 0.05;
 
-  final TextPaint _textPaint = TextPaint(
+  final TextPaint _countPaint = TextPaint(
     style: const TextStyle(
-      fontSize: 1,
+      fontSize: 1.1,
       color: Color(0xff003366),
       fontWeight: FontWeight.bold,
       fontFamily: 'Awesome Font',
@@ -27,16 +26,12 @@ class ShipsCounter extends PositionComponent {
 
   final TextPaint _labelPaint = TextPaint(
     style: const TextStyle(
-      fontSize: 1,
+      fontSize: 1.2,
       color: Color(0xff003366),
       fontFamily: 'Awesome Font',
+      fontWeight: FontWeight.bold,
     ),
   );
-
-  @override
-  Future<void> onLoad() async {
-    anchor = Anchor.topLeft;
-  }
 
   @override
   void render(Canvas canvas) {
@@ -46,11 +41,8 @@ class ShipsCounter extends PositionComponent {
 
     _labelPaint.render(canvas, 'Ships left:', Vector2(0, 0));
 
-    int size4 = 0;
-    int size3 = 0;
-    int size2 = 0;
-    int size1 = 0;
-
+    // Zliczanie statków
+    int size4 = 0; int size3 = 0; int size2 = 0; int size1 = 0;
     for (var ship in linkedGrid.ships) {
       if (!linkedGrid.shipsDown.contains(ship)) {
         int s = ship.type.size;
@@ -61,59 +53,61 @@ class ShipsCounter extends PositionComponent {
         }
         else if (s == 2) {
           size2++;
-        }
-        else if (s == 1) {
+        } else if (s == 1) {
           size1++;
         }
       }
     }
 
-    double iconSize = BattleShipsGame.squareLength / 2;
-    double gap = 0.2;
-    double groupGap = BattleShipsGame.squareLength / 2;
+    double effectiveGridWidth = linkedGrid.size.x * linkedGrid.scale.x;
 
-    double currentX = 0;
+    int gridSize = linkedGrid.game.squaresInGrid;
+    double startY = 1.5 + (10 - gridSize) * 0.15;
+    startY = startY.clamp(1.5, 3.5);
 
-    double startY = 2;
+    double baseIconSize = BattleShipsGame.squareLength / 2.2;
+    double gapBetweenIconAndText = 0.3;
+    double gapBetweenGroups = 1.2;
+
+    double getGroupWidth(int shipSize) => (shipSize * baseIconSize) + gapBetweenIconAndText + 1.2;
+
+    double totalContentWidth = getGroupWidth(4) + getGroupWidth(3) + getGroupWidth(2) + getGroupWidth(1) + (3 * gapBetweenGroups);
+
+    double contentScale = 1.0;
+    if (totalContentWidth > effectiveGridWidth) {
+      contentScale = effectiveGridWidth / (totalContentWidth + 1.0);
+    }
+
+    canvas.save();
+    canvas.scale(contentScale);
+
+    double startX = (effectiveGridWidth / contentScale - totalContentWidth) / 2;
+
+    if (startX < 0) startX = 0;
+
+    double currentX = startX;
 
     void drawGroup(int shipSize, int count) {
-      // Mini statek
       for (int i = 0; i < shipSize; i++) {
-        Rect rect = Rect.fromLTWH(currentX + (i * iconSize), startY, iconSize, iconSize);
+        Rect rect = Rect.fromLTWH(currentX + (i * baseIconSize), startY, baseIconSize, baseIconSize);
         canvas.drawRect(rect, _shipPaint);
         canvas.drawRect(rect, _borderPaint);
       }
+      currentX += (shipSize * baseIconSize) + gapBetweenIconAndText;
 
-      currentX += (shipSize * iconSize) + gap;
+      TextPaint paintToUse = count > 0
+          ? _countPaint
+          : TextPaint(style: _countPaint.style.copyWith(color: const Color(0x55003366)));
 
-      // Counter
-      TextPaint paintToUse;
-
-      if (count > 0) {
-        paintToUse = TextPaint(
-          style: _textPaint.style.copyWith(
-            fontWeight: FontWeight.w900, // Gruby
-            color: const Color(0xFF003366),
-          ),
-        );
-      } else {
-        paintToUse = TextPaint(
-          style: _textPaint.style.copyWith(
-            fontWeight: FontWeight.normal,
-            color: const Color(0xEE003366),
-          ),
-        );
-      }
-
-      String label = " x$count";
-      paintToUse.render(canvas, label, Vector2(currentX, startY));
-
-      currentX += 1.5 + groupGap;
+      paintToUse.render(canvas, "x$count", Vector2(currentX, startY));
+      currentX += 1.4 + gapBetweenGroups;
     }
 
     drawGroup(4, size4);
     drawGroup(3, size3);
     drawGroup(2, size2);
     drawGroup(1, size1);
+
+    canvas.restore();
   }
 }

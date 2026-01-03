@@ -64,7 +64,7 @@ class HelpScreen extends StatelessWidget {
 
                       const SizedBox(height: 15),
                       _buildHeader("Power-ups"),
-                      _buildListItem("• Octopus:", "Unleash the beast! Select a square, and the Octopus will drag down 4 random points surrounding that target."),
+                      _buildListItem("• Octopus:", "Unleash the beast! Select a square, and the Octopus will sink it along with 4 random points surrounding that target."),
                       _buildListItem("• Triple Shot:", "Fire three times in a single round. If you hit a ship, the standard bonus rules apply, allowing for devastating combos."),
                       _buildListItem("• Shark:", "High risk, high reward. Select a row on the enemy grid to sink it entirely. But beware - the Shark bites back, destroying the corresponding line on your own grid as well!"),
 
