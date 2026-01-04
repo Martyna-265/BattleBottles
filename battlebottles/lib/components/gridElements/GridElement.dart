@@ -1,11 +1,14 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:battlebottles/animations/SharkAnimation.dart';
 import 'package:battlebottles/components/bottleElements/Condition.dart';
 import 'package:battlebottles/services/AudioManager.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import '../../BattleShipsGame.dart';
+import '../../animations/OctopusHeadAnimation.dart';
+import '../../animations/TentacleAnimation.dart';
 import '../bottleElements/PowerUpType.dart';
 import 'Bottle.dart';
 import 'Water.dart';
@@ -161,6 +164,41 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
     List<Point<int>> targets = neighbors.take(4).toList();
     targets.add(Point(gridX, gridY));
 
+    double scaledSquareSize = BattleShipsGame.squareLength * game.gridScale;
+    var targetGrid = opponent ? game.opponentsGrid : game.playersGrid;
+
+    // Animacja
+
+    Vector2 headPos = Vector2(
+      targetGrid.position.x + (gridX * scaledSquareSize),
+      targetGrid.position.y + ((gridY - 0.3) * scaledSquareSize),
+    );
+
+    game.world.add(OctopusHeadAnimation(
+      targetPosition: headPos,
+      cellSize: scaledSquareSize,
+    ));
+
+    for (var p in targets) {
+      if (p.x == gridX && p.y == gridY) {
+        continue;
+      }
+      Vector2 tentaclePos = Vector2(
+        targetGrid.position.x + (p.x * scaledSquareSize),
+        targetGrid.position.y + ((p.y - 0.3) * scaledSquareSize),
+      );
+
+      bool shouldFlip = p.x < gridX;
+
+      game.world.add(TentacleAnimation(
+        targetPosition: tentaclePos,
+        cellSize: scaledSquareSize,
+        flip: shouldFlip,
+      ));
+    }
+
+    // Koniec animacji
+
     var gridRef = opponent ? game.opponentsGrid.grid : game.playersGrid.grid;
     bool hitAnyFreshShip = false;
 
@@ -205,6 +243,23 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   }
 
   void _handleShark() {
+
+    double scaledSquareSize = BattleShipsGame.squareLength * game.gridScale;
+    var targetGrid = game.isNarrow ? game.opponentsGrid : game.playersGrid;
+    double rowWorldY = targetGrid.position.y + (gridY * scaledSquareSize);
+
+    double gameWorldWidth = game.isNarrow
+        ? game.scaledGridWidth + 10.0
+        : (game.scaledGridWidth * 2) + BattleShipsGame.gap + 10.0;
+
+    final shark = SharkAnimation(
+        targetY: rowWorldY,
+        worldWidth: gameWorldWidth,
+        cellSize: scaledSquareSize
+    );
+
+    game.world.add(shark);
+
     AudioManager.playMonster();
     int n = game.squaresInGrid;
 
