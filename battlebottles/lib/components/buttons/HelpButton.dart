@@ -23,18 +23,23 @@ class HelpButton extends PositionComponent with HasGameReference<BattleShipsGame
   }
 
   final _bgPaint = Paint()..color = const Color(0xff004488);
+
   final _borderPaint = Paint()
     ..color = const Color(0xFFFFFFFF)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
+    ..style = PaintingStyle.stroke;
 
   late final TextPaint _textPaint;
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(size.toRect(), _bgPaint);
-    _borderPaint.strokeWidth = size.x * 0.06;
-    canvas.drawRect(size.toRect(), _borderPaint);
+    double radius = size.x / 2;
+    Offset center = Offset(radius, radius);
+
+    canvas.drawCircle(center, radius, _bgPaint);
+
+    _borderPaint.strokeWidth = size.x * 0.05;
+    canvas.drawCircle(center, radius, _borderPaint);
+
     double scaleFactor = (size.y * 0.55) / _baseFontSize;
     canvas.save();
     canvas.translate(size.x / 2, size.y / 2);

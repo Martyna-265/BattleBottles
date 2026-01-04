@@ -9,7 +9,10 @@ class StartButton extends PositionComponent with HasGameReference<BattleShipsGam
   StartButton() : super(size: Vector2(6, 2.5));
 
   final Paint _bgPaint = Paint()..color = const Color(0xFF4CAF50);
-  final Paint _shadowPaint = Paint()..color = const Color(0xFF2E7D32);
+  final Paint _borderPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 0.1;
 
   final _textPaint = TextPaint(
     style: const TextStyle(
@@ -22,14 +25,10 @@ class StartButton extends PositionComponent with HasGameReference<BattleShipsGam
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(0, 0.2, size.x, size.y), const Radius.circular(10)),
-        _shadowPaint
-    );
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.x, size.y), const Radius.circular(10)),
-        _bgPaint
-    );
+    RRect rrect = RRect.fromRectAndRadius(size.toRect(), Radius.circular(size.y / 2));
+
+    canvas.drawRRect(rrect, _bgPaint);
+    canvas.drawRRect(rrect, _borderPaint);
 
     _textPaint.render(canvas, 'START', Vector2(size.x / 2, size.y / 2), anchor: Anchor.center);
   }

@@ -1,8 +1,6 @@
 import 'dart:math';
 import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
-import 'package:battlebottles/services/AudioManager.dart';
-
 import 'components/gridElements/Bottle.dart';
 import 'components/gridElements/Ship.dart';
 

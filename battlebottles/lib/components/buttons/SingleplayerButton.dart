@@ -8,19 +8,27 @@ import '../../services/AudioManager.dart';
 class PlaySingleButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
   PlaySingleButton() : super(size: Vector2(200, 60));
 
-  final _backgroundPaint = Paint()..color = const Color(0xff4CAF50);
+  final _backgroundPaint = Paint()..color = const Color(0xff4CAF50); // Green
+  final _borderPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2;
+
   final _textPaint = TextPaint(
     style: const TextStyle(
       fontSize: 24.0,
       color: Color(0xFFFFFFFF),
       fontFamily: 'Awesome Font',
+      fontWeight: FontWeight.bold, // Bold text
     ),
   );
 
   @override
   void render(Canvas canvas) {
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(10));
+    // Rounded Rectangle with Border
+    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(30)); // Highly rounded (pill shape)
     canvas.drawRRect(rrect, _backgroundPaint);
+    canvas.drawRRect(rrect, _borderPaint);
 
     _textPaint.render(
       canvas,

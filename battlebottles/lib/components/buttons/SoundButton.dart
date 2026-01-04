@@ -11,22 +11,25 @@ class SoundButton extends PositionComponent with HasGameReference<BattleShipsGam
 
   final Paint _bgPaint = Paint()..color = const Color(0xff004488);
   final Paint _iconPaint = Paint()..color = const Color(0xFFFFFFFF)..style = PaintingStyle.fill;
+
   final Paint _borderPaint = Paint()
     ..color = const Color(0xFFFFFFFF)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
+    ..style = PaintingStyle.stroke;
 
   final Paint _crossPaint = Paint()
     ..color = const Color(0xFFE53935)
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 3
     ..strokeCap = StrokeCap.round;
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(size.toRect(), _bgPaint);
-    _borderPaint.strokeWidth = size.x * 0.06;
-    canvas.drawRect(size.toRect(), _borderPaint);
+    double radius = size.x / 2;
+    Offset center = Offset(radius, radius);
+
+    canvas.drawCircle(center, radius, _bgPaint);
+
+    _borderPaint.strokeWidth = size.x * 0.05;
+    canvas.drawCircle(center, radius, _borderPaint);
 
     canvas.save();
     canvas.translate(size.x / 2, size.y / 2);
@@ -51,11 +54,11 @@ class SoundButton extends PositionComponent with HasGameReference<BattleShipsGam
         ..strokeWidth = 2;
 
       canvas.drawArc(const Rect.fromLTWH(-4, -6, 12, 12), -0.7, 1.4, false, wavePaint);
-
       canvas.drawArc(const Rect.fromLTWH(-4, -8, 16, 16), -0.7, 1.4, false, wavePaint);
     }
 
     if (!AudioManager.sfxOn) {
+      _crossPaint.strokeWidth = 3;
       canvas.drawLine(const Offset(-8, -8), const Offset(8, 8), _crossPaint);
     }
 

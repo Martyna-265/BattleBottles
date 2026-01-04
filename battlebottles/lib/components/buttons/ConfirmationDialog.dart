@@ -14,15 +14,24 @@ class DialogButton extends PositionComponent with TapCallbacks {
   DialogButton(this.text, this.color, this.onTapAction)
       : super(size: Vector2(6, 2.5));
 
+  late final Paint _bgPaint = Paint()..color = color;
+  final Paint _borderPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 0.1;
+
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(size.toRect(), Paint()..color = color);
+    RRect rrect = RRect.fromRectAndRadius(size.toRect(), Radius.circular(size.y / 2));
+    canvas.drawRRect(rrect, _bgPaint);
+    canvas.drawRRect(rrect, _borderPaint);
 
     TextPaint(
       style: const TextStyle(
         fontSize: 0.8,
         color: Color(0xFFFFFFFF),
         fontFamily: 'Awesome Font',
+        fontWeight: FontWeight.bold,
       ),
     ).render(
         canvas,
@@ -51,17 +60,18 @@ class ConfirmationDialog extends PositionComponent with HasGameReference<BattleS
   });
 
   final _overlayPaint = Paint()..color = const Color(0xAA000000);
-  final _bgPaint = Paint()..color = const Color(0xFF222222);
+  final _bgPaint = Paint()..color = const Color(0xFF003366);
   final _borderPaint = Paint()
     ..color = const Color(0xFFFFFFFF)
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 0.1;
+    ..strokeWidth = 0.2;
 
   final _textPaint = TextPaint(
     style: const TextStyle(
       fontSize: 1,
       color: Color(0xFFFFFFFF),
       fontFamily: 'Awesome Font',
+      fontWeight: FontWeight.bold,
     ),
   );
 
@@ -102,19 +112,22 @@ class ConfirmationDialog extends PositionComponent with HasGameReference<BattleS
     canvas.drawRect(size.toRect(), _overlayPaint);
 
     final center = size.toOffset() / 2;
-    final boxRect = Rect.fromCenter(
-        center: center,
-        width: _boxSize.x,
-        height: _boxSize.y
+    final boxRect = RRect.fromRectAndRadius(
+        Rect.fromCenter(
+            center: center,
+            width: _boxSize.x,
+            height: _boxSize.y
+        ),
+        const Radius.circular(2.0)
     );
 
-    canvas.drawRect(boxRect, _bgPaint);
-    canvas.drawRect(boxRect, _borderPaint);
+    canvas.drawRRect(boxRect, _bgPaint);
+    canvas.drawRRect(boxRect, _borderPaint);
 
     _textPaint.render(
         canvas,
         message,
-        Vector2(center.dx, center.dy - _boxSize.y / 2 + 1.5),
+        Vector2(center.dx, center.dy - _boxSize.y / 2 + 2.5),
         anchor: Anchor.center
     );
   }
