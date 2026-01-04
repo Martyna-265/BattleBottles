@@ -124,7 +124,6 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
     if (_isExpanded) {
       final user = _auth.currentUser;
       double optionHeight = 35;
-
       double startY = size.y;
 
       add(DropdownOption('Stats', () async {
@@ -132,7 +131,10 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
         if (game.buildContext != null) {
           final stats = await StatsService().getStats();
           if (game.buildContext != null) {
-            _showStatsDialog(game.buildContext!, stats);
+            showDialog(
+              context: game.buildContext!,
+              builder: (ctx) => StatsDialog(stats: stats),
+            );
           }
         }
       }, isLast: false)..position = Vector2(0, startY));
@@ -171,10 +173,8 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
                 isRegister: true,
                 onSubmit: (email, pass, username) async {
                   await _auth.register(email, pass, username ?? 'Player');
-
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setString('last_email', email);
-
                   final updatedUser = _auth.currentUser;
                   if (updatedUser != null) {
                     String labelText = updatedUser.displayName ?? updatedUser.email ?? 'User';
@@ -266,9 +266,7 @@ void showAuthDialog({
                       passController.text.trim(),
                       isRegister ? userController.text.trim() : null,
                     );
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
+                    if (context.mounted) Navigator.of(context).pop();
                   } catch (e) {
                     if (context.mounted) {
                       setState(() {
@@ -279,11 +277,7 @@ void showAuthDialog({
                   }
                 },
                 child: isLoading
-                    ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-                )
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : Text(isRegister ? 'Register' : 'Login', style: const TextStyle(color: Colors.white)),
               ),
             ],
@@ -311,47 +305,112 @@ Widget _buildTextField(TextEditingController controller, String label, bool obsc
   );
 }
 
-void _showStatsDialog(BuildContext context, Map<String, dynamic> stats) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        backgroundColor: const Color(0xff003366),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Your Stats', style: TextStyle(color: Colors.white, fontFamily: 'Awesome Font', fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildStatRow('Games Played', stats['gamesPlayed']?.toString() ?? '0'),
-            _buildStatRow('Wins', stats['wins']?.toString() ?? '0'),
-            _buildStatRow('Losses', stats['losses']?.toString() ?? '0'),
-            const Divider(color: Colors.white54),
-            _buildStatRow('Sunk Ships', stats['sunkShips']?.toString() ?? '0'),
-            _buildStatRow('Lost Ships', stats['lostShips']?.toString() ?? '0'),
-            const Divider(color: Colors.white54),
-            _buildStatRow('Win Rate', '${stats['winRate']?.toStringAsFixed(1) ?? '0'}%'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      );
-    },
-  );
-}
+class StatsDialog extends StatelessWidget {
+  final Map<String, dynamic> stats;
 
-Widget _buildStatRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.white70)),
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+  const StatsDialog({Key? key, required this.stats}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    int wins = (stats['wins'] as num?)?.toInt() ?? 0;
+    int losses = (stats['losses'] as num?)?.toInt() ?? 0;
+    int totalGames = wins + losses;
+    double winRate = totalGames > 0 ? (wins / totalGames * 100) : 0;
+    int sinkedEnemy = (stats['sinked_enemy_ships'] as num?)?.toInt() ?? 0;
+    int sinkedSelf = (stats['sinked_ships'] as num?)?.toInt() ?? 0;
+    int singleGames = (stats['games_single'] as num?)?.toInt() ?? 0;
+    int multiGames = (stats['games_multi'] as num?)?.toInt() ?? 0;
+
+    int puTotal = (stats['pu_total'] as num?)?.toInt() ?? 0;
+    int puOctopus = (stats['pu_octopus'] as num?)?.toInt() ?? 0;
+    int puTriple = (stats['pu_triple'] as num?)?.toInt() ?? 0;
+    int puShark = (stats['pu_shark'] as num?)?.toInt() ?? 0;
+
+    return AlertDialog(
+      backgroundColor: const Color(0xFF003366),
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: Colors.white, width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      title: const Text(
+        "Captain's Log",
+        style: TextStyle(color: Colors.white, fontFamily: 'Awesome Font', fontSize: 24),
+        textAlign: TextAlign.center,
+      ),
+      content: SizedBox(
+        width: 500,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Divider(color: Colors.white54),
+              _buildStatRow(Icons.emoji_events, "Victories", "$wins", Colors.greenAccent),
+              _buildStatRow(Icons.dangerous, "Defeats", "$losses", Colors.redAccent),
+              const SizedBox(height: 10),
+              _buildStatRow(Icons.my_location, "Sunk Enemies", "$sinkedEnemy", Colors.cyanAccent),
+              _buildStatRow(Icons.warning, "Lost Ships", "$sinkedSelf", Colors.orangeAccent),
+              const Divider(color: Colors.white54),
+              _buildStatRow(Icons.analytics, "Total Games", "$totalGames", Colors.white),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0, left: 40.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Single: $singleGames | Multi: $multiGames",
+                      style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                ),
+              ),
+              _buildStatRow(Icons.percent, "Win Rate", "${winRate.toStringAsFixed(1)}%", Colors.orangeAccent),
+              const Divider(color: Colors.white54),
+              _buildStatRow(Icons.flash_on, "Power-ups Used", "$puTotal", Colors.yellowAccent),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
+                child: Column(
+                  children: [
+                    _buildMiniStatRow("Octopus", "$puOctopus"),
+                    _buildMiniStatRow("Triple Shot", "$puTriple"),
+                    _buildMiniStatRow("Shark", "$puShark"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("CLOSE", style: TextStyle(color: Colors.white)),
+        ),
       ],
-    ),
-  );
+    );
+  }
+
+  Widget _buildStatRow(IconData icon, String label, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 18)),
+          ),
+          Text(value, style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniStatRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 14)),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
 }

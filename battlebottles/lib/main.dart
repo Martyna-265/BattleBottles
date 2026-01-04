@@ -20,8 +20,17 @@ Future<void> main() async {
 
   final game = BattleShipsGame();
 
-  runApp(
-    MaterialApp(
+  runApp(BattleBottlesApp(game: game));
+}
+
+class BattleBottlesApp extends StatelessWidget {
+  final BattleShipsGame game;
+
+  const BattleBottlesApp({super.key, required this.game});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: 'Battle Bottles',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
@@ -40,7 +49,6 @@ Future<void> main() async {
                     },
                   );
                 },
-
                 'GameOptionsScreen': (BuildContext context, BattleShipsGame game) {
                   return GameOptionsScreen(
                     game: game,
@@ -48,7 +56,6 @@ Future<void> main() async {
                     gameId: game.tempGameId,
                   );
                 },
-
                 'GameOverMenu': (BuildContext context, BattleShipsGame game) {
                   return GameOverMenu(
                     game: game,
@@ -63,6 +70,6 @@ Future<void> main() async {
           },
         ),
       ),
-    ),
-  );
+    );
+  }
 }

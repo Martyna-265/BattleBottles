@@ -12,8 +12,11 @@ class HelpScreen extends StatelessWidget {
       backgroundColor: const Color(0xAA000000),
       body: Center(
         child: Container(
-          width: 500,
-          height: 650,
+          constraints: const BoxConstraints(
+            maxWidth: 500,
+            maxHeight: 650,
+          ),
+          width: MediaQuery.of(context).size.width * 0.9,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: const Color(0xff003366),
@@ -25,13 +28,15 @@ class HelpScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'HELP & RULES',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Awesome Font',
+                  const Expanded(
+                    child: Text(
+                      'HELP & RULES',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Awesome Font',
+                      ),
                     ),
                   ),
                   IconButton(
