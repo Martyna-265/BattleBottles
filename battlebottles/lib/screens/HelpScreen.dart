@@ -60,7 +60,8 @@ class HelpScreen extends StatelessWidget {
                       _buildListItem("3. Open Fire:", "Tap on the enemy grid to launch a bomb. If you score a direct hit, you are rewarded with a bonus shot. The same rule applies to your opponent!"),
                       _buildListItem("4. Special Tactics:", "Before firing, you can activate a Power-up to turn the tide of battle. Use them wisely, as your supply is limited.\nNote: In single-player, the computer does not use power-ups, but it has the ability to randomly strike twice in a single round."),
                       _buildListItem("5. Track Progress:", "Keep an eye on the ship counter below the enemy grid. To win, you must sink every ship type in their fleet."),
-                      _buildListItem("6. After Action Report:", "Even if you lose, you can reveal the battlefield to see the enemy's formation and discover exactly where those elusive ships were hiding."),
+                      _buildListItem("6. View Modes:", "On narrow screens (mobile portrait), only the active grid is visible to maximize detail. Rotate your device to landscape or use a wider screen to see both your fleet and the enemy's simultaneously."),
+                      _buildListItem("7. After Action Report:", "Even if you lose, you can reveal the battlefield to see the enemy's formation and discover exactly where those elusive ships were hiding."),
 
                       const SizedBox(height: 15),
                       _buildHeader("Power-ups"),

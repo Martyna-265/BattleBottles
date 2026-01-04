@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
@@ -39,7 +41,7 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
   }
 
   @override
-  void onTapDown(TapDownEvent event) {
+  void onTapDown(TapDownEvent event) async {
     AudioManager.playClick();
     AudioManager.playBgm();
 
@@ -63,8 +65,43 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
           },
         );
       }
-    } else {
-      game.openMultiplayerLobby();
+      return;
     }
+
+    bool hasInternet = true;
+
+    if (!kIsWeb) {
+      try {
+        final result = await InternetAddress.lookup('google.com');
+        if (result.isEmpty || result[0].rawAddress.isEmpty) {
+          hasInternet = false;
+        }
+      } on SocketException catch (_) {
+        hasInternet = false;
+      }
+    }
+
+    if (!hasInternet) {
+      if (game.buildContext != null) {
+        showDialog(
+          context: game.buildContext!,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('No Internet'),
+              content: const Text('You need an active internet connection to play multiplayer.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+      return;
+    }
+
+    game.openMultiplayerLobby();
   }
 }

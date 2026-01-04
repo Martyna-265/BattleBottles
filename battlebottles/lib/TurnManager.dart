@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:battlebottles/BattleShipsGame.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
+import 'package:battlebottles/services/AudioManager.dart';
 
 import 'components/gridElements/Bottle.dart';
 import 'components/gridElements/Ship.dart';
@@ -136,9 +137,10 @@ class TurnManager {
       // Ostateczne sprawdzenie czy element nadal należy do aktywnej siatki
       if (!game.playersGrid.children.contains(targetElement)) return;
 
-      targetElement.bomb();
+      //targetElement.bomb();
 
       if (targetElement is Bottle) {
+        targetElement.bomb();
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (_sessionId != mySession) return;
@@ -146,6 +148,22 @@ class TurnManager {
 
         if (currentPlayer == 2) {
           _opponentsTurn();
+        }
+      } else {
+        if (random.nextDouble() < 0.03) {
+          game.isMultiplayer = true;
+          targetElement.bomb();
+          game.actionFeedback.setMessage("miss", true, addition: "Lucky! Bonus shot");
+          game.isMultiplayer = false;
+          await Future.delayed(const Duration(seconds: 2));
+          if (_sessionId != mySession) return;
+          if (!game.isGameRunning) return;
+
+          if (currentPlayer == 2) {
+            _opponentsTurn();
+          }
+        } else {
+          targetElement.bomb();
         }
       }
     } else {
