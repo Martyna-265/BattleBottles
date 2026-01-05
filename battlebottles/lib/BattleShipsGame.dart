@@ -132,9 +132,10 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
     helpButton = HelpButton(sideLength: squareLength)..anchor = Anchor.topLeft;
     soundButton = SoundButton(sideLength: squareLength)..anchor = Anchor.topLeft;
-    octopusBtn = PowerUpButton(imageName: 'Octopus.png', type: PowerUpType.octopus, count: limitOctopus);
-    tripleBtn = PowerUpButton(imageName: 'Bombs.png', type: PowerUpType.triple, count: limitTriple);
-    sharkBtn = PowerUpButton(imageName: 'Shark.png', type: PowerUpType.shark, count: limitShark);
+
+    octopusBtn = PowerUpButton(imageName: 'octopus.png', type: PowerUpType.octopus, count: limitOctopus);
+    tripleBtn = PowerUpButton(imageName: 'bombs.png', type: PowerUpType.triple, count: limitTriple);
+    sharkBtn = PowerUpButton(imageName: 'shark.png', type: PowerUpType.shark, count: limitShark);
 
     octopusBtn.anchor = Anchor.center;
     tripleBtn.anchor = Anchor.center;
@@ -466,47 +467,60 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     _updateUiPositions();
 
     if (isNarrow) {
-      // MOBILE
+      // Narrow
       bool showOpponent = (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) || (visibleCurrentPlayer == 1);
 
       if (showOpponent) {
-        if (!opponentsGrid.isMounted) world.add(opponentsGrid);
+        // Pokaż przeciwnika
+        if (opponentsGrid.parent == null) world.add(opponentsGrid);
+        opponentsGrid.scale = Vector2.all(gridScale);
 
-        if (!opponentLabel.isMounted) world.add(opponentLabel);
+        if (opponentLabel.parent == null) world.add(opponentLabel);
         opponentLabel.text = opponentName;
 
-        if (!opponentCounter.isMounted) world.add(opponentCounter);
+        if (opponentCounter.parent == null) world.add(opponentCounter);
 
-        if (playersGrid.isMounted) world.remove(playersGrid);
-        if (playerLabel.isMounted) world.remove(playerLabel);
-        if (playerCounter.isMounted) world.remove(playerCounter);
+        // Ukryj gracza
+        if (playersGrid.parent != null) playersGrid.removeFromParent();
+        if (playerLabel.parent != null) playerLabel.removeFromParent();
+        if (playerCounter.parent != null) playerCounter.removeFromParent();
 
         opponentsGrid.position = Vector2(0, 0);
         positionLabel(opponentsGrid, opponentLabel);
         positionCounter(opponentsGrid, opponentCounter);
 
       } else {
-        if (!playersGrid.isMounted) world.add(playersGrid);
-        if (!playerLabel.isMounted) world.add(playerLabel);
-        if (!playerCounter.isMounted) world.add(playerCounter);
+        // Pokaż gracza
+        if (playersGrid.parent == null) world.add(playersGrid);
+        playersGrid.scale = Vector2.all(gridScale);
 
-        if (opponentsGrid.isMounted) world.remove(opponentsGrid);
-        if (opponentLabel.isMounted) world.remove(opponentLabel);
-        if (opponentCounter.isMounted) world.remove(opponentCounter);
+        if (playerLabel.parent == null) world.add(playerLabel);
+        if (playerCounter.parent == null) world.add(playerCounter);
+
+        // Ukryj przeciwnika
+        if (opponentsGrid.parent != null) opponentsGrid.removeFromParent();
+        if (opponentLabel.parent != null) opponentLabel.removeFromParent();
+        if (opponentCounter.parent != null) opponentCounter.removeFromParent();
 
         playersGrid.position = Vector2(0, 0);
         positionLabel(playersGrid, playerLabel);
         positionCounter(playersGrid, playerCounter);
       }
     } else {
-      // WIDE
-      world.add(playersGrid); world.add(playerLabel); world.add(playerCounter);
-      world.add(opponentsGrid);
+      // Wide
+      if (playersGrid.parent == null) world.add(playersGrid);
+      playersGrid.scale = Vector2.all(gridScale);
 
-      world.add(opponentLabel);
+      if (playerLabel.parent == null) world.add(playerLabel);
+      if (playerCounter.parent == null) world.add(playerCounter);
+
+      if (opponentsGrid.parent == null) world.add(opponentsGrid);
+      opponentsGrid.scale = Vector2.all(gridScale);
+
+      if (opponentLabel.parent == null) world.add(opponentLabel);
       opponentLabel.text = opponentName;
 
-      world.add(opponentCounter);
+      if (opponentCounter.parent == null) world.add(opponentCounter);
 
       playersGrid.position = Vector2(0, 0);
       positionLabel(playersGrid, playerLabel);
