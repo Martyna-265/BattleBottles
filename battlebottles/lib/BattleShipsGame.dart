@@ -75,8 +75,8 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   late ShipsCounter playerCounter;
   late ShipsCounter opponentCounter;
 
-  late TextComponent playerLabel;
-  late TextComponent opponentLabel;
+  late PlayerLabel playerLabel;
+  late PlayerLabel opponentLabel;
 
   String winnerMessage = '';
 
@@ -101,7 +101,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   bool get isNarrow => size.x < size.y * 0.8;
 
   @override
-  Color backgroundColor() => const Color(0xff84afdb);
+  Color backgroundColor() => const Color(0x00000000);
 
   void _updateGridDimensions(int gridSize) {
     squaresInGrid = gridSize;
@@ -112,7 +112,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
   @override
   Future<void> onLoad() async {
-    await Flame.images.loadAll(['Bottle1x1.png', 'Octopus.png', 'Bombs.png', 'Shark.png']);
+    await Flame.images.loadAll(['grid_element_sheet.png', 'octopus.png', 'bombs.png', 'shark.png']);
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -144,11 +144,11 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     actionFeedback = ActionFeedback()..anchor = Anchor.center;
 
     final labelStyle = TextPaint(
-      style: const TextStyle(fontSize: 1.1, color: Color(0xff003366), fontFamily: 'Awesome Font', fontWeight: FontWeight.bold),
+      style: const TextStyle(fontSize: 1.1, color: Color(0xffffffff), fontFamily: 'Awesome Font', fontWeight: FontWeight.bold),
     );
 
-    playerLabel = TextComponent(textRenderer: labelStyle)..anchor = Anchor.center;
-    opponentLabel = TextComponent(textRenderer: labelStyle)..anchor = Anchor.center;
+    playerLabel = PlayerLabel(textRenderer: labelStyle)..anchor = Anchor.center;
+    opponentLabel = PlayerLabel(textRenderer: labelStyle)..anchor = Anchor.center;
 
     mainMenu = MainMenu();
     world.add(mainMenu);
@@ -466,7 +466,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
     visibleCurrentPlayer = turnManager.currentPlayer;
 
-    void positionLabel(BattleGrid grid, TextComponent label) {
+    void positionLabel(BattleGrid grid, PlayerLabel label) {
       label.position = Vector2(grid.position.x + scaledGridWidth / 2, grid.position.y - 2.5);
     }
     void positionCounter(BattleGrid grid, ShipsCounter counter) {
@@ -561,6 +561,10 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     isGameRunning = true;
     restartGameInternalState();
 
+    if (overlays.isActive('WinnerConfetti')) {
+      overlays.remove('WinnerConfetti');
+    }
+
     if (!startButton.isMounted) world.add(startButton);
     if (!restartButton.isMounted) world.add(restartButton);
     if (!returnToMenuButton.isMounted) world.add(returnToMenuButton);
@@ -576,6 +580,11 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     gameStream?.cancel();
     isMultiplayer = false;
     isGameRunning = false;
+
+    if (overlays.isActive('WinnerConfetti')) {
+      overlays.remove('WinnerConfetti');
+    }
+
     _clearWorldForGame();
     if (helpButton.isMounted) world.remove(helpButton);
     if (actionFeedback.isMounted) actionFeedback.reset();
@@ -773,13 +782,18 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
       turnManager.currentPlayer = -1;
       StatsService().recordGameResult(!playerLost, isMultiplayer);
 
+      overlays.add('GameOverMenu');
+
       if (playerLost) {
         winnerMessage = "You Lost!";
         AudioManager.playLoss();
       } else {
         winnerMessage = "You Won!";
         AudioManager.playWin();
-      }      overlays.add('GameOverMenu');
+
+        overlays.add('WinnerConfetti');
+      }
+
       updateView();
     }
   }
@@ -832,5 +846,53 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   @override
   void onTapDown(TapDownEvent event) {
     AudioManager.playBgm();
+  }
+
+}
+
+class PlayerLabel extends PositionComponent {
+  String _text = "";
+  final TextPaint _textPaint;
+  final Paint _bgPaint = Paint()..color = const Color(0xcc003366);
+  final Paint _borderPaint = Paint()..color = const Color(0xFFFFFFFF)..style = PaintingStyle.stroke..strokeWidth = 0.05;
+
+  PlayerLabel({required TextPaint textRenderer}) : _textPaint = textRenderer, super(priority: 10);
+
+  set text(String value) {
+    _text = value;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    if (_text.isEmpty) return;
+
+    final textSpan = TextSpan(text: _text, style: _textPaint.style);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+
+    double width = textPainter.width;
+    double height = textPainter.height;
+    double padding = 1.0;
+
+    Rect bgRect = Rect.fromCenter(
+      center: Offset.zero,
+      width: width + padding * 2,
+      height: height + padding,
+    );
+
+    RRect rrect = RRect.fromRectAndRadius(bgRect, const Radius.circular(0.5));
+
+    canvas.drawRRect(rrect, _bgPaint);
+    canvas.drawRRect(rrect, _borderPaint);
+
+    _textPaint.render(
+      canvas,
+      _text,
+      Vector2.zero(),
+      anchor: Anchor.center,
+    );
   }
 }

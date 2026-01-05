@@ -22,9 +22,9 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
   List<Ship> shipsHurt = [];
   List<Ship> shipsDown = [];
 
-  static final Paint blueBackgroundPaint = Paint()..color = const Color(0xff7aa3cc);
+  static final Paint blueBackgroundPaint = Paint()..color = const Color(0x00000000);
   static final Paint blackBorderPaint = Paint()
-    ..color = const Color(0xff000000)
+    ..color = const Color(0xee000000)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 0.08;
 
@@ -273,7 +273,10 @@ class BattleGrid extends PositionComponent with HasGameReference<BattleShipsGame
     canvas.drawRect(size.toRect(), blackBorderPaint);
 
     final textPainter = TextPainter(textAlign: TextAlign.center, textDirection: TextDirection.ltr);
-    final textStyle = TextStyle(color: const Color(0xFF000000), fontSize: cellHeight * 0.4);
+    final textStyle = TextStyle(
+        color: const Color(0xFFFFFFFF),
+        fontSize: cellHeight * 0.4,
+        fontWeight: FontWeight.w900);
 
     for (int i = 0; i < game.squaresInGrid; i++) {
       final letter = String.fromCharCode(65 + i);

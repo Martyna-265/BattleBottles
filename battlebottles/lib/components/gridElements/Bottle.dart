@@ -8,6 +8,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:battlebottles/components/gridElements/GridElement.dart';
 
+import '../../animations/ExplosionAnimation.dart';
 import '../../services/AudioManager.dart';
 import '../../services/StatsService.dart';
 import 'Water.dart';
@@ -16,7 +17,7 @@ class Bottle extends GridElement with DragCallbacks {
 
   Bottle(super.gridX, super.gridY, int intSize, super.opponent, this.parentShip)
       : super(condition: Condition.fromInt(0)) {
-    sprite = opponent ? Condition.fromInt(3).sprite : condition.sprite;
+    sprite = opponent ? Condition.fromInt(5).sprite : condition.sprite;
   }
 
   final Ship parentShip;
@@ -26,11 +27,6 @@ class Bottle extends GridElement with DragCallbacks {
   late Vector2 _startPosition;
   final List<Bottle> _squad = [];
   final List<Vector2> _squadOriginalPositions = [];
-
-  @override
-  String toString() {
-    return "Bottle condition: ${condition.label}";
-  }
 
   @override
   void onDragStart(DragStartEvent event) {
@@ -210,6 +206,16 @@ class Bottle extends GridElement with DragCallbacks {
         AudioManager.playSink();
         sinkShip();
       } else {
+        double scaledSquareSize = BattleShipsGame.squareLength * game.gridScale;
+        Vector2 effectPos = Vector2(
+          battleGrid.position.x + (gridX * scaledSquareSize),
+          battleGrid.position.y + (gridY * scaledSquareSize),
+        );
+
+        game.world.add(ExplosionAnimation(
+            targetPosition: effectPos,
+            cellSize: scaledSquareSize
+        ));
         AudioManager.playExplosion();
         game.actionFeedback.setMessage("hit", !isMyTurn);
       }
@@ -225,6 +231,17 @@ class Bottle extends GridElement with DragCallbacks {
         element.condition = Condition.fromInt(2);
         element.sprite = element.condition.sprite;
         element.bombable = false;
+
+        double scaledSquareSize = BattleShipsGame.squareLength * game.gridScale;
+        Vector2 effectPos = Vector2(
+          battleGrid.position.x + (p.x * scaledSquareSize),
+          battleGrid.position.y + (p.y * scaledSquareSize),
+        );
+
+        game.world.add(ExplosionAnimation(
+            targetPosition: effectPos,
+            cellSize: scaledSquareSize
+        ));
 
         void markWaterAsHit(int x, int y) {
           if (x >= 0 && x < game.squaresInGrid && y >= 0 && y < game.squaresInGrid) {

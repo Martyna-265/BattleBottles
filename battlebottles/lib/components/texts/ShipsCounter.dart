@@ -9,8 +9,13 @@ class ShipsCounter extends PositionComponent {
 
   ShipsCounter(this.linkedGrid);
 
-  final Paint _shipPaint = Paint()..color = const Color(0xff003366);
+  final Paint _shipPaint = Paint()..color = const Color(0xff000000);
   final Paint _borderPaint = Paint()
+    ..color = Colors.white
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 0.05;
+  final Paint _bgPaint = Paint()..color = const Color(0xcc003366);
+  final Paint _bgBorderPaint = Paint()
     ..color = Colors.white
     ..style = PaintingStyle.stroke
     ..strokeWidth = 0.05;
@@ -18,7 +23,7 @@ class ShipsCounter extends PositionComponent {
   final TextPaint _countPaint = TextPaint(
     style: const TextStyle(
       fontSize: 1.1,
-      color: Color(0xff003366),
+      color: Color(0xffffffff),
       fontWeight: FontWeight.bold,
       fontFamily: 'Awesome Font',
     ),
@@ -26,8 +31,8 @@ class ShipsCounter extends PositionComponent {
 
   final TextPaint _labelPaint = TextPaint(
     style: const TextStyle(
-      fontSize: 1.2,
-      color: Color(0xff003366),
+      fontSize: 1.0,
+      color: Color(0xffffffff),
       fontFamily: 'Awesome Font',
       fontWeight: FontWeight.bold,
     ),
@@ -39,9 +44,20 @@ class ShipsCounter extends PositionComponent {
 
     if (linkedGrid.ships.isEmpty) return;
 
+    double effectiveGridWidth = linkedGrid.size.x * linkedGrid.scale.x;
+
+    double bgHeight = 3.5;
+
+    RRect bgRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(-0.2, -0.2, effectiveGridWidth + 0.5, bgHeight),
+      const Radius.circular(0.5),
+    );
+
+    canvas.drawRRect(bgRect, _bgPaint);
+    canvas.drawRRect(bgRect, _bgBorderPaint);
+
     _labelPaint.render(canvas, 'Ships left:', Vector2(0, 0));
 
-    // Zliczanie statków
     int size4 = 0; int size3 = 0; int size2 = 0; int size1 = 0;
     for (var ship in linkedGrid.ships) {
       if (!linkedGrid.shipsDown.contains(ship)) {
@@ -59,10 +75,8 @@ class ShipsCounter extends PositionComponent {
       }
     }
 
-    double effectiveGridWidth = linkedGrid.size.x * linkedGrid.scale.x;
-
     int gridSize = linkedGrid.game.squaresInGrid;
-    double startY = 1.5 + (10 - gridSize) * 0.15;
+    double startY = 1.2 + (10 - gridSize) * 0.15;
     startY = startY.clamp(1.5, 3.5);
 
     double baseIconSize = BattleShipsGame.squareLength / 2.2;
@@ -97,7 +111,7 @@ class ShipsCounter extends PositionComponent {
 
       TextPaint paintToUse = count > 0
           ? _countPaint
-          : TextPaint(style: _countPaint.style.copyWith(color: const Color(0x55003366)));
+          : TextPaint(style: _countPaint.style.copyWith(color: const Color(0x55ffffff)));
 
       paintToUse.render(canvas, "x$count", Vector2(currentX, startY));
       currentX += 1.4 + gapBetweenGroups;

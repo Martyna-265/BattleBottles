@@ -22,10 +22,16 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
   final _titlePaint = TextPaint(
     style: const TextStyle(
       fontSize: 40.0,
-      color: Color(0xff003366),
+      color: Color(0xffffffff),
       fontWeight: FontWeight.bold,
     ),
   );
+
+  final _bgPaint = Paint()..color = const Color(0xcc003366);
+  final _borderPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2;
 
   @override
   Future<void> onLoad() async {
@@ -59,7 +65,7 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
     size = newSize;
 
     playButton.position = Vector2(size.x / 2, size.y / 2 - 20);
-    multiplayerButton.position = Vector2(size.x / 2, size.y / 2 + 80);
+    multiplayerButton.position = Vector2(size.x / 2, size.y / 2 + 60);
     accountDropdown.position = Vector2(size.x - 20, 20);
 
     helpButton.position = Vector2(20, 20);
@@ -68,10 +74,26 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
 
   @override
   void render(Canvas canvas) {
+    double titleWidth = 400;
+    double titleHeight = 60;
+
+    Vector2 centerPos = Vector2(size.x / 2, size.y / 2 - 100);
+
+    Rect rect = Rect.fromCenter(
+      center: Offset(centerPos.x, centerPos.y),
+      width: titleWidth,
+      height: titleHeight,
+    );
+
+    RRect rrect = RRect.fromRectAndRadius(rect, const Radius.circular(15));
+
+    canvas.drawRRect(rrect, _bgPaint);
+    canvas.drawRRect(rrect, _borderPaint);
+
     _titlePaint.render(
       canvas,
       'BATTLE BOTTLES',
-      Vector2(size.x / 2, size.y / 2 - 100),
+      centerPos,
       anchor: Anchor.center,
     );
   }
