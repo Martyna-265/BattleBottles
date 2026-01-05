@@ -131,10 +131,7 @@ class AccountDropdown extends PositionComponent with HasGameReference<BattleShip
         if (game.buildContext != null) {
           final stats = await StatsService().getStats();
           if (game.buildContext != null) {
-            showDialog(
-              context: game.buildContext!,
-              builder: (ctx) => StatsDialog(stats: stats),
-            );
+            showAnimatedDialog(game.buildContext!, StatsDialog(stats: stats));
           }
         }
       }, isLast: false)..position = Vector2(0, startY));
@@ -222,85 +219,78 @@ void showAuthDialog({
   final passController = TextEditingController();
   final userController = TextEditingController();
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      bool isLoading = false;
-      String? errorMessage;
-
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            backgroundColor: const Color(0xff003366),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Text(isRegister ? 'Register' : 'Login',
-                style: const TextStyle(color: Colors.white, fontFamily: 'Awesome Font', fontWeight: FontWeight.bold)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(errorMessage!, style: const TextStyle(color: Colors.redAccent)),
+  showAnimatedDialog(
+    context,
+    StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          backgroundColor: const Color(0xff003366),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: const BorderSide(color: Colors.white, width: 2)
+          ),
+          title: Text(
+            isRegister ? 'Register' : 'Login',
+            style: const TextStyle(color: Colors.white, fontFamily: 'Awesome Font'),
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isRegister)
+                TextField(
+                  controller: userController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white70)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                   ),
-                _buildTextField(emailController, 'Email', false),
-                _buildTextField(passController, 'Password', true),
-                if (isRegister) _buildTextField(userController, 'Username', false),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                onPressed: isLoading ? null : () async {
-                  setState(() => isLoading = true);
-                  try {
-                    await onSubmit(
-                      emailController.text.trim(),
-                      passController.text.trim(),
-                      isRegister ? userController.text.trim() : null,
-                    );
-                    if (context.mounted) Navigator.of(context).pop();
-                  } catch (e) {
-                    if (context.mounted) {
-                      setState(() {
-                        isLoading = false;
-                        errorMessage = e.toString();
-                      });
-                    }
-                  }
-                },
-                child: isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text(isRegister ? 'Register' : 'Login', style: const TextStyle(color: Colors.white)),
+              TextField(
+                controller: emailController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white70)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                ),
+              ),
+              TextField(
+                controller: passController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white70)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                ),
               ),
             ],
-          );
-        },
-      );
-    },
-  );
-}
-
-Widget _buildTextField(TextEditingController controller, String label, bool obscure) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 10.0),
-    child: TextField(
-      controller: controller,
-      obscureText: obscure,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
-        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-      ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+              onPressed: () {
+                onSubmit(
+                  emailController.text,
+                  passController.text,
+                  isRegister ? userController.text : null,
+                );
+                Navigator.of(context).pop();
+              },
+              child: Text(isRegister ? 'Register' : 'Login', style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     ),
   );
 }
@@ -413,4 +403,21 @@ class StatsDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+void showAnimatedDialog(BuildContext context, Widget dialog) {
+  showGeneralDialog(
+    context: context,
+    pageBuilder: (ctx, a1, a2) => dialog,
+    transitionBuilder: (ctx, a1, a2, child) {
+      return ScaleTransition(
+        scale: CurvedAnimation(parent: a1, curve: Curves.easeOutBack),
+        child: FadeTransition(opacity: a1, child: child),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+    barrierDismissible: true,
+    barrierLabel: '',
+    barrierColor: Colors.black54,
+  );
 }

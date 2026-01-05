@@ -402,30 +402,20 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     roundInfo.position = Vector2(uiCenterX, roundInfoY);
     actionFeedback.position = Vector2(uiCenterX, feedbackY);
 
-    if (helpButton.isMounted && soundButton.isMounted) {
-      double roundInfoWidth = 7 * squareLength;
-      double roundInfoLeftEdge = uiCenterX - (roundInfoWidth / 2);
+    double roundInfoWidth = 7 * squareLength;
+    double roundInfoLeftEdge = uiCenterX - (roundInfoWidth / 2);
+    double buttonSize = helpButton.size.x;
+    double padding = 0.5;
 
-      double buttonSize = helpButton.size.x;
-      double padding = 0.5;
+    soundButton.position = Vector2(
+        roundInfoLeftEdge - padding - buttonSize,
+        roundInfoY - (buttonSize / 2)
+    );
 
-      soundButton.position = Vector2(
-          roundInfoLeftEdge - padding - buttonSize,
-          roundInfoY - (buttonSize / 2)
-      );
-
-      helpButton.position = Vector2(
-          soundButton.position.x - padding - buttonSize,
-          roundInfoY - (buttonSize / 2)
-      );
-    }
-    else if (helpButton.isMounted) {
-      double roundInfoWidth = 7 * squareLength;
-      double roundInfoLeftEdge = uiCenterX - (roundInfoWidth / 2);
-      double padding = 1.5;
-      double btnWidth = helpButton.size.x;
-      helpButton.position = Vector2(roundInfoLeftEdge - padding - btnWidth, roundInfoY - (helpButton.size.y / 2));
-    }
+    helpButton.position = Vector2(
+        soundButton.position.x - padding - buttonSize,
+        roundInfoY - (buttonSize / 2)
+    );
 
     double powerUpY = scaledGridHeight + 7.5;
 

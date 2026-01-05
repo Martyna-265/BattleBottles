@@ -60,28 +60,34 @@ class BattleBottlesApp extends StatelessWidget {
                   game: game,
                   overlayBuilderMap: {
                     'MultiplayerLobby': (BuildContext context, BattleShipsGame game) {
-                      return MultiplayerLobby(
-                        game: game,
-                        onClose: () {
-                          game.overlays.remove('MultiplayerLobby');
-                        },
+                      return AnimatedOverlay(
+                        child: MultiplayerLobby(
+                          game: game,
+                          onClose: () => game.overlays.remove('MultiplayerLobby'),
+                        ),
                       );
                     },
                     'GameOptionsScreen': (BuildContext context, BattleShipsGame game) {
-                      return GameOptionsScreen(
-                        game: game,
-                        isMultiplayer: game.tempIsMultiplayer,
-                        gameId: game.tempGameId,
+                      return AnimatedOverlay(
+                        child: GameOptionsScreen(
+                          game: game,
+                          isMultiplayer: game.tempIsMultiplayer,
+                          gameId: game.tempGameId,
+                        ),
                       );
                     },
                     'GameOverMenu': (BuildContext context, BattleShipsGame game) {
-                      return GameOverMenu(
-                        game: game,
-                        overlayId: 'GameOverMenu',
+                      return AnimatedOverlay(
+                        child: GameOverMenu(
+                          game: game,
+                          overlayId: 'GameOverMenu',
+                        ),
                       );
                     },
                     'HelpScreen': (BuildContext context, BattleShipsGame game) {
-                      return HelpScreen(game: game);
+                      return AnimatedOverlay(
+                        child: HelpScreen(game: game),
+                      );
                     },
                     'WinnerConfetti': (BuildContext context, BattleShipsGame game) {
                       return IgnorePointer(
@@ -99,5 +105,40 @@ class BattleBottlesApp extends StatelessWidget {
           ],
         ),
       ), );
+  }
+}
+
+class AnimatedOverlay extends StatefulWidget {
+  final Widget child;
+  const AnimatedOverlay({super.key, required this.child});
+
+  @override
+  State<AnimatedOverlay> createState() => _AnimatedOverlayState();
+}
+
+class _AnimatedOverlayState extends State<AnimatedOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: widget.child,
+    );
   }
 }
