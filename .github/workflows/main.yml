@@ -46,8 +46,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.1'
-          channel: 'stable'
+          channel: 'master'
           cache: true
 
       - name: Create firebase_options.dart
@@ -110,6 +109,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Decode Debug Keystore
+          env:
+            ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+          run: |
+            mkdir -p /home/runner/.config/.android/
+            echo "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > /home/runner/.config/.android/debug.keystore
+            
       - name: Show SHA-1 Key
         run: |
           cd android
