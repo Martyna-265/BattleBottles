@@ -59,7 +59,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web App
-        run: flutter build web --release --web-renderer html
+        run: flutter build web --release
 
       - name: Delete Service Worker (Fix 206 error)
         run: rm build/web/flutter_service_worker.js
@@ -115,7 +115,7 @@ jobs:
         run: |
           mkdir -p /home/runner/.config/.android/
           echo "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > /home/runner/.config/.android/debug.keystore
-          
+
       - name: Show SHA-1 Key
         run: |
           cd android
