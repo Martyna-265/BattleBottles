@@ -77,6 +77,6 @@ The project utilizes GitHub Actions for Continuous Integration and Deployment. T
 4. Builds the web and android versions of the app.
 
 ---
-**Author: Martyna Sadowska**
-GitHub repository: [BattleBottles](https://github.com/Martyna-265/BattleBottles)
+**Author: Martyna Sadowska**  
+GitHub repository: [BattleBottles](https://github.com/Martyna-265/BattleBottles)  
 Web version available [here](https://battlebottles-d5aee.web.app/)
