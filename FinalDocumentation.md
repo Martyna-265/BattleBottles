@@ -79,3 +79,4 @@ The project utilizes GitHub Actions for Continuous Integration and Deployment. T
 ---
 **Author: Martyna Sadowska**
 GitHub repository: [BattleBottles](https://github.com/Martyna-265/BattleBottles)
+Web version available [here](https://battlebottles-d5aee.web.app/)

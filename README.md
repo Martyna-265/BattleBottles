@@ -1,7 +1,7 @@
 # Battle Bottles
 ---
 _Battle Bottles_ is a Flutter application made for the Flutter course during the fifth semester (2025/2026) at the Warsaw University of Technology.  
-It's inspired by the classic battleships game.
+It's inspired by the classic battleships game. You can check out the web version [here](https://battlebottles-d5aee.web.app/).
 Take command of miniature crews navigating tiny bottles across dynamic battlefields. The seas may be small, but the strategy runs deep as you outmaneuver opponents in a test of wits and luck. Will your fleet survive the storm, or will your hopes end up shattered at the bottom of the ocean?
 ## How to play
 ---
