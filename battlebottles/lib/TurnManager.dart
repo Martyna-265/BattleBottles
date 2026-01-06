@@ -39,7 +39,7 @@ class TurnManager {
 
     await Future.delayed(const Duration(seconds: BattleShipsGame.delay));
 
-    // Czy gra została zrestartowana?
+    // Was the game restarted?
     if (_sessionId != mySession) return;
     if (!game.isGameRunning) return;
 
@@ -72,7 +72,7 @@ class TurnManager {
     int targetX = -1;
     int targetY = -1;
 
-    // Logika celowania w zranione statki
+    // Aiming for already hurt ships
     if (shipsHurt.isNotEmpty) {
       Ship ship = shipsHurt.first;
       List<Point<int>> hitParts = [];
@@ -111,7 +111,7 @@ class TurnManager {
       }
     }
 
-    // Losowanie
+    // Random selection
     if (targetX == -1) {
       while (targetX == -1 && _availableMoves.isNotEmpty) {
         int index = random.nextInt(_availableMoves.length);
@@ -126,16 +126,13 @@ class TurnManager {
       }
     }
 
-    // Wykonanie strzału
+    // Making the shot
     if (targetX != -1 && targetY != -1) {
       _availableMoves.remove(Point(targetX, targetY));
 
       var targetElement = grid[targetY][targetX]!;
 
-      // Ostateczne sprawdzenie czy element nadal należy do aktywnej siatki
       if (!game.playersGrid.children.contains(targetElement)) return;
-
-      //targetElement.bomb();
 
       if (targetElement is Bottle) {
         targetElement.bomb();

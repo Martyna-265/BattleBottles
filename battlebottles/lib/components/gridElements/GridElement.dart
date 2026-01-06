@@ -167,7 +167,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
     double scaledSquareSize = BattleShipsGame.squareLength * game.gridScale;
     var targetGrid = opponent ? game.opponentsGrid : game.playersGrid;
 
-    // Animacja
+    // Animation
 
     Vector2 headPos = Vector2(
       targetGrid.position.x + (gridX * scaledSquareSize),
@@ -197,7 +197,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       ));
     }
 
-    // Koniec animacji
+    // Animation end
 
     var gridRef = opponent ? game.opponentsGrid.grid : game.playersGrid.grid;
     bool hitAnyFreshShip = false;
@@ -229,12 +229,16 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       game.turnManager.currentPlayer = 1;
 
       if (wasMultiplayer) {
+        int centerIndex = gridY * game.squaresInGrid + gridX;
+        game.sendSpecialEffect('octopus', centerIndex);
         game.sendPowerUpShots(hitIndices, true);
       }
     } else {
-      // Nie trafiono nowego statku -> Koniec tury
+      // No new ships hit -> end of turn
 
       if (wasMultiplayer) {
+        int centerIndex = gridY * game.squaresInGrid + gridX;
+        game.sendSpecialEffect('octopus', centerIndex);
         game.sendPowerUpShots(hitIndices, false);
       } else {
         game.turnManager.nextTurn();
@@ -294,6 +298,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       game.turnManager.currentPlayer = 1;
 
       if (wasMultiplayer) {
+        game.sendSpecialEffect('shark', gridY);
         game.sendSharkAttack(gridY, true);
       }
 
@@ -301,6 +306,7 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       game.actionFeedback.setMessage("miss", false, addition: "Shark attack end");
 
       if (wasMultiplayer) {
+        game.sendSpecialEffect('shark', gridY);
         game.sendSharkAttack(gridY, false);
       } else {
         game.turnManager.nextTurn();

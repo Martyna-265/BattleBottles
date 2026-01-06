@@ -25,8 +25,7 @@ class PlaySingleButton extends PositionComponent with HasGameReference<BattleShi
 
   @override
   void render(Canvas canvas) {
-    // Rounded Rectangle with Border
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(30)); // Highly rounded (pill shape)
+    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(30));
     canvas.drawRRect(rrect, _backgroundPaint);
     canvas.drawRRect(rrect, _borderPaint);
 

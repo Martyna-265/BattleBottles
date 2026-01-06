@@ -21,7 +21,6 @@ class GameOverMenu extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Informacja kto wygrał
             Text(
               game.winnerMessage,
               style: const TextStyle(
@@ -35,7 +34,6 @@ class GameOverMenu extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // Przycisk See Ships
             ElevatedButton(
               onPressed: () {
                 game.overlays.remove(overlayId);

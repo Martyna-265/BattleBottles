@@ -69,7 +69,7 @@ class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsG
     // Badge
     canvas.drawCircle(Offset(size.x - 0.5, 0.5), 0.7, _badgePaint);
 
-    // Liczba
+    // Number
     _counterTextPaint.render(
       canvas,
       count.toString(),

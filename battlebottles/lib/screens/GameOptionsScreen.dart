@@ -295,7 +295,7 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
                           min: 5,
                           max: 15,
                           divisions: 10,
-                          activeColor: _isUpdating ? Colors.grey : Colors.green, // Szary gdy zajęty
+                          activeColor: _isUpdating ? Colors.grey : Colors.green,
                           inactiveColor: Colors.white24,
                           onChanged: (amIHost && !_isUpdating) ? _onGridSizeChanged : null,
                           onChangeEnd: (amIHost && !_isUpdating) ? (val) => _updateSettings() : null,

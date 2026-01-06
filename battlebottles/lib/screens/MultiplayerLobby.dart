@@ -53,20 +53,18 @@ class MultiplayerLobby extends StatelessWidget {
 
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: _firestoreService.getFriends(), // 1. Pobieramy znajomych
+                  stream: _firestoreService.getFriends(),
                   builder: (context, friendsSnapshot) {
-                    // Jeśli ładuje znajomych, czekamy (opcjonalnie można pominąć loader)
                     if (friendsSnapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    // Tworzymy listę ID naszych znajomych
                     final List<String> friendIds = friendsSnapshot.data?.docs
-                        .map((doc) => doc.id) // Zakładamy, że ID dokumentu to UID znajomego
+                        .map((doc) => doc.id)
                         .toList() ?? [];
 
                     return StreamBuilder<QuerySnapshot>(
-                      stream: _firestoreService.getAvailableGames(), // 2. Pobieramy gry
+                      stream: _firestoreService.getAvailableGames(),
                       builder: (context, gamesSnapshot) {
                         if (gamesSnapshot.hasError) {
                           return const Center(child: Text('Error loading games', style: TextStyle(color: Colors.red)));
@@ -77,11 +75,9 @@ class MultiplayerLobby extends StatelessWidget {
 
                         final allGames = gamesSnapshot.data!.docs;
 
-                        // 3. FILTROWANIE: Pokaż tylko gry, gdzie host jest moim znajomym
                         final friendGames = allGames.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
                           final hostId = data['player1Id'];
-                          // Gra musi być stworzona przez kogoś z friendIds
                           return friendIds.contains(hostId);
                         }).toList();
 
@@ -141,7 +137,6 @@ class MultiplayerLobby extends StatelessWidget {
                 ),
               ),
 
-              // Przycisk Create
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: SizedBox(

@@ -22,6 +22,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
 import '../components/texts/ShipsCounter.dart';
+import 'animations/OctopusHeadAnimation.dart';
+import 'animations/SharkAnimation.dart';
+import 'animations/TentacleAnimation.dart';
 import 'components/buttons/HelpButton.dart';
 import 'components/buttons/PowerUpButton.dart';
 import 'components/bottleElements/PowerUpType.dart';
@@ -51,6 +54,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   int limitShark = 1;
   int tripleShotsLeft = 0;
   PowerUpType activePowerUp = PowerUpType.none;
+  String lastSpecialAttackId = '';
 
   String opponentName = "Pirate";
 
@@ -175,10 +179,8 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      // Aplikacja w tle -> Pauza muzyki
       AudioManager.pauseBgm();
     } else if (state == AppLifecycleState.resumed) {
-      // Powrót do aplikacji -> Wznowienie muzyki
       AudioManager.resumeBgm();
     }
   }
@@ -471,7 +473,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
       bool showOpponent = (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) || (visibleCurrentPlayer == 1);
 
       if (showOpponent) {
-        // Pokaż przeciwnika
+        // Show opponent
         if (opponentsGrid.parent == null) world.add(opponentsGrid);
         opponentsGrid.scale = Vector2.all(gridScale);
 
@@ -480,7 +482,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
         if (opponentCounter.parent == null) world.add(opponentCounter);
 
-        // Ukryj gracza
+        // Hide player
         if (playersGrid.parent != null) playersGrid.removeFromParent();
         if (playerLabel.parent != null) playerLabel.removeFromParent();
         if (playerCounter.parent != null) playerCounter.removeFromParent();
@@ -490,14 +492,14 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
         positionCounter(opponentsGrid, opponentCounter);
 
       } else {
-        // Pokaż gracza
+        // Show player
         if (playersGrid.parent == null) world.add(playersGrid);
         playersGrid.scale = Vector2.all(gridScale);
 
         if (playerLabel.parent == null) world.add(playerLabel);
         if (playerCounter.parent == null) world.add(playerCounter);
 
-        // Ukryj przeciwnika
+        // Hide opponent
         if (opponentsGrid.parent != null) opponentsGrid.removeFromParent();
         if (opponentLabel.parent != null) opponentLabel.removeFromParent();
         if (opponentCounter.parent != null) opponentCounter.removeFromParent();
@@ -681,6 +683,17 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
         _syncShots(data);
 
+        if (data.containsKey('lastSpecialAttack')) {
+          var attackData = data['lastSpecialAttack'] as Map<String, dynamic>;
+          String attackId = attackData['id'];
+          String attackerId = attackData['attacker'];
+
+          if (attackId != lastSpecialAttackId && attackerId != myUserId) {
+            lastSpecialAttackId = attackId;
+            _playEnemySpecialAnimation(attackData['type'], attackData['target']);
+          }
+        }
+
         String currentTurnUserId = data['currentTurn'];
         int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
 
@@ -700,6 +713,62 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
       updateView();
     });
+  }
+
+  void _playEnemySpecialAnimation(String type, int target) {
+    double scaledSquareSize = BattleShipsGame.squareLength * gridScale;
+
+    BattleGrid myGrid = playersGrid;
+
+    if (type == 'shark') {
+      int rowY = target;
+      double rowWorldY = myGrid.position.y + (rowY * scaledSquareSize);
+
+      double gameWorldWidth = isNarrow
+          ? scaledGridWidth + 10.0
+          : (scaledGridWidth * 2) + gap + 10.0;
+
+      world.add(SharkAnimation(
+          targetY: rowWorldY,
+          worldWidth: gameWorldWidth,
+          cellSize: scaledSquareSize
+      ));
+      AudioManager.playMonster();
+
+    } else if (type == 'octopus') {
+      int gridX = target % squaresInGrid;
+      int gridY = target ~/ squaresInGrid;
+
+      Vector2 headPos = Vector2(
+        myGrid.position.x + (gridX * scaledSquareSize),
+        myGrid.position.y + ((gridY - 0.3) * scaledSquareSize),
+      );
+
+      world.add(OctopusHeadAnimation(
+        targetPosition: headPos,
+        cellSize: scaledSquareSize,
+      ));
+
+      List<math.Point<int>> offsets = [
+        const math.Point(0, -1), const math.Point(0, 1),
+        const math.Point(-1, 0), const math.Point(1, 0)
+      ];
+
+      for (var offset in offsets) {
+        Vector2 tentaclePos = Vector2(
+          myGrid.position.x + ((gridX + offset.x) * scaledSquareSize),
+          myGrid.position.y + (((gridY + offset.y) - 0.3) * scaledSquareSize),
+        );
+        if (gridX + offset.x >= 0 && gridX + offset.x < squaresInGrid) {
+          world.add(TentacleAnimation(
+            targetPosition: tentaclePos,
+            cellSize: scaledSquareSize,
+            flip: offset.x < 0,
+          ));
+        }
+      }
+      AudioManager.playMonster();
+    }
   }
 
   Future<void> sendPowerUpShots(List<int> indices, bool keepTurn) async {
@@ -753,6 +822,23 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
       Map<String, dynamic> updates = { fieldToUpdate: FieldValue.arrayUnion([index]), };
       if (!isHit) { updates['currentTurn'] = nextTurnUser; }
       transaction.update(gameRef, updates);
+    });
+  }
+
+  Future<void> sendSpecialEffect(String type, int indexOrRow) async {
+    if (multiplayerGameId == null) return;
+
+    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+
+    String attackId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    await gameRef.update({
+      'lastSpecialAttack': {
+        'id': attackId,
+        'attacker': myUserId,
+        'type': type,
+        'target': indexOrRow
+      }
     });
   }
 

@@ -3,7 +3,7 @@ import 'dart:math';
 class ShipType {
   final int id;
   final String name;
-  final List<Point<int>> relativePositions; // Punkty względem (0,0)
+  final List<Point<int>> relativePositions; // Point relative to (0,0)
 
   const ShipType._(this.id, this.name, this.relativePositions);
 
@@ -17,12 +17,12 @@ class ShipType {
     return sameSizeTypes[(currentIndex + 1) % sameSizeTypes.length];
   }
 
-  // POJEDYNCZE (1 pole)
+  // SINGLE (1 squre)
   static const ShipType single = ShipType._(0, 'Single', [
     Point(0, 0),
   ]);
 
-  // PODWÓJNE (2 pola)
+  // DOUBLE (2 squares)
   static const ShipType doubleH = ShipType._(1, 'Double H', [
     Point(0, 0), Point(1, 0),
   ]);
@@ -31,7 +31,7 @@ class ShipType {
     Point(0, 0), Point(0, 1),
   ]);
 
-  // POTRÓJNE (3 pola)
+  // TRIPLE (3 squares)
   static const ShipType tripleLineH = ShipType._(3, 'Triple Line H', [
     Point(0, 0), Point(1, 0), Point(2, 0),
   ]);
@@ -40,7 +40,6 @@ class ShipType {
     Point(0, 0), Point(0, 1), Point(0, 2),
   ]);
 
-  // Narożnik (L-małe)
   // [X]
   // [X][X]
   static const ShipType tripleCorner = ShipType._(5, 'Triple Corner', [
@@ -48,7 +47,6 @@ class ShipType {
     Point(0, 1), Point(1, 1),
   ]);
 
-  // Narożnik odwrócony
   // [X][X]
   // [X]
   static const ShipType tripleCornerRev = ShipType._(6, 'Triple Corner Rev', [
@@ -56,7 +54,6 @@ class ShipType {
     Point(0, 1),
   ]);
 
-  // Narożnik lewy
   //    [X]
   // [X][X]
   static const ShipType tripleCornerLeft = ShipType._(7, 'Triple Corner Left', [
@@ -64,7 +61,6 @@ class ShipType {
     Point(0, 1), Point(1, 1),
   ]);
 
-  // Narożnik odwrócony lewy
   // [X][X]
   //    [X]
   static const ShipType tripleCornerRevLeft = ShipType._(8, 'Triple Corner Rev Left', [
@@ -72,7 +68,8 @@ class ShipType {
     Point(1, 1),
   ]);
 
-  // POCZWÓRNE - LINIE I KWADRATY
+  // QUADS (4 squares)
+  // Lines and square
   static const ShipType quadLineH = ShipType._(9, 'Quad Line H', [
     Point(0, 0), Point(1, 0), Point(2, 0), Point(3, 0),
   ]);
@@ -86,9 +83,8 @@ class ShipType {
     Point(0, 1), Point(1, 1),
   ]);
 
-  // POCZWÓRNE - LITERA T (Wszystkie 4 obroty)
+  // Letter T
 
-  // T1: Dół
   // [X][X][X]
   //    [X]
   static const ShipType quadT_Down = ShipType._(12, 'Quad T Down', [
@@ -96,7 +92,6 @@ class ShipType {
     Point(1, 1),
   ]);
 
-  // T2: Góra
   //    [X]
   // [X][X][X]
   static const ShipType quadT_Up = ShipType._(13, 'Quad T Up', [
@@ -104,7 +99,6 @@ class ShipType {
     Point(0, 1), Point(1, 1), Point(2, 1),
   ]);
 
-  // T3: Prawo
   // [X]
   // [X][X]
   // [X]
@@ -114,7 +108,6 @@ class ShipType {
     Point(0, 2),
   ]);
 
-  // T4: Lewo
   //    [X]
   // [X][X]
   //    [X]
@@ -124,9 +117,8 @@ class ShipType {
     Point(1, 2),
   ]);
 
-  // POCZWÓRNE - LITERA L (Wszystkie 4 obroty)
+  // Letter L
 
-  // L1: Normalne L
   // [X]
   // [X]
   // [X][X]
@@ -136,7 +128,6 @@ class ShipType {
     Point(0, 2), Point(1, 2),
   ]);
 
-  // L2: Leżące L (dziób w prawo)
   //       [X]
   // [X][X][X]
   static const ShipType quadL_Right = ShipType._(17, 'Quad L Right', [
@@ -144,7 +135,6 @@ class ShipType {
     Point(0, 1), Point(1, 1), Point(2, 1),
   ]);
 
-  // L3: L do góry nogami
   // [X][X]
   //    [X]
   //    [X]
@@ -154,7 +144,6 @@ class ShipType {
     Point(1, 2),
   ]);
 
-  // L4: Leżące L (dziób w lewo)
   // [X][X][X]
   // [X]
   static const ShipType quadL_Left = ShipType._(19, 'Quad L Left', [
@@ -162,9 +151,8 @@ class ShipType {
     Point(0, 1),
   ]);
 
-  // POCZWÓRNE - LITERA J (Odwrócone L - 4 obroty)
+  // Letter J
 
-  // J1: Normalne J
   //    [X]
   //    [X]
   // [X][X]
@@ -174,7 +162,6 @@ class ShipType {
     Point(0, 2), Point(1, 2),
   ]);
 
-  // J2: Leżące J (dziób w prawo)
   // [X]
   // [X][X][X]
   static const ShipType quadJ_Right = ShipType._(21, 'Quad J Right', [
@@ -182,7 +169,6 @@ class ShipType {
     Point(0, 1), Point(1, 1), Point(2, 1),
   ]);
 
-  // J3: J do góry nogami
   // [X][X]
   // [X]
   // [X]
@@ -192,7 +178,6 @@ class ShipType {
     Point(0, 2),
   ]);
 
-  // J4: Leżące J (dziób w lewo)
   // [X][X][X]
   //       [X]
   static const ShipType quadJ_Left = ShipType._(23, 'Quad J Left', [
@@ -200,9 +185,8 @@ class ShipType {
     Point(2, 1),
   ]);
 
-  // POCZWÓRNE - ZYGZAKI (S i Z)
+  // Letters S and Z
 
-  // Z1: Poziome
   // [X][X]
   //    [X][X]
   static const ShipType quadZ_Hor = ShipType._(24, 'Quad Z Horizontal', [
@@ -210,7 +194,6 @@ class ShipType {
     Point(1, 1), Point(2, 1),
   ]);
 
-  // Z2: Pionowe
   //    [X]
   // [X][X]
   // [X]
@@ -220,7 +203,6 @@ class ShipType {
     Point(0, 2),
   ]);
 
-  // S1: Poziome (Odbite Z)
   //    [X][X]
   // [X][X]
   static const ShipType quadS_Hor = ShipType._(26, 'Quad S Horizontal', [
@@ -228,7 +210,6 @@ class ShipType {
     Point(0, 1), Point(1, 1),
   ]);
 
-  // S2: Pionowe (Odbite Z)
   // [X]
   // [X][X]
   //    [X]
@@ -239,7 +220,7 @@ class ShipType {
   ]);
 
 
-  // Lista wszystkich typów
+  // List of all types
   static const List<ShipType> all = [
     single,
     doubleH, doubleV,

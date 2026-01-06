@@ -34,7 +34,7 @@ class FirestoreService {
       'player2Name': null,
       'status': 'waiting',
       'createdAt': FieldValue.serverTimestamp(),
-      'currentTurn': user.uid, // Domyślnie zaczyna Host
+      'currentTurn': user.uid, // Host starts by default
       'player1Ready': false,
       'player2Ready': false,
     });
@@ -100,7 +100,7 @@ class FirestoreService {
 
     WriteBatch batch = _db.batch();
 
-    // Dodaje znajomego do mojej kolekcji
+    // Adds a friend to my collection
     DocumentReference myFriendRef = _db
         .collection('users')
         .doc(currentUser.uid)
@@ -113,7 +113,7 @@ class FirestoreService {
       'addedAt': FieldValue.serverTimestamp(),
     });
 
-    // Dodaje mnie do kolekcji znajomego
+    // Adds me to the friend's collection
     DocumentReference meInFriendRef = _db
         .collection('users')
         .doc(friendId)
@@ -131,19 +131,19 @@ class FirestoreService {
     await batch.commit();
   }
 
-  // Usuwa znajomego obustronnie
+  // Removes a friend on both sides
   Future<void> removeFriend(String friendId) async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return;
 
     WriteBatch batch = _db.batch();
 
-    // Usuwa u mnie
+    // Removes a friend from my collection
     batch.delete(
         _db.collection('users').doc(currentUser.uid).collection('friends').doc(friendId)
     );
 
-    // Usuwa mnie u niego
+    // Removes me from the friend's collection
     batch.delete(
         _db.collection('users').doc(friendId).collection('friends').doc(currentUser.uid)
     );
@@ -190,10 +190,10 @@ class FirestoreService {
     final String p1Id = data['player1Id'];
 
     if (p1Id == user.uid) {
-      // JESTEŚ HOSTEM -> Usuń całą grę
+      // You're hosting -> Deletes the whole game
       await deleteGame(gameId);
     } else {
-      // JESTEŚ GOŚCIEM -> Opuść grę (wyczyść pola playera 2)
+      // You're joining -> Deletes you from the game
       await docRef.update({
         'player2Id': null,
         'player2Name': null,

@@ -65,7 +65,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           TextButton(
             child: const Text("YES", style: TextStyle(color: Colors.greenAccent)),
             onPressed: () async {
-              Navigator.of(ctx).pop(); // Zamknij dialog
+              Navigator.of(ctx).pop();
               await _firestoreService.removeFriend(friendId);
             },
           ),
@@ -89,7 +89,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
           child: Column(
             children: [
-              // Nagłówek
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
@@ -113,7 +112,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               ),
               const Divider(color: Colors.white),
 
-              // Lista znajomych
+              // Friends list
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _firestoreService.getFriends(),
@@ -177,7 +176,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 ),
               ),
 
-              // Wyświetlanie błędów
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -188,7 +186,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   ),
                 ),
 
-              // Sekcja dodawania
+              // Adding friends
               Container(
                 padding: const EdgeInsets.all(16),
                 color: Colors.black45,

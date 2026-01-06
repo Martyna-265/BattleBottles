@@ -21,18 +21,15 @@ class AudioManager {
     await FlameAudio.audioCache.load('bgm.mp3');
 
     try {
-      // Częste dźwięki
       _clickPool = await FlameAudio.createPool('click.wav', minPlayers: 1, maxPlayers: 3);
       _explosionPool = await FlameAudio.createPool('explosion.wav', minPlayers: 1, maxPlayers: 3);
       _splashPool = await FlameAudio.createPool('splash.wav', minPlayers: 1, maxPlayers: 3);
 
-      // Rzadsze dźwięki
       _startPool = await FlameAudio.createPool('start.wav', minPlayers: 1, maxPlayers: 1);
       _powerUpPool = await FlameAudio.createPool('powerup.wav', minPlayers: 1, maxPlayers: 2);
       _monsterPool = await FlameAudio.createPool('monster.wav', minPlayers: 1, maxPlayers: 2);
       _sinkPool = await FlameAudio.createPool('sink.wav', minPlayers: 1, maxPlayers: 2);
 
-      // Dźwięki końcowe
       _winPool = await FlameAudio.createPool('win.wav', minPlayers: 1, maxPlayers: 1);
       _losePool = await FlameAudio.createPool('lose.wav', minPlayers: 1, maxPlayers: 1);
 
