@@ -108,6 +108,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Show SHA-1 Key
+        run: cd android && ./gradlew signingReport
+
       - name: Build APK
         run: flutter build apk --release
 
