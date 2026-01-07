@@ -6,12 +6,13 @@ import 'package:battlebottles/BattleShipsGame.dart';
 
 class FakeBattleShipsGame extends BattleShipsGame {
   @override
-  Future<void> onLoad() async {
-  }
+  Future<void> onLoad() async {}
 }
 
 void main() {
-  testWidgets('HelpScreen displays all main headers correctly', (WidgetTester tester) async {
+  testWidgets('HelpScreen displays all main headers correctly', (
+    WidgetTester tester,
+  ) async {
     final fakeGame = FakeBattleShipsGame();
 
     tester.view.physicalSize = const Size(1080, 2400);
@@ -22,9 +23,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: HelpScreen(game: fakeGame),
-        ),
+        home: Scaffold(body: HelpScreen(game: fakeGame)),
       ),
     );
     await tester.pump();

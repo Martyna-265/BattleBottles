@@ -43,19 +43,26 @@ class _FriendsScreenState extends State<FriendsScreen> {
     }
   }
 
-  void _confirmDelete(BuildContext context, String friendId, String friendName) {
+  void _confirmDelete(
+    BuildContext context,
+    String friendId,
+    String friendName,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF222222),
         shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Colors.white, width: 1),
-            borderRadius: BorderRadius.circular(0)
+          side: const BorderSide(color: Colors.white, width: 1),
+          borderRadius: BorderRadius.circular(0),
         ),
-        title: const Text("Remove Friend?", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Remove Friend?",
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
-            "Are you sure you want to remove $friendName from your friends list?",
-            style: const TextStyle(color: Colors.white70)
+          "Are you sure you want to remove $friendName from your friends list?",
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
@@ -63,7 +70,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
-            child: const Text("YES", style: TextStyle(color: Colors.greenAccent)),
+            child: const Text(
+              "YES",
+              style: TextStyle(color: Colors.greenAccent),
+            ),
             onPressed: () async {
               Navigator.of(ctx).pop();
               await _firestoreService.removeFriend(friendId);
@@ -141,14 +151,24 @@ class _FriendsScreenState extends State<FriendsScreen> {
                         final email = data['email'] ?? '';
 
                         return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black26,
                             border: Border.all(color: Colors.white12),
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            leading: const Icon(Icons.person, color: Colors.lightBlueAccent, size: 32),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            leading: const Icon(
+                              Icons.person,
+                              color: Colors.lightBlueAccent,
+                              size: 32,
+                            ),
                             title: Text(
                               name,
                               style: const TextStyle(
@@ -165,8 +185,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
                               ),
                             ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.close, color: Colors.redAccent),
-                              onPressed: () => _confirmDelete(context, friendDoc.id, name),
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed: () =>
+                                  _confirmDelete(context, friendDoc.id, name),
                             ),
                           ),
                         );
@@ -200,7 +224,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                           hintText: 'Enter friend\'s email',
                           hintStyle: TextStyle(color: Colors.white54),
                           enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white)
+                            borderSide: BorderSide(color: Colors.white),
                           ),
                         ),
                       ),
@@ -214,9 +238,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       onPressed: _isLoading ? null : _handleAddFriend,
                       child: _isLoading
                           ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : const Text('ADD'),
                     ),
                   ],

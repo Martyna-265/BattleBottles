@@ -6,22 +6,20 @@ import 'package:battlebottles/components/bottleElements/ShipType.dart';
 
 void main() {
   group('Ship Logic Tests', () {
+    test(
+      'getOccupiedPoints() returns correct coordinates for Vertical Triple Ship',
+      () {
+        final ship = Ship(type: ShipType.tripleLineV, x: 5, y: 5);
 
-    test('getOccupiedPoints() returns correct coordinates for Vertical Triple Ship', () {
-      final ship = Ship(
-        type: ShipType.tripleLineV,
-        x: 5,
-        y: 5,
-      );
+        final points = ship.getOccupiedPoints();
 
-      final points = ship.getOccupiedPoints();
+        expect(points.length, 3);
 
-      expect(points.length, 3);
-
-      expect(points, contains(const Point(5, 5)));
-      expect(points, contains(const Point(5, 6)));
-      expect(points, contains(const Point(5, 7)));
-    });
+        expect(points, contains(const Point(5, 5)));
+        expect(points, contains(const Point(5, 6)));
+        expect(points, contains(const Point(5, 7)));
+      },
+    );
 
     test('ShipType.single nextRotation is still ShipType.single', () {
       const type = ShipType.single;
@@ -49,6 +47,5 @@ void main() {
       expect(restoredShip.y, originalShip.y);
       expect(restoredShip.type.id, originalShip.type.id);
     });
-
   });
 }

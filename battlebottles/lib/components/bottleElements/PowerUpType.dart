@@ -1,6 +1,1 @@
-enum PowerUpType {
-  none,
-  octopus,
-  triple,
-  shark
-}
+enum PowerUpType { none, octopus, triple, shark }

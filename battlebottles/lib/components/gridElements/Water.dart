@@ -7,9 +7,8 @@ import '../../animations/SplashAnimation.dart';
 import '../../services/AudioManager.dart';
 
 class Water extends GridElement {
-
   Water(super.gridX, super.gridY, super.opponent)
-      : super(condition: Condition.fromInt(3)) {
+    : super(condition: Condition.fromInt(3)) {
     sprite = opponent ? Condition.fromInt(5).sprite : condition.sprite;
   }
 
@@ -24,10 +23,9 @@ class Water extends GridElement {
         targetGrid.position.y + (gridY * scaledSquareSize),
       );
 
-      game.world.add(SplashAnimation(
-          targetPosition: effectPos,
-          cellSize: scaledSquareSize
-      ));
+      game.world.add(
+        SplashAnimation(targetPosition: effectPos, cellSize: scaledSquareSize),
+      );
 
       bool isMyTurn = (game.turnManager.currentPlayer == 1);
       game.actionFeedback.setMessage("miss", !isMyTurn);
@@ -36,5 +34,4 @@ class Water extends GridElement {
       super.bomb();
     }
   }
-
 }

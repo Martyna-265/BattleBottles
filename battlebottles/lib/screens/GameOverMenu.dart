@@ -28,7 +28,11 @@ class GameOverMenu extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 shadows: [
-                  Shadow(blurRadius: 2, color: Colors.black, offset: Offset(1, 1))
+                  Shadow(
+                    blurRadius: 2,
+                    color: Colors.black,
+                    offset: Offset(1, 1),
+                  ),
                 ],
               ),
             ),
@@ -42,7 +46,10 @@ class GameOverMenu extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
                 textStyle: const TextStyle(fontSize: 18),
               ),
               child: const Text("See Ships"),

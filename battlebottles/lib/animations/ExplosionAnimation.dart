@@ -1,14 +1,13 @@
 import 'package:flame/components.dart';
 import '../BattleShipsGame.dart';
 
-class ExplosionAnimation extends SpriteAnimationComponent with HasGameReference<BattleShipsGame> {
+class ExplosionAnimation extends SpriteAnimationComponent
+    with HasGameReference<BattleShipsGame> {
   final Vector2 targetPosition;
   final double cellSize;
 
-  ExplosionAnimation({
-    required this.targetPosition,
-    required this.cellSize,
-  }) : super(priority: 300);
+  ExplosionAnimation({required this.targetPosition, required this.cellSize})
+    : super(priority: 300);
 
   @override
   Future<void> onLoad() async {

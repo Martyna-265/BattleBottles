@@ -30,8 +30,8 @@ import 'components/buttons/PowerUpButton.dart';
 import 'components/bottleElements/PowerUpType.dart';
 import 'components/buttons/SoundButton.dart';
 
-class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserver{
-
+class BattleShipsGame extends FlameGame
+    with TapCallbacks, WidgetsBindingObserver {
   static const double squareLength = 2.0;
   static final Vector2 squareSize = Vector2(squareLength, squareLength);
   static const double gap = 15.0;
@@ -116,7 +116,12 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
   @override
   Future<void> onLoad() async {
-    await Flame.images.loadAll(['grid_element_sheet.png', 'octopus.png', 'bombs.png', 'shark.png']);
+    await Flame.images.loadAll([
+      'grid_element_sheet.png',
+      'octopus.png',
+      'bombs.png',
+      'shark.png',
+    ]);
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -124,8 +129,10 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
     turnManager = TurnManager(2, this);
 
-    playersGrid = BattleGrid(false, {'1': 1})..size = Vector2(battleGridWidth, battleGridHeight);
-    opponentsGrid = BattleGrid(true, {'1': 1})..size = Vector2(battleGridWidth, battleGridHeight);
+    playersGrid = BattleGrid(false, {'1': 1})
+      ..size = Vector2(battleGridWidth, battleGridHeight);
+    opponentsGrid = BattleGrid(true, {'1': 1})
+      ..size = Vector2(battleGridWidth, battleGridHeight);
 
     playerCounter = ShipsCounter(playersGrid);
     opponentCounter = ShipsCounter(opponentsGrid);
@@ -135,11 +142,24 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     returnToMenuButton = ReturnToMenuButton()..anchor = Anchor.center;
 
     helpButton = HelpButton(sideLength: squareLength)..anchor = Anchor.topLeft;
-    soundButton = SoundButton(sideLength: squareLength)..anchor = Anchor.topLeft;
+    soundButton = SoundButton(sideLength: squareLength)
+      ..anchor = Anchor.topLeft;
 
-    octopusBtn = PowerUpButton(imageName: 'octopus.png', type: PowerUpType.octopus, count: limitOctopus);
-    tripleBtn = PowerUpButton(imageName: 'bombs.png', type: PowerUpType.triple, count: limitTriple);
-    sharkBtn = PowerUpButton(imageName: 'shark.png', type: PowerUpType.shark, count: limitShark);
+    octopusBtn = PowerUpButton(
+      imageName: 'octopus.png',
+      type: PowerUpType.octopus,
+      count: limitOctopus,
+    );
+    tripleBtn = PowerUpButton(
+      imageName: 'bombs.png',
+      type: PowerUpType.triple,
+      count: limitTriple,
+    );
+    sharkBtn = PowerUpButton(
+      imageName: 'shark.png',
+      type: PowerUpType.shark,
+      count: limitShark,
+    );
 
     octopusBtn.anchor = Anchor.center;
     tripleBtn.anchor = Anchor.center;
@@ -149,18 +169,24 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     actionFeedback = ActionFeedback()..anchor = Anchor.center;
 
     final labelStyle = TextPaint(
-      style: const TextStyle(fontSize: 1.1, color: Color(0xffffffff), fontFamily: 'Awesome Font', fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        fontSize: 1.1,
+        color: Color(0xffffffff),
+        fontFamily: 'Awesome Font',
+        fontWeight: FontWeight.bold,
+      ),
     );
 
     playerLabel = PlayerLabel(textRenderer: labelStyle)..anchor = Anchor.center;
-    opponentLabel = PlayerLabel(textRenderer: labelStyle)..anchor = Anchor.center;
+    opponentLabel = PlayerLabel(textRenderer: labelStyle)
+      ..anchor = Anchor.center;
 
     mainMenu = MainMenu();
     world.add(mainMenu);
     isInMenu = true;
     _isLoaded = true;
 
-    camera.viewfinder.position = Vector2(0,0);
+    camera.viewfinder.position = Vector2(0, 0);
     camera.viewfinder.anchor = Anchor.topLeft;
   }
 
@@ -178,7 +204,8 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       AudioManager.pauseBgm();
     } else if (state == AppLifecycleState.resumed) {
       AudioManager.resumeBgm();
@@ -236,9 +263,13 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
     opponentName = "Pirate";
 
-    final fleet = fleetCounts ?? {'4':1, '3':2, '2':3, '1':4};
-    playersGrid = BattleGrid(false, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
-    opponentsGrid = BattleGrid(true, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
+    final fleet = fleetCounts ?? {'4': 1, '3': 2, '2': 3, '1': 4};
+    playersGrid = BattleGrid(false, fleet)
+      ..size = Vector2(battleGridWidth, battleGridHeight)
+      ..scale = Vector2.all(gridScale);
+    opponentsGrid = BattleGrid(true, fleet)
+      ..size = Vector2(battleGridWidth, battleGridHeight)
+      ..scale = Vector2.all(gridScale);
     playerCounter = ShipsCounter(playersGrid);
     opponentCounter = ShipsCounter(opponentsGrid);
 
@@ -255,12 +286,14 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     isMultiplayer = false;
 
     world.add(playersGrid);
-    world.add(playerLabel); playerLabel.text = "You";
+    world.add(playerLabel);
+    playerLabel.text = "You";
     world.add(playerCounter);
 
     if (!isNarrow) {
       world.add(opponentsGrid);
-      world.add(opponentLabel); opponentLabel.text = opponentName;
+      world.add(opponentLabel);
+      opponentLabel.text = opponentName;
       world.add(opponentCounter);
     }
 
@@ -295,14 +328,14 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   }
 
   void startMultiplayerGame(
-      String gameId, {
-        int gridSize = 10,
-        Map<String, int>? fleetCounts,
-        Map<String, int>? powerUps,
-        required String p1Name,
-        required String? p2Name,
-        required String p1Id
-      }) {
+    String gameId, {
+    int gridSize = 10,
+    Map<String, int>? fleetCounts,
+    Map<String, int>? powerUps,
+    required String p1Name,
+    required String? p2Name,
+    required String p1Id,
+  }) {
     if (isGameRunning) return;
     AudioManager.playStart();
     overlays.remove('MultiplayerLobby');
@@ -328,9 +361,13 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     _updateGridDimensions(gridSize);
     _clearWorldForGame();
 
-    final fleet = fleetCounts ?? {'4':1, '3':2, '2':3, '1':4};
-    playersGrid = BattleGrid(false, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
-    opponentsGrid = BattleGrid(true, fleet)..size = Vector2(battleGridWidth, battleGridHeight)..scale = Vector2.all(gridScale);
+    final fleet = fleetCounts ?? {'4': 1, '3': 2, '2': 3, '1': 4};
+    playersGrid = BattleGrid(false, fleet)
+      ..size = Vector2(battleGridWidth, battleGridHeight)
+      ..scale = Vector2.all(gridScale);
+    opponentsGrid = BattleGrid(true, fleet)
+      ..size = Vector2(battleGridWidth, battleGridHeight)
+      ..scale = Vector2.all(gridScale);
     playerCounter = ShipsCounter(playersGrid);
     opponentCounter = ShipsCounter(opponentsGrid);
 
@@ -383,10 +420,20 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
   void _clearWorldForGame() {
     final componentsToRemove = [
-      playersGrid, opponentsGrid, playerCounter, opponentCounter,
-      playerLabel, opponentLabel, startButton, restartButton,
-      returnToMenuButton, octopusBtn, tripleBtn, sharkBtn,
-      roundInfo, actionFeedback
+      playersGrid,
+      opponentsGrid,
+      playerCounter,
+      opponentCounter,
+      playerLabel,
+      opponentLabel,
+      startButton,
+      restartButton,
+      returnToMenuButton,
+      octopusBtn,
+      tripleBtn,
+      sharkBtn,
+      roundInfo,
+      actionFeedback,
     ];
     world.removeAll(componentsToRemove.where((c) => c.isMounted));
   }
@@ -411,13 +458,13 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     double padding = 0.5;
 
     soundButton.position = Vector2(
-        roundInfoLeftEdge - padding - buttonSize,
-        roundInfoY - (buttonSize / 2)
+      roundInfoLeftEdge - padding - buttonSize,
+      roundInfoY - (buttonSize / 2),
     );
 
     helpButton.position = Vector2(
-        soundButton.position.x - padding - buttonSize,
-        roundInfoY - (buttonSize / 2)
+      soundButton.position.x - padding - buttonSize,
+      roundInfoY - (buttonSize / 2),
     );
 
     double powerUpY = scaledGridHeight + 7.5;
@@ -444,7 +491,7 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
     if (isInMenu) {
       camera.viewfinder.visibleGameSize = size;
-      camera.viewfinder.position = Vector2(0,0);
+      camera.viewfinder.position = Vector2(0, 0);
       camera.viewfinder.anchor = Anchor.topLeft;
     } else {
       _updateUiPositions();
@@ -460,17 +507,26 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     visibleCurrentPlayer = turnManager.currentPlayer;
 
     void positionLabel(BattleGrid grid, PlayerLabel label) {
-      label.position = Vector2(grid.position.x + scaledGridWidth / 2, grid.position.y - 2.5);
+      label.position = Vector2(
+        grid.position.x + scaledGridWidth / 2,
+        grid.position.y - 2.5,
+      );
     }
+
     void positionCounter(BattleGrid grid, ShipsCounter counter) {
-      counter.position = Vector2(grid.position.x, grid.position.y + scaledGridHeight + 0.5);
+      counter.position = Vector2(
+        grid.position.x,
+        grid.position.y + scaledGridHeight + 0.5,
+      );
     }
 
     _updateUiPositions();
 
     if (isNarrow) {
       // Narrow
-      bool showOpponent = (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) || (visibleCurrentPlayer == 1);
+      bool showOpponent =
+          (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) ||
+          (visibleCurrentPlayer == 1);
 
       if (showOpponent) {
         // Show opponent
@@ -490,7 +546,6 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
         opponentsGrid.position = Vector2(0, 0);
         positionLabel(opponentsGrid, opponentLabel);
         positionCounter(opponentsGrid, opponentCounter);
-
       } else {
         // Show player
         if (playersGrid.parent == null) world.add(playersGrid);
@@ -551,14 +606,20 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
       double visibleWidth = math.max(gridWidthWithMargins, minVisibleWidth);
 
       camera.viewfinder.visibleGameSize = Vector2(visibleWidth, visibleHeight);
-      camera.viewfinder.position = Vector2(scaledGridWidth / 2, scaledGridHeight / 2 + 1.0);
+      camera.viewfinder.position = Vector2(
+        scaledGridWidth / 2,
+        scaledGridHeight / 2 + 1.0,
+      );
     } else {
       double totalContentWidth = scaledGridWidth * 2 + gap;
       double gridWidthWithMargins = totalContentWidth + (sideMargin * 4);
       double visibleWidth = math.max(gridWidthWithMargins, minVisibleWidth);
 
       camera.viewfinder.visibleGameSize = Vector2(visibleWidth, visibleHeight);
-      camera.viewfinder.position = Vector2(totalContentWidth / 2, scaledGridHeight / 2 + 1.0);
+      camera.viewfinder.position = Vector2(
+        totalContentWidth / 2,
+        scaledGridHeight / 2 + 1.0,
+      );
     }
     camera.viewfinder.anchor = Anchor.center;
   }
@@ -635,10 +696,10 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     List<Map<String, dynamic>> myShipsData = playersGrid.getShipsData();
     String readyField = amIHost ? 'player1Ready' : 'player2Ready';
     String shipsField = amIHost ? 'ships_p1' : 'ships_p2';
-    await FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).update({
-      readyField: true,
-      shipsField: myShipsData,
-    });
+    await FirebaseFirestore.instance
+        .collection('battles')
+        .doc(multiplayerGameId)
+        .update({readyField: true, shipsField: myShipsData});
     turnManager.currentPlayer = -1;
     if (startButton.isMounted) world.remove(startButton);
     updateView();
@@ -646,73 +707,90 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
 
   void _listenToMultiplayerChanges() {
     if (multiplayerGameId == null) return;
-    gameStream = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId).snapshots().listen((snapshot) async {
-      if (!snapshot.exists) return;
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    gameStream = FirebaseFirestore.instance
+        .collection('battles')
+        .doc(multiplayerGameId)
+        .snapshots()
+        .listen((snapshot) async {
+          if (!snapshot.exists) return;
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-      if (data['player1Id'] == myUserId) { amIHost = true; } else { amIHost = false; }
-
-      String p1Name = data['player1Name'] ?? 'Player 1';
-      String p2Name = data['player2Name'] ?? 'Player 2';
-
-      if (amIHost) {
-        opponentName = p2Name;
-      } else {
-        opponentName = p1Name;
-      }
-
-      if (playerLabel.isMounted) {
-        if (amIHost) { playerLabel.text = "You ($p1Name)"; }
-        else { playerLabel.text = "You ($p2Name)"; }
-      }
-
-      bool p1Ready = data['player1Ready'] ?? false;
-      bool p2Ready = data['player2Ready'] ?? false;
-
-      if (p1Ready && p2Ready) {
-
-        if (!turnManager.hasShipsSynced) {
-          List<dynamic> enemyShipsPositions = amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
-          if (enemyShipsPositions.isNotEmpty) {
-            opponentsGrid.setEnemyShips(enemyShipsPositions);
-            turnManager.hasShipsSynced = true;
-            isGameRunning = true;
+          if (data['player1Id'] == myUserId) {
+            amIHost = true;
+          } else {
+            amIHost = false;
           }
-        }
-        if (startButton.isMounted) world.remove(startButton);
 
-        _syncShots(data);
+          String p1Name = data['player1Name'] ?? 'Player 1';
+          String p2Name = data['player2Name'] ?? 'Player 2';
 
-        if (data.containsKey('lastSpecialAttack')) {
-          var attackData = data['lastSpecialAttack'] as Map<String, dynamic>;
-          String attackId = attackData['id'];
-          String attackerId = attackData['attacker'];
-
-          if (attackId != lastSpecialAttackId && attackerId != myUserId) {
-            lastSpecialAttackId = attackId;
-            _playEnemySpecialAnimation(attackData['type'], attackData['target']);
+          if (amIHost) {
+            opponentName = p2Name;
+          } else {
+            opponentName = p1Name;
           }
-        }
 
-        String currentTurnUserId = data['currentTurn'];
-        int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
+          if (playerLabel.isMounted) {
+            if (amIHost) {
+              playerLabel.text = "You ($p1Name)";
+            } else {
+              playerLabel.text = "You ($p2Name)";
+            }
+          }
 
-        if (turnManager.currentPlayer != newPlayerState && turnManager.currentPlayer != -1 && isGameRunning) {
-          await Future.delayed(const Duration(seconds: delay));
-        }
-        turnManager.currentPlayer = newPlayerState;
+          bool p1Ready = data['player1Ready'] ?? false;
+          bool p2Ready = data['player2Ready'] ?? false;
 
-      } else {
-        String myReadyField = amIHost ? 'player1Ready' : 'player2Ready';
-        bool amIReady = data[myReadyField] ?? false;
+          if (p1Ready && p2Ready) {
+            if (!turnManager.hasShipsSynced) {
+              List<dynamic> enemyShipsPositions = amIHost
+                  ? (data['ships_p2'] ?? [])
+                  : (data['ships_p1'] ?? []);
+              if (enemyShipsPositions.isNotEmpty) {
+                opponentsGrid.setEnemyShips(enemyShipsPositions);
+                turnManager.hasShipsSynced = true;
+                isGameRunning = true;
+              }
+            }
+            if (startButton.isMounted) world.remove(startButton);
 
-        if (amIReady && turnManager.currentPlayer == 0) {
-          turnManager.currentPlayer = -1; // Waiting state
-        }
-      }
+            _syncShots(data);
 
-      updateView();
-    });
+            if (data.containsKey('lastSpecialAttack')) {
+              var attackData =
+                  data['lastSpecialAttack'] as Map<String, dynamic>;
+              String attackId = attackData['id'];
+              String attackerId = attackData['attacker'];
+
+              if (attackId != lastSpecialAttackId && attackerId != myUserId) {
+                lastSpecialAttackId = attackId;
+                _playEnemySpecialAnimation(
+                  attackData['type'],
+                  attackData['target'],
+                );
+              }
+            }
+
+            String currentTurnUserId = data['currentTurn'];
+            int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
+
+            if (turnManager.currentPlayer != newPlayerState &&
+                turnManager.currentPlayer != -1 &&
+                isGameRunning) {
+              await Future.delayed(const Duration(seconds: delay));
+            }
+            turnManager.currentPlayer = newPlayerState;
+          } else {
+            String myReadyField = amIHost ? 'player1Ready' : 'player2Ready';
+            bool amIReady = data[myReadyField] ?? false;
+
+            if (amIReady && turnManager.currentPlayer == 0) {
+              turnManager.currentPlayer = -1; // Waiting state
+            }
+          }
+
+          updateView();
+        });
   }
 
   void _playEnemySpecialAnimation(String type, int target) {
@@ -728,13 +806,14 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
           ? scaledGridWidth + 10.0
           : (scaledGridWidth * 2) + gap + 10.0;
 
-      world.add(SharkAnimation(
+      world.add(
+        SharkAnimation(
           targetY: rowWorldY,
           worldWidth: gameWorldWidth,
-          cellSize: scaledSquareSize
-      ));
+          cellSize: scaledSquareSize,
+        ),
+      );
       AudioManager.playMonster();
-
     } else if (type == 'octopus') {
       int gridX = target % squaresInGrid;
       int gridY = target ~/ squaresInGrid;
@@ -744,14 +823,18 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
         myGrid.position.y + ((gridY - 0.3) * scaledSquareSize),
       );
 
-      world.add(OctopusHeadAnimation(
-        targetPosition: headPos,
-        cellSize: scaledSquareSize,
-      ));
+      world.add(
+        OctopusHeadAnimation(
+          targetPosition: headPos,
+          cellSize: scaledSquareSize,
+        ),
+      );
 
       List<math.Point<int>> offsets = [
-        const math.Point(0, -1), const math.Point(0, 1),
-        const math.Point(-1, 0), const math.Point(1, 0)
+        const math.Point(0, -1),
+        const math.Point(0, 1),
+        const math.Point(-1, 0),
+        const math.Point(1, 0),
       ];
 
       for (var offset in offsets) {
@@ -760,11 +843,13 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
           myGrid.position.y + (((gridY + offset.y) - 0.3) * scaledSquareSize),
         );
         if (gridX + offset.x >= 0 && gridX + offset.x < squaresInGrid) {
-          world.add(TentacleAnimation(
-            targetPosition: tentaclePos,
-            cellSize: scaledSquareSize,
-            flip: offset.x < 0,
-          ));
+          world.add(
+            TentacleAnimation(
+              targetPosition: tentaclePos,
+              cellSize: scaledSquareSize,
+              flip: offset.x < 0,
+            ),
+          );
         }
       }
       AudioManager.playMonster();
@@ -775,7 +860,9 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     if (multiplayerGameId == null) return;
 
     String fieldToUpdate = amIHost ? 'shots_p1' : 'shots_p2';
-    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+    final gameRef = FirebaseFirestore.instance
+        .collection('battles')
+        .doc(multiplayerGameId);
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(gameRef);
@@ -803,13 +890,17 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   Future<void> sendMoveToFirebase(int index) async {
     if (multiplayerGameId == null) return;
     String fieldToUpdate = amIHost ? 'shots_p1' : 'shots_p2';
-    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+    final gameRef = FirebaseFirestore.instance
+        .collection('battles')
+        .doc(multiplayerGameId);
     int gridY = index ~/ squaresInGrid;
     int gridX = index % squaresInGrid;
     bool isHit = false;
     if (gridY < squaresInGrid && gridX < squaresInGrid) {
       var element = opponentsGrid.grid[gridY][gridX];
-      if (element is Bottle) { isHit = true; }
+      if (element is Bottle) {
+        isHit = true;
+      }
     }
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(gameRef);
@@ -819,8 +910,12 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
       String p1 = data['player1Id'];
       String p2 = data['player2Id'] ?? '';
       String nextTurnUser = (myUserId == p1) ? p2 : p1;
-      Map<String, dynamic> updates = { fieldToUpdate: FieldValue.arrayUnion([index]), };
-      if (!isHit) { updates['currentTurn'] = nextTurnUser; }
+      Map<String, dynamic> updates = {
+        fieldToUpdate: FieldValue.arrayUnion([index]),
+      };
+      if (!isHit) {
+        updates['currentTurn'] = nextTurnUser;
+      }
       transaction.update(gameRef, updates);
     });
   }
@@ -828,7 +923,9 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   Future<void> sendSpecialEffect(String type, int indexOrRow) async {
     if (multiplayerGameId == null) return;
 
-    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+    final gameRef = FirebaseFirestore.instance
+        .collection('battles')
+        .doc(multiplayerGameId);
 
     String attackId = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -837,8 +934,8 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
         'id': attackId,
         'attacker': myUserId,
         'type': type,
-        'target': indexOrRow
-      }
+        'target': indexOrRow,
+      },
     });
   }
 
@@ -850,12 +947,24 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     int myCount = amIHost ? lastProcessedP1Shots : lastProcessedP2Shots;
     int enemyCount = amIHost ? lastProcessedP2Shots : lastProcessedP1Shots;
     if (myShots.length > myCount) {
-      for (int i = myCount; i < myShots.length; i++) { if (myShots[i] is int) opponentsGrid.visualizeHit(myShots[i]); }
-      if (amIHost) { lastProcessedP1Shots = myShots.length; } else { lastProcessedP2Shots = myShots.length; }
+      for (int i = myCount; i < myShots.length; i++) {
+        if (myShots[i] is int) opponentsGrid.visualizeHit(myShots[i]);
+      }
+      if (amIHost) {
+        lastProcessedP1Shots = myShots.length;
+      } else {
+        lastProcessedP2Shots = myShots.length;
+      }
     }
     if (enemyShots.length > enemyCount) {
-      for (int i = enemyCount; i < enemyShots.length; i++) { if (enemyShots[i] is int) playersGrid.visualizeHit(enemyShots[i]); }
-      if (amIHost) { lastProcessedP2Shots = enemyShots.length; } else { lastProcessedP1Shots = enemyShots.length; }
+      for (int i = enemyCount; i < enemyShots.length; i++) {
+        if (enemyShots[i] is int) playersGrid.visualizeHit(enemyShots[i]);
+      }
+      if (amIHost) {
+        lastProcessedP2Shots = enemyShots.length;
+      } else {
+        lastProcessedP1Shots = enemyShots.length;
+      }
     }
   }
 
@@ -865,7 +974,8 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
     if (winnerMessage.isNotEmpty && !isGameRunning) return;
 
     bool playerLost = playersGrid.ships.length == playersGrid.shipsDown.length;
-    bool enemyLost = opponentsGrid.ships.length == opponentsGrid.shipsDown.length;
+    bool enemyLost =
+        opponentsGrid.ships.length == opponentsGrid.shipsDown.length;
 
     if (playerLost || enemyLost) {
       isGameRunning = false;
@@ -905,9 +1015,14 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   Future<void> sendSharkAttack(int rowY, bool keepTurn) async {
     if (multiplayerGameId == null) return;
 
-    final gameRef = FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
+    final gameRef = FirebaseFirestore.instance
+        .collection('battles')
+        .doc(multiplayerGameId);
 
-    List<int> rowIndices = List.generate(squaresInGrid, (x) => rowY * squaresInGrid + x);
+    List<int> rowIndices = List.generate(
+      squaresInGrid,
+      (x) => rowY * squaresInGrid + x,
+    );
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(gameRef);
@@ -937,16 +1052,20 @@ class BattleShipsGame extends FlameGame with TapCallbacks, WidgetsBindingObserve
   void onTapDown(TapDownEvent event) {
     AudioManager.playBgm();
   }
-
 }
 
 class PlayerLabel extends PositionComponent {
   String _text = "";
   final TextPaint _textPaint;
   final Paint _bgPaint = Paint()..color = const Color(0xcc003366);
-  final Paint _borderPaint = Paint()..color = const Color(0xFFFFFFFF)..style = PaintingStyle.stroke..strokeWidth = 0.05;
+  final Paint _borderPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 0.05;
 
-  PlayerLabel({required TextPaint textRenderer}) : _textPaint = textRenderer, super(priority: 10);
+  PlayerLabel({required TextPaint textRenderer})
+    : _textPaint = textRenderer,
+      super(priority: 10);
 
   set text(String value) {
     _text = value;
@@ -978,11 +1097,6 @@ class PlayerLabel extends PositionComponent {
     canvas.drawRRect(rrect, _bgPaint);
     canvas.drawRRect(rrect, _borderPaint);
 
-    _textPaint.render(
-      canvas,
-      _text,
-      Vector2.zero(),
-      anchor: Anchor.center,
-    );
+    _textPaint.render(canvas, _text, Vector2.zero(), anchor: Anchor.center);
   }
 }

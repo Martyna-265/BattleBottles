@@ -13,7 +13,8 @@ import '../bottleElements/PowerUpType.dart';
 import 'Bottle.dart';
 import 'Water.dart';
 
-abstract class GridElement extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
+abstract class GridElement extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   int gridX;
   int gridY;
   Condition condition;
@@ -22,8 +23,13 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   final bool opponent;
 
   GridElement(this.gridX, this.gridY, this.opponent, {required this.condition})
-      : bombable = (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') ? false : true,
-        super(size: BattleShipsGame.squareSize);
+    : bombable =
+          (condition.label == 'down' ||
+              condition.label == 'water_down' ||
+              condition.label == 'hurt')
+          ? false
+          : true,
+      super(size: BattleShipsGame.squareSize);
 
   @override
   void render(Canvas canvas) {
@@ -42,7 +48,6 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
     if (game.turnManager.currentPlayer != 1) return;
 
     if (opponent) {
-
       if (game.tripleShotsLeft > 0) {
         if (!bombable) return;
         _handleTripleShotExecution();
@@ -111,16 +116,17 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       if (wasMultiplayer) {
         game.sendPowerUpShots([shotIndex], true);
       }
-
     } else {
       game.tripleShotsLeft--;
 
       if (game.tripleShotsLeft > 0) {
-        String shotsText = game.tripleShotsLeft == 1 ? "shot left" : "shots left";
+        String shotsText = game.tripleShotsLeft == 1
+            ? "shot left"
+            : "shots left";
         game.actionFeedback.setMessage(
-            'miss',
-            false,
-            addition: "${game.tripleShotsLeft} $shotsText"
+          'miss',
+          false,
+          addition: "${game.tripleShotsLeft} $shotsText",
         );
         game.turnManager.currentPlayer = 1;
 
@@ -144,9 +150,14 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
     Random random = Random();
 
     List<Point<int>> directions = [
-      const Point(-1, -1), const Point(0, -1), const Point(1, -1),
-      const Point(-1, 0),                      const Point(1, 0),
-      const Point(-1, 1),  const Point(0, 1),  const Point(1, 1),
+      const Point(-1, -1),
+      const Point(0, -1),
+      const Point(1, -1),
+      const Point(-1, 0),
+      const Point(1, 0),
+      const Point(-1, 1),
+      const Point(0, 1),
+      const Point(1, 1),
     ];
 
     int n = game.squaresInGrid;
@@ -174,10 +185,9 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
       targetGrid.position.y + ((gridY - 0.3) * scaledSquareSize),
     );
 
-    game.world.add(OctopusHeadAnimation(
-      targetPosition: headPos,
-      cellSize: scaledSquareSize,
-    ));
+    game.world.add(
+      OctopusHeadAnimation(targetPosition: headPos, cellSize: scaledSquareSize),
+    );
 
     for (var p in targets) {
       if (p.x == gridX && p.y == gridY) {
@@ -190,11 +200,13 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
 
       bool shouldFlip = p.x < gridX;
 
-      game.world.add(TentacleAnimation(
-        targetPosition: tentaclePos,
-        cellSize: scaledSquareSize,
-        flip: shouldFlip,
-      ));
+      game.world.add(
+        TentacleAnimation(
+          targetPosition: tentaclePos,
+          cellSize: scaledSquareSize,
+          flip: shouldFlip,
+        ),
+      );
     }
 
     // Animation end
@@ -247,7 +259,6 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   }
 
   void _handleShark() {
-
     double scaledSquareSize = BattleShipsGame.squareLength * game.gridScale;
     var targetGrid = game.isNarrow ? game.opponentsGrid : game.playersGrid;
     double rowWorldY = targetGrid.position.y + (gridY * scaledSquareSize);
@@ -257,9 +268,9 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
         : (game.scaledGridWidth * 2) + BattleShipsGame.gap + 10.0;
 
     final shark = SharkAnimation(
-        targetY: rowWorldY,
-        worldWidth: gameWorldWidth,
-        cellSize: scaledSquareSize
+      targetY: rowWorldY,
+      worldWidth: gameWorldWidth,
+      cellSize: scaledSquareSize,
     );
 
     game.world.add(shark);
@@ -276,7 +287,6 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
     game.isMultiplayer = true;
 
     for (int x = 0; x < n; x++) {
-
       var enemyElement = enemyGrid[gridY][x];
       if (enemyElement != null && enemyElement.bombable) {
         if (enemyElement is Bottle && enemyElement.condition.value == 0) {
@@ -301,9 +311,12 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
         game.sendSpecialEffect('shark', gridY);
         game.sendSharkAttack(gridY, true);
       }
-
     } else {
-      game.actionFeedback.setMessage("miss", false, addition: "Shark attack end");
+      game.actionFeedback.setMessage(
+        "miss",
+        false,
+        addition: "Shark attack end",
+      );
 
       if (wasMultiplayer) {
         game.sendSpecialEffect('shark', gridY);
@@ -317,7 +330,9 @@ abstract class GridElement extends PositionComponent with HasGameReference<Battl
   void bomb() {
     if (bombable) {
       condition = Condition.fromInt(condition.value + 1);
-      if (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') {
+      if (condition.label == 'down' ||
+          condition.label == 'water_down' ||
+          condition.label == 'hurt') {
         bombable = false;
       }
       sprite = condition.sprite;

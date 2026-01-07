@@ -148,7 +148,11 @@ class TurnManager {
         if (random.nextDouble() < 0.03) {
           game.isMultiplayer = true;
           targetElement.bomb();
-          game.actionFeedback.setMessage("miss", true, addition: "Lucky! Bonus shot");
+          game.actionFeedback.setMessage(
+            "miss",
+            true,
+            addition: "Lucky! Bonus shot",
+          );
           game.isMultiplayer = false;
           await Future.delayed(const Duration(seconds: 2));
           if (_sessionId != mySession) return;

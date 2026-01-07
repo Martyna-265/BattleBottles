@@ -53,9 +53,7 @@ class FirestoreService {
   }
 
   Future<void> startGameFromLobby(String gameId) async {
-    await _db.collection('battles').doc(gameId).update({
-      'status': 'playing',
-    });
+    await _db.collection('battles').doc(gameId).update({'status': 'playing'});
   }
 
   Future<void> deleteGame(String gameId) async {
@@ -96,7 +94,8 @@ class FirestoreService {
     final friendDoc = querySnapshot.docs.first;
     final friendData = friendDoc.data();
     final String friendId = friendDoc.id;
-    final String friendName = friendData['username'] ?? friendData['email'] ?? 'Unknown';
+    final String friendName =
+        friendData['username'] ?? friendData['email'] ?? 'Unknown';
 
     WriteBatch batch = _db.batch();
 
@@ -120,7 +119,8 @@ class FirestoreService {
         .collection('friends')
         .doc(currentUser.uid);
 
-    final myName = currentUser.displayName ?? currentUser.email ?? 'Unknown Player';
+    final myName =
+        currentUser.displayName ?? currentUser.email ?? 'Unknown Player';
 
     batch.set(meInFriendRef, {
       'email': currentUser.email,
@@ -140,12 +140,20 @@ class FirestoreService {
 
     // Removes a friend from my collection
     batch.delete(
-        _db.collection('users').doc(currentUser.uid).collection('friends').doc(friendId)
+      _db
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('friends')
+          .doc(friendId),
     );
 
     // Removes me from the friend's collection
     batch.delete(
-        _db.collection('users').doc(friendId).collection('friends').doc(currentUser.uid)
+      _db
+          .collection('users')
+          .doc(friendId)
+          .collection('friends')
+          .doc(currentUser.uid),
     );
 
     await batch.commit();
@@ -171,7 +179,6 @@ class FirestoreService {
 
       await batch.commit();
       debugPrint("CLEANUP: Deleted ${snapshot.docs.length} old games.");
-
     } catch (e) {
       debugPrint("CLEANUP ERROR: $e");
     }
@@ -203,7 +210,12 @@ class FirestoreService {
     }
   }
 
-  Future<void> updateGameSettings(String gameId, int gridSize, Map<String, int> fleetCounts, Map<String, int> powerUps) async {
+  Future<void> updateGameSettings(
+    String gameId,
+    int gridSize,
+    Map<String, int> fleetCounts,
+    Map<String, int> powerUps,
+  ) async {
     await _db.collection('battles').doc(gameId).update({
       'gridSize': gridSize,
       'fleetCounts': fleetCounts,
@@ -212,15 +224,26 @@ class FirestoreService {
   }
 
   Future<void> addBulkStats(
-      int wins, int losses,
-      int sinkedEnemy, int sinkedSelf,
-      int gamesSingle, int gamesMulti,
-      int puTotal, int puOctopus, int puTriple, int puShark
-      ) async {
+    int wins,
+    int losses,
+    int sinkedEnemy,
+    int sinkedSelf,
+    int gamesSingle,
+    int gamesMulti,
+    int puTotal,
+    int puOctopus,
+    int puTriple,
+    int puShark,
+  ) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    if (wins == 0 && losses == 0 && gamesSingle == 0 && gamesMulti == 0 && puTotal == 0) return;
+    if (wins == 0 &&
+        losses == 0 &&
+        gamesSingle == 0 &&
+        gamesMulti == 0 &&
+        puTotal == 0)
+      return;
 
     final userRef = _db.collection('users').doc(user.uid);
 
@@ -277,19 +300,18 @@ class FirestoreService {
 
     await userRef.update(updates);
   }
-  
+
   Future<void> updateSinkedStats(bool opponents) async {
     final user = _auth.currentUser;
     if (user == null) return;
-    
+
     final userRef = _db.collection('users').doc(user.uid);
-    
+
     if (opponents) {
-      await userRef.update({'sinked_enemy_ships' : FieldValue.increment(1)});
+      await userRef.update({'sinked_enemy_ships': FieldValue.increment(1)});
     } else {
       await userRef.update({'sinked_ships': FieldValue.increment(1)});
     }
-    
   }
 
   Future<void> updatePowerUpStats(String type) async {
@@ -298,12 +320,12 @@ class FirestoreService {
 
     final userRef = _db.collection('users').doc(user.uid);
 
-    Map<String, dynamic> updates = {
-      'powerups_total': FieldValue.increment(1),
-    };
+    Map<String, dynamic> updates = {'powerups_total': FieldValue.increment(1)};
 
-    if (type == 'octopus') updates['powerups_octopus'] = FieldValue.increment(1);
-    if (type == 'triple_shot') updates['powerups_triple_shot'] = FieldValue.increment(1);
+    if (type == 'octopus')
+      updates['powerups_octopus'] = FieldValue.increment(1);
+    if (type == 'triple_shot')
+      updates['powerups_triple_shot'] = FieldValue.increment(1);
     if (type == 'shark') updates['powerups_shark'] = FieldValue.increment(1);
 
     await userRef.update(updates);
@@ -313,10 +335,16 @@ class FirestoreService {
     final user = _auth.currentUser;
 
     final Map<String, int> emptyStats = {
-      'wins': 0, 'losses': 0,
-      'sinked_enemy_ships': 0, 'sinked_ships': 0,
-      'games_single': 0, 'games_multi': 0,
-      'pu_total': 0, 'pu_octopus': 0, 'pu_triple': 0, 'pu_shark': 0
+      'wins': 0,
+      'losses': 0,
+      'sinked_enemy_ships': 0,
+      'sinked_ships': 0,
+      'games_single': 0,
+      'games_multi': 0,
+      'pu_total': 0,
+      'pu_octopus': 0,
+      'pu_triple': 0,
+      'pu_shark': 0,
     };
 
     if (user == null) return emptyStats;

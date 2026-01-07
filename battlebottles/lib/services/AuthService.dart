@@ -16,7 +16,8 @@ class AuthService {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       await StatsService().syncLocalStatsToAccount();
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found' || e.code == 'wrong-password' ||
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
           e.code == 'invalid-credential') {
         throw 'Invalid email or password.';
       } else if (e.code == 'invalid-email') {
@@ -32,8 +33,8 @@ class AuthService {
   Future<void> register(String email, String password, String username) async {
     try {
       UserCredential cred = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password
+        email: email,
+        password: password,
       );
 
       if (cred.user != null) {
@@ -46,7 +47,6 @@ class AuthService {
         await firestoreService.saveUserData(currentUser!, username);
         await StatsService().syncLocalStatsToAccount();
       }
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         throw 'The password is too weak (min. 6 characters).';

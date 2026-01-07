@@ -4,9 +4,15 @@ import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 import '../../BattleShipsGame.dart';
 
-class ActionFeedback extends PositionComponent with HasGameReference<BattleShipsGame> {
+class ActionFeedback extends PositionComponent
+    with HasGameReference<BattleShipsGame> {
   ActionFeedback()
-      : super(size: Vector2(BattleShipsGame.squareLength * 7, BattleShipsGame.squareLength * 1.3));
+    : super(
+        size: Vector2(
+          BattleShipsGame.squareLength * 7,
+          BattleShipsGame.squareLength * 1.3,
+        ),
+      );
 
   late TextPaint _mainTextPaint;
   late TextPaint _subTextPaint;
@@ -29,22 +35,22 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
         "Just water",
         "Splash!",
         "Nothing there",
-        "Empty coordinates"
+        "Empty coordinates",
       ],
       'hit': [
         "Hit! Shoot again",
         "Direct hit! Keep going",
         "Nice shot! Keep going",
         "Target damaged!",
-        "Boom! Keep going"
+        "Boom! Keep going",
       ],
       'sink': [
         "You sunk a ship!",
         "Enemy vessel down!",
         "That's a kill!",
         "Blub blub blub...",
-        "One less problem!"
-      ]
+        "One less problem!",
+      ],
     },
     true: {
       'miss': [
@@ -52,23 +58,23 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
         "Close call!",
         "We are safe",
         "They hit water",
-        "Lucky us!"
+        "Lucky us!",
       ],
       'hit': [
         "Opponent hit your ship!",
         "We're taking damage!",
         "Hull breached!",
         "They have another shot",
-        "Watch out!"
+        "Watch out!",
       ],
       'sink': [
         "Opponent sunk your ship!",
         "Men overboard!",
         "We lost a vessel!",
         "Critical damage!",
-        "They are winning..."
-      ]
-    }
+        "They are winning...",
+      ],
+    },
   };
 
   @override
@@ -120,7 +126,9 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
 
     _subText = addition;
 
-    _mainTextPaint = TextPaint(style: _mainTextPaint.style.copyWith(color: mainColor));
+    _mainTextPaint = TextPaint(
+      style: _mainTextPaint.style.copyWith(color: mainColor),
+    );
 
     _timer = 2.0;
   }
@@ -148,8 +156,8 @@ class ActionFeedback extends PositionComponent with HasGameReference<BattleShips
     if (_mainText.isEmpty && _subText.isEmpty) return;
 
     RRect rrect = RRect.fromRectAndRadius(
-        size.toRect(),
-        const Radius.circular(0.4)
+      size.toRect(),
+      const Radius.circular(0.4),
     );
 
     canvas.drawRRect(rrect, _backgroundPaint);

@@ -10,8 +10,8 @@ import 'AccountDropdown.dart';
 import '../components/buttons/SingleplayerButton.dart';
 import '../services/FirestoreService.dart';
 
-class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> {
-
+class MainMenu extends PositionComponent
+    with HasGameReference<BattleShipsGame> {
   MainMenu() : super();
 
   late GameTitle _gameTitle;
@@ -63,10 +63,19 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
 
     double titleOffset = game.isNarrow ? 80.0 : 80.0;
 
-    _gameTitle.position = Vector2(effectiveSize.x / 2, effectiveSize.y / 2 - titleOffset);
+    _gameTitle.position = Vector2(
+      effectiveSize.x / 2,
+      effectiveSize.y / 2 - titleOffset,
+    );
 
-    playButton.position = Vector2(effectiveSize.x / 2, effectiveSize.y / 2 + 30);
-    multiplayerButton.position = Vector2(effectiveSize.x / 2, effectiveSize.y / 2 + 110);
+    playButton.position = Vector2(
+      effectiveSize.x / 2,
+      effectiveSize.y / 2 + 30,
+    );
+    multiplayerButton.position = Vector2(
+      effectiveSize.x / 2,
+      effectiveSize.y / 2 + 110,
+    );
 
     accountDropdown.position = Vector2(effectiveSize.x - 20, 20);
     helpButton.position = Vector2(20, 20);
@@ -74,7 +83,8 @@ class MainMenu extends PositionComponent with HasGameReference<BattleShipsGame> 
   }
 }
 
-class GameTitle extends PositionComponent with HasGameReference<BattleShipsGame> {
+class GameTitle extends PositionComponent
+    with HasGameReference<BattleShipsGame> {
   late TextPaint _titlePaint;
 
   final _bgPaint = Paint()..color = const Color(0xcc003366);
@@ -134,17 +144,17 @@ class GameTitle extends PositionComponent with HasGameReference<BattleShipsGame>
     add(
       ScaleEffect.to(
         Vector2.all(1.0),
-        EffectController(
-          duration: 0.8,
-          curve: Curves.elasticOut,
-        ),
+        EffectController(duration: 0.8, curve: Curves.elasticOut),
       ),
     );
   }
 
   @override
   void render(Canvas canvas) {
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(30));
+    RRect rrect = RRect.fromRectAndRadius(
+      size.toRect(),
+      const Radius.circular(30),
+    );
     canvas.drawRRect(rrect, _bgPaint);
     canvas.drawRRect(rrect, _borderPaint);
 

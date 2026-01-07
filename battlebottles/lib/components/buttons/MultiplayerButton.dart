@@ -8,8 +8,8 @@ import '../../BattleShipsGame.dart';
 import '../../services/AuthService.dart';
 import '../../services/AudioManager.dart';
 
-class MultiplayerButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
-
+class MultiplayerButton extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   MultiplayerButton() : super(size: Vector2(200, 60));
 
   final _activePaint = Paint()..color = const Color(0xffFF9800);
@@ -34,7 +34,10 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
   void render(Canvas canvas) {
     final bool isLoggedIn = _auth.currentUser != null;
 
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(30));
+    RRect rrect = RRect.fromRectAndRadius(
+      size.toRect(),
+      const Radius.circular(30),
+    );
     canvas.drawRRect(rrect, isLoggedIn ? _activePaint : _disabledPaint);
     canvas.drawRRect(rrect, _borderPaint);
 
@@ -59,14 +62,28 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
           context: game.buildContext!,
           builder: (context) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               backgroundColor: const Color(0xff003366),
-              title: const Text('Log in', style: TextStyle(color: Colors.white, fontFamily: 'Awesome Font')),
-              content: const Text('You need to be logged in to play in multiplayer.', style: TextStyle(color: Colors.white70)),
+              title: const Text(
+                'Log in',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Awesome Font',
+                ),
+              ),
+              content: const Text(
+                'You need to be logged in to play in multiplayer.',
+                style: TextStyle(color: Colors.white70),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK', style: TextStyle(color: Colors.greenAccent)),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.greenAccent),
+                  ),
                 ),
               ],
             );
@@ -95,14 +112,28 @@ class MultiplayerButton extends PositionComponent with HasGameReference<BattleSh
           context: game.buildContext!,
           builder: (context) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               backgroundColor: const Color(0xff003366),
-              title: const Text('No Internet', style: TextStyle(color: Colors.white, fontFamily: 'Awesome Font')),
-              content: const Text('You need an active internet connection to play multiplayer.', style: TextStyle(color: Colors.white70)),
+              title: const Text(
+                'No Internet',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Awesome Font',
+                ),
+              ),
+              content: const Text(
+                'You need an active internet connection to play multiplayer.',
+                style: TextStyle(color: Colors.white70),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK', style: TextStyle(color: Colors.greenAccent)),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.greenAccent),
+                  ),
                 ),
               ],
             );

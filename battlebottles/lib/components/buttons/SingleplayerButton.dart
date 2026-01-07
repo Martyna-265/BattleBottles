@@ -5,7 +5,8 @@ import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
 import '../../services/AudioManager.dart';
 
-class PlaySingleButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
+class PlaySingleButton extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   PlaySingleButton() : super(size: Vector2(200, 60));
 
   final _backgroundPaint = Paint()..color = const Color(0xff4CAF50); // Green
@@ -25,7 +26,10 @@ class PlaySingleButton extends PositionComponent with HasGameReference<BattleShi
 
   @override
   void render(Canvas canvas) {
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(30));
+    RRect rrect = RRect.fromRectAndRadius(
+      size.toRect(),
+      const Radius.circular(30),
+    );
     canvas.drawRRect(rrect, _backgroundPaint);
     canvas.drawRRect(rrect, _borderPaint);
 

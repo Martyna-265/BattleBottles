@@ -14,14 +14,15 @@ import '../../services/StatsService.dart';
 import 'Water.dart';
 
 class Bottle extends GridElement with DragCallbacks {
-
   Bottle(super.gridX, super.gridY, int intSize, super.opponent, this.parentShip)
-      : super(condition: Condition.fromInt(0)) {
+    : super(condition: Condition.fromInt(0)) {
     sprite = opponent ? Condition.fromInt(5).sprite : condition.sprite;
   }
 
   final Ship parentShip;
-  late final BattleGrid battleGrid = opponent ? game.opponentsGrid : game.playersGrid;
+  late final BattleGrid battleGrid = opponent
+      ? game.opponentsGrid
+      : game.playersGrid;
 
   late Vector2 _positionDelta = Vector2(0, 0);
   late Vector2 _startPosition;
@@ -68,17 +69,24 @@ class Bottle extends GridElement with DragCallbacks {
     super.onDragEnd(event);
     if (_squad.isEmpty) return;
 
-    int dx = ((position.x - _startPosition.x) / BattleShipsGame.squareLength).round();
-    int dy = ((position.y - _startPosition.y) / BattleShipsGame.squareLength).round();
+    int dx = ((position.x - _startPosition.x) / BattleShipsGame.squareLength)
+        .round();
+    int dy = ((position.y - _startPosition.y) / BattleShipsGame.squareLength)
+        .round();
 
     int newHeadX = parentShip.x + dx;
     int newHeadY = parentShip.y + dy;
 
     bool canMove = true;
-    List<Point<int>> newPoints = parentShip.type.relativePositions.map((p) => Point(newHeadX + p.x, newHeadY + p.y)).toList();
+    List<Point<int>> newPoints = parentShip.type.relativePositions
+        .map((p) => Point(newHeadX + p.x, newHeadY + p.y))
+        .toList();
 
     for (var p in newPoints) {
-      if (p.x < 0 || p.x >= game.squaresInGrid || p.y < 0 || p.y >= game.squaresInGrid) {
+      if (p.x < 0 ||
+          p.x >= game.squaresInGrid ||
+          p.y < 0 ||
+          p.y >= game.squaresInGrid) {
         canMove = false;
         break;
       }
@@ -101,7 +109,10 @@ class Bottle extends GridElement with DragCallbacks {
       ];
 
       for (var n in neighbors) {
-        if (n.x >= 0 && n.x < game.squaresInGrid && n.y >= 0 && n.y < game.squaresInGrid) {
+        if (n.x >= 0 &&
+            n.x < game.squaresInGrid &&
+            n.y >= 0 &&
+            n.y < game.squaresInGrid) {
           var neighbor = battleGrid.grid[n.y][n.x];
           if (neighbor is Bottle && neighbor.parentShip != parentShip) {
             canMove = false;
@@ -115,11 +126,12 @@ class Bottle extends GridElement with DragCallbacks {
     if (canMove) {
       List<Point<int>> oldPoints = parentShip.getOccupiedPoints();
       for (var p in oldPoints) {
-        if (battleGrid.grid[p.y][p.x] == null || battleGrid.grid[p.y][p.x] is Bottle) {
+        if (battleGrid.grid[p.y][p.x] == null ||
+            battleGrid.grid[p.y][p.x] is Bottle) {
           Water freshWater = Water(p.x, p.y, opponent);
           freshWater.position = Vector2(
-              p.x * BattleShipsGame.squareLength,
-              p.y * BattleShipsGame.squareLength
+            p.x * BattleShipsGame.squareLength,
+            p.y * BattleShipsGame.squareLength,
           );
           battleGrid.add(freshWater);
           battleGrid.grid[p.y][p.x] = freshWater;
@@ -141,14 +153,13 @@ class Bottle extends GridElement with DragCallbacks {
         battleGrid.grid[newGridY][newGridX] = bottle;
 
         bottle.position = Vector2(
-            newGridX * BattleShipsGame.squareLength,
-            newGridY * BattleShipsGame.squareLength
+          newGridX * BattleShipsGame.squareLength,
+          newGridY * BattleShipsGame.squareLength,
         );
 
         bottle.gridX = newGridX;
         bottle.gridY = newGridY;
       }
-
     } else {
       for (int i = 0; i < _squad.length; i++) {
         _squad[i].position = _squadOriginalPositions[i];
@@ -176,7 +187,9 @@ class Bottle extends GridElement with DragCallbacks {
     if (bombable) {
       condition = Condition.fromInt(condition.value + 1);
 
-      if (condition.label == 'down' || condition.label == 'water_down' || condition.label == 'hurt') {
+      if (condition.label == 'down' ||
+          condition.label == 'water_down' ||
+          condition.label == 'hurt') {
         bombable = false;
       }
 
@@ -212,10 +225,12 @@ class Bottle extends GridElement with DragCallbacks {
           battleGrid.position.y + (gridY * scaledSquareSize),
         );
 
-        game.world.add(ExplosionAnimation(
+        game.world.add(
+          ExplosionAnimation(
             targetPosition: effectPos,
-            cellSize: scaledSquareSize
-        ));
+            cellSize: scaledSquareSize,
+          ),
+        );
         AudioManager.playExplosion();
         game.actionFeedback.setMessage("hit", !isMyTurn);
       }
@@ -238,13 +253,18 @@ class Bottle extends GridElement with DragCallbacks {
           battleGrid.position.y + (p.y * scaledSquareSize),
         );
 
-        game.world.add(ExplosionAnimation(
+        game.world.add(
+          ExplosionAnimation(
             targetPosition: effectPos,
-            cellSize: scaledSquareSize
-        ));
+            cellSize: scaledSquareSize,
+          ),
+        );
 
         void markWaterAsHit(int x, int y) {
-          if (x >= 0 && x < game.squaresInGrid && y >= 0 && y < game.squaresInGrid) {
+          if (x >= 0 &&
+              x < game.squaresInGrid &&
+              y >= 0 &&
+              y < game.squaresInGrid) {
             var target = battleGrid.grid[y][x];
             if (target is Water && target.bombable) {
               target.condition = Condition.fromInt(4);

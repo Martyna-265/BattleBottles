@@ -9,12 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 class FakeBattleShipsGame extends BattleShipsGame {
   @override
-  Future<void> onLoad() async {
-  }
+  Future<void> onLoad() async {}
 
   @override
-  void startGame({int? gridSize, Map<String, int>? fleetCounts}) {
-  }
+  void startGame({int? gridSize, Map<String, int>? fleetCounts}) {}
 }
 
 void main() {
@@ -29,50 +27,48 @@ void main() {
   });
 
   group('GameOptionsScreen Widget Tests', () {
+    testWidgets(
+      'Singleplayer screen renders correctly and updates ship count',
+      (WidgetTester tester) async {
+        final fakeGame = FakeBattleShipsGame();
 
-    testWidgets('Singleplayer screen renders correctly and updates ship count', (WidgetTester tester) async {
-      final fakeGame = FakeBattleShipsGame();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: GameOptionsScreen(
-            game: fakeGame,
-            isMultiplayer: false,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: GameOptionsScreen(game: fakeGame, isMultiplayer: false),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
+        await tester.pump();
 
-      expect(find.text('GAME OPTIONS'), findsOneWidget);
+        expect(find.text('GAME OPTIONS'), findsOneWidget);
 
-      expect(find.text('4'), findsWidgets);
+        expect(find.text('4'), findsWidgets);
 
-      final singleRowFinder = find.ancestor(
-        of: find.text('Single (1)'),
-        matching: find.byType(Row),
-      ).first;
+        final singleRowFinder = find
+            .ancestor(of: find.text('Single (1)'), matching: find.byType(Row))
+            .first;
 
-      final plusButton = find.descendant(
-        of: singleRowFinder,
-        matching: find.byIcon(Icons.add_circle),
-      );
+        final plusButton = find.descendant(
+          of: singleRowFinder,
+          matching: find.byIcon(Icons.add_circle),
+        );
 
-      await tester.tap(plusButton);
-      await tester.pump();
+        await tester.tap(plusButton);
+        await tester.pump();
 
-      expect(find.text('5'), findsOneWidget);
-    });
+        expect(find.text('5'), findsOneWidget);
+      },
+    );
   });
 }
 
 void setupFirebaseAuthMocks() {
-  const MethodChannel authChannel = MethodChannel('plugins.flutter.io/firebase_auth');
-
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-    authChannel,
-        (MethodCall methodCall) async {
-      return null;
-    },
+  const MethodChannel authChannel = MethodChannel(
+    'plugins.flutter.io/firebase_auth',
   );
+
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(authChannel, (MethodCall methodCall) async {
+        return null;
+      });
 }

@@ -120,12 +120,24 @@ class StatsService {
     int lPuTriple = prefs.getInt(_keyPuTriple) ?? 0;
     int lPuShark = prefs.getInt(_keyPuShark) ?? 0;
 
-    if (lWins > 0 || lLosses > 0 || lSinkEnemy > 0 || lSinkSelf > 0 ||
-        lSingle > 0 || lMulti > 0 || lPuTotal > 0) {
-
+    if (lWins > 0 ||
+        lLosses > 0 ||
+        lSinkEnemy > 0 ||
+        lSinkSelf > 0 ||
+        lSingle > 0 ||
+        lMulti > 0 ||
+        lPuTotal > 0) {
       await _firestore.addBulkStats(
-          lWins, lLosses, lSinkEnemy, lSinkSelf, lSingle, lMulti,
-          lPuTotal, lPuOctopus, lPuTriple, lPuShark
+        lWins,
+        lLosses,
+        lSinkEnemy,
+        lSinkSelf,
+        lSingle,
+        lMulti,
+        lPuTotal,
+        lPuOctopus,
+        lPuTriple,
+        lPuShark,
       );
 
       await prefs.setInt(_keyWins, 0);

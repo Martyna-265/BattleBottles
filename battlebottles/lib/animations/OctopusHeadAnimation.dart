@@ -1,14 +1,13 @@
 import 'package:flame/components.dart';
 import '../BattleShipsGame.dart';
 
-class OctopusHeadAnimation extends SpriteAnimationComponent with HasGameReference<BattleShipsGame> {
+class OctopusHeadAnimation extends SpriteAnimationComponent
+    with HasGameReference<BattleShipsGame> {
   final Vector2 targetPosition;
   final double cellSize;
 
-  OctopusHeadAnimation({
-    required this.targetPosition,
-    required this.cellSize,
-  }) : super(priority: 200);
+  OctopusHeadAnimation({required this.targetPosition, required this.cellSize})
+    : super(priority: 200);
 
   @override
   Future<void> onLoad() async {

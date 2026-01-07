@@ -58,7 +58,10 @@ class ShipsCounter extends PositionComponent {
 
     _labelPaint.render(canvas, 'Ships left:', Vector2(0, 0));
 
-    int size4 = 0; int size3 = 0; int size2 = 0; int size1 = 0;
+    int size4 = 0;
+    int size3 = 0;
+    int size2 = 0;
+    int size1 = 0;
     for (var ship in linkedGrid.ships) {
       if (!linkedGrid.shipsDown.contains(ship)) {
         int s = ship.type.size;
@@ -66,8 +69,7 @@ class ShipsCounter extends PositionComponent {
           size4++;
         } else if (s == 3) {
           size3++;
-        }
-        else if (s == 2) {
+        } else if (s == 2) {
           size2++;
         } else if (s == 1) {
           size1++;
@@ -83,9 +85,15 @@ class ShipsCounter extends PositionComponent {
     double gapBetweenIconAndText = 0.3;
     double gapBetweenGroups = 1.2;
 
-    double getGroupWidth(int shipSize) => (shipSize * baseIconSize) + gapBetweenIconAndText + 1.2;
+    double getGroupWidth(int shipSize) =>
+        (shipSize * baseIconSize) + gapBetweenIconAndText + 1.2;
 
-    double totalContentWidth = getGroupWidth(4) + getGroupWidth(3) + getGroupWidth(2) + getGroupWidth(1) + (3 * gapBetweenGroups);
+    double totalContentWidth =
+        getGroupWidth(4) +
+        getGroupWidth(3) +
+        getGroupWidth(2) +
+        getGroupWidth(1) +
+        (3 * gapBetweenGroups);
 
     double contentScale = 1.0;
     if (totalContentWidth > effectiveGridWidth) {
@@ -103,7 +111,12 @@ class ShipsCounter extends PositionComponent {
 
     void drawGroup(int shipSize, int count) {
       for (int i = 0; i < shipSize; i++) {
-        Rect rect = Rect.fromLTWH(currentX + (i * baseIconSize), startY, baseIconSize, baseIconSize);
+        Rect rect = Rect.fromLTWH(
+          currentX + (i * baseIconSize),
+          startY,
+          baseIconSize,
+          baseIconSize,
+        );
         canvas.drawRect(rect, _shipPaint);
         canvas.drawRect(rect, _borderPaint);
       }
@@ -111,7 +124,9 @@ class ShipsCounter extends PositionComponent {
 
       TextPaint paintToUse = count > 0
           ? _countPaint
-          : TextPaint(style: _countPaint.style.copyWith(color: const Color(0x55ffffff)));
+          : TextPaint(
+              style: _countPaint.style.copyWith(color: const Color(0x55ffffff)),
+            );
 
       paintToUse.render(canvas, "x$count", Vector2(currentX, startY));
       currentX += 1.4 + gapBetweenGroups;

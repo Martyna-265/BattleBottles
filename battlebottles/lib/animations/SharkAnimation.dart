@@ -1,7 +1,8 @@
 import 'package:flame/components.dart';
 import '../BattleShipsGame.dart';
 
-class SharkAnimation extends SpriteComponent with HasGameReference<BattleShipsGame> {
+class SharkAnimation extends SpriteComponent
+    with HasGameReference<BattleShipsGame> {
   final double targetY;
   final double worldWidth;
   final double cellSize;

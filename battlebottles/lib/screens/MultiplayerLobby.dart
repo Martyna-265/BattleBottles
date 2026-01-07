@@ -7,7 +7,8 @@ class MultiplayerLobby extends StatelessWidget {
   final BattleShipsGame game;
   final VoidCallback onClose;
 
-  MultiplayerLobby({Key? key, required this.game, required this.onClose}) : super(key: key);
+  MultiplayerLobby({Key? key, required this.game, required this.onClose})
+    : super(key: key);
 
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -55,22 +56,33 @@ class MultiplayerLobby extends StatelessWidget {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _firestoreService.getFriends(),
                   builder: (context, friendsSnapshot) {
-                    if (friendsSnapshot.connectionState == ConnectionState.waiting) {
+                    if (friendsSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    final List<String> friendIds = friendsSnapshot.data?.docs
-                        .map((doc) => doc.id)
-                        .toList() ?? [];
+                    final List<String> friendIds =
+                        friendsSnapshot.data?.docs
+                            .map((doc) => doc.id)
+                            .toList() ??
+                        [];
 
                     return StreamBuilder<QuerySnapshot>(
                       stream: _firestoreService.getAvailableGames(),
                       builder: (context, gamesSnapshot) {
                         if (gamesSnapshot.hasError) {
-                          return const Center(child: Text('Error loading games', style: TextStyle(color: Colors.red)));
+                          return const Center(
+                            child: Text(
+                              'Error loading games',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          );
                         }
-                        if (gamesSnapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (gamesSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         final allGames = gamesSnapshot.data!.docs;
@@ -102,25 +114,37 @@ class MultiplayerLobby extends StatelessWidget {
 
                             return Card(
                               color: Colors.blue[900],
-                              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
                               child: ListTile(
                                 title: Text(
                                   hostName,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 subtitle: const Text(
                                   'Friend\'s Lobby',
-                                  style: TextStyle(color: Colors.greenAccent, fontSize: 12),
+                                  style: TextStyle(
+                                    color: Colors.greenAccent,
+                                    fontSize: 12,
+                                  ),
                                 ),
                                 trailing: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
+                                    backgroundColor: Colors.green,
                                     foregroundColor: Colors.white,
                                   ),
                                   onPressed: () async {
                                     try {
                                       await _firestoreService.joinGame(doc.id);
-                                      game.openGameOptions(isMultiplayer: true, gameId: doc.id);
+                                      game.openGameOptions(
+                                        isMultiplayer: true,
+                                        gameId: doc.id,
+                                      );
                                     } catch (e) {
                                       debugPrint("Error: $e");
                                     }
@@ -143,18 +167,26 @@ class MultiplayerLobby extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
                     onPressed: () async {
                       try {
                         String gameId = await _firestoreService.createGame();
-                        game.openGameOptions(isMultiplayer: true, gameId: gameId);
+                        game.openGameOptions(
+                          isMultiplayer: true,
+                          gameId: gameId,
+                        );
                       } catch (e) {
                         debugPrint("Error: $e");
                       }
                     },
                     child: const Text(
                       'CREATE A NEW GAME',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

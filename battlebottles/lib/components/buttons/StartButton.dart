@@ -5,7 +5,8 @@ import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
 import '../../services/AudioManager.dart';
 
-class StartButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
+class StartButton extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   StartButton() : super(size: Vector2(6, 2.5));
 
   final Paint _bgPaint = Paint()..color = const Color(0xFF4CAF50);
@@ -25,19 +26,27 @@ class StartButton extends PositionComponent with HasGameReference<BattleShipsGam
 
   @override
   void render(Canvas canvas) {
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), Radius.circular(size.y / 2));
+    RRect rrect = RRect.fromRectAndRadius(
+      size.toRect(),
+      Radius.circular(size.y / 2),
+    );
 
     canvas.drawRRect(rrect, _bgPaint);
     canvas.drawRRect(rrect, _borderPaint);
 
-    _textPaint.render(canvas, 'START', Vector2(size.x / 2, size.y / 2), anchor: Anchor.center);
+    _textPaint.render(
+      canvas,
+      'START',
+      Vector2(size.x / 2, size.y / 2),
+      anchor: Anchor.center,
+    );
   }
 
   @override
   void onTapDown(TapDownEvent event) {
     AudioManager.playClick();
     if (game.turnManager.currentPlayer != 0) return;
-    if (game.isMultiplayer){
+    if (game.isMultiplayer) {
       game.confirmMultiplayerShips();
     } else {
       game.startSingleplayerGame();

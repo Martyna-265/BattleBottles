@@ -6,7 +6,8 @@ import '../../BattleShipsGame.dart';
 import '../../services/AudioManager.dart';
 import '../bottleElements/PowerUpType.dart';
 
-class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
+class PowerUpButton extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   final String imageName;
   final PowerUpType type;
   int count;
@@ -58,7 +59,8 @@ class PowerUpButton extends PositionComponent with HasGameReference<BattleShipsG
     );
 
     bool isActive = game.activePowerUp == type;
-    bool isOngoingTriple = (type == PowerUpType.triple && game.tripleShotsLeft > 0);
+    bool isOngoingTriple =
+        (type == PowerUpType.triple && game.tripleShotsLeft > 0);
 
     if (isActive || isOngoingTriple) {
       canvas.drawCircle(Offset(radius, radius), radius, _activeBorderPaint);

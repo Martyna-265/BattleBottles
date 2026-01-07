@@ -9,12 +9,19 @@ class Ship {
   int y;
   List<Point<int>>? _syncedRelativePositions;
 
-  Ship({required this.type, required this.x, required this.y, List<Point<int>>? syncedPoints})
-      : _syncedRelativePositions = syncedPoints;
+  Ship({
+    required this.type,
+    required this.x,
+    required this.y,
+    List<Point<int>>? syncedPoints,
+  }) : _syncedRelativePositions = syncedPoints;
 
   List<Point<int>> getOccupiedPoints() {
-    if (_syncedRelativePositions != null && _syncedRelativePositions!.isNotEmpty) {
-      return _syncedRelativePositions!.map((p) => Point(x + p.x, y + p.y)).toList();
+    if (_syncedRelativePositions != null &&
+        _syncedRelativePositions!.isNotEmpty) {
+      return _syncedRelativePositions!
+          .map((p) => Point(x + p.x, y + p.y))
+          .toList();
     }
     return type.relativePositions.map((p) => Point(x + p.x, y + p.y)).toList();
   }
@@ -24,7 +31,9 @@ class Ship {
       'typeId': type.id,
       'x': x,
       'y': y,
-      'relPoints': type.relativePositions.map((p) => {'x': p.x, 'y': p.y}).toList(),
+      'relPoints': type.relativePositions
+          .map((p) => {'x': p.x, 'y': p.y})
+          .toList(),
     };
   }
 

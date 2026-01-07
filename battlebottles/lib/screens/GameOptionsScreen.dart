@@ -28,18 +28,9 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
   static const double _maxShipSpace = 0.4;
 
   int _gridSize = 10;
-  Map<String, int> _fleetCounts = {
-    "4": 2,
-    "3": 3,
-    "2": 3,
-    "1": 4,
-  };
+  Map<String, int> _fleetCounts = {"4": 2, "3": 3, "2": 3, "1": 4};
 
-  Map<String, int> _powerUpCounts = {
-    "octopus": 2,
-    "triple": 1,
-    "shark": 1,
-  };
+  Map<String, int> _powerUpCounts = {"octopus": 2, "triple": 1, "shark": 1};
 
   bool _isUpdating = false;
 
@@ -56,11 +47,11 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 3),
-          backgroundColor: Colors.redAccent,
-        )
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.redAccent,
+      ),
     );
   }
 
@@ -69,7 +60,12 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
 
     setState(() => _isUpdating = true);
     try {
-      await _firestoreService.updateGameSettings(widget.gameId!, _gridSize, _fleetCounts, _powerUpCounts);
+      await _firestoreService.updateGameSettings(
+        widget.gameId!,
+        _gridSize,
+        _fleetCounts,
+        _powerUpCounts,
+      );
     } catch (e) {
       debugPrint("Error updating settings: $e");
     } finally {
@@ -106,7 +102,8 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
     _fleetCounts.forEach((key, c) {
       currentOccupied += int.parse(key) * c;
     });
-    int newOccupied = currentOccupied - (current * shipSize) + (newCount * shipSize);
+    int newOccupied =
+        currentOccupied - (current * shipSize) + (newCount * shipSize);
 
     int maxCapacity = (_gridSize * _gridSize * _maxShipSpace).floor();
 
@@ -134,7 +131,9 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
 
     if (newSize < _gridSize) {
       if (!_canFitInGrid(newSize)) {
-        _showError("Too many ships for ${newSize}x$newSize grid! Remove ships first.");
+        _showError(
+          "Too many ships for ${newSize}x$newSize grid! Remove ships first.",
+        );
         return;
       }
     }
@@ -155,7 +154,9 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white, width: 2),
           ),
-          child: widget.isMultiplayer ? _buildMultiplayerStream() : _buildSingleplayerView(),
+          child: widget.isMultiplayer
+              ? _buildMultiplayerStream()
+              : _buildSingleplayerView(),
         ),
       ),
     );
@@ -163,9 +164,13 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
 
   Widget _buildMultiplayerStream() {
     return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('battles').doc(widget.gameId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('battles')
+          .doc(widget.gameId)
+          .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
         if (!snapshot.data!.exists) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (widget.game.overlays.isActive('GameOptionsScreen')) {
@@ -198,14 +203,15 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
             if (widget.game.overlays.isActive('GameOptionsScreen')) {
               widget.game.overlays.remove('GameOptionsScreen');
               widget.game.startMultiplayerGame(
-                  widget.gameId!,
-                  gridSize: _gridSize,
-                  fleetCounts: _fleetCounts,
-                  powerUps: _powerUpCounts,
-                  p1Name: p1Name,
-                  p2Name: p2Name,
-                  p1Id: p1Id
-              );            }
+                widget.gameId!,
+                gridSize: _gridSize,
+                fleetCounts: _fleetCounts,
+                powerUps: _powerUpCounts,
+                p1Name: p1Name,
+                p2Name: p2Name,
+                p1Id: p1Id,
+              );
+            }
           });
         }
 
@@ -213,11 +219,13 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
           amIHost: amIHost,
           p1Name: data['player1Name'] ?? 'Host',
           p2Name: data['player2Name'],
-          onStart: amIHost ? () async {
-            if (_isUpdating) return;
-            await _updateSettings();
-            await _firestoreService.startGameFromLobby(widget.gameId!);
-          } : null,
+          onStart: amIHost
+              ? () async {
+                  if (_isUpdating) return;
+                  await _updateSettings();
+                  await _firestoreService.startGameFromLobby(widget.gameId!);
+                }
+              : null,
           onLeave: () async {
             await _firestoreService.exitLobby(widget.gameId!);
             widget.game.overlays.remove('GameOptionsScreen');
@@ -250,7 +258,14 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
     return Column(
       children: [
         const SizedBox(height: 20),
-        const Text('GAME OPTIONS', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+        const Text(
+          'GAME OPTIONS',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const Divider(color: Colors.white54, indent: 50, endIndent: 50),
 
         Expanded(
@@ -265,13 +280,23 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
                       const SizedBox(height: 20),
                       _playerInfo(p1Name, true),
                       const SizedBox(height: 10),
-                      const Text('VS', style: TextStyle(color: Colors.orange, fontSize: 20, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'VS',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       _playerInfo(p2Name ?? 'Waiting...', p2Name != null),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20, child: VerticalDivider(color: Colors.white24, width: 1)),
+                const SizedBox(
+                  height: 20,
+                  child: VerticalDivider(color: Colors.white24, width: 1),
+                ),
                 Expanded(
                   flex: 2,
                   child: Padding(
@@ -282,12 +307,22 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("Grid Size: $_gridSize x $_gridSize", style: const TextStyle(color: Colors.white, fontSize: 18)),
+                            Text(
+                              "Grid Size: $_gridSize x $_gridSize",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
                             if (_isUpdating)
                               const SizedBox(
-                                width: 16, height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.greenAccent),
-                              )
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.greenAccent,
+                                ),
+                              ),
                           ],
                         ),
                         Slider(
@@ -297,23 +332,75 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
                           divisions: 10,
                           activeColor: _isUpdating ? Colors.grey : Colors.green,
                           inactiveColor: Colors.white24,
-                          onChanged: (amIHost && !_isUpdating) ? _onGridSizeChanged : null,
-                          onChangeEnd: (amIHost && !_isUpdating) ? (val) => _updateSettings() : null,
+                          onChanged: (amIHost && !_isUpdating)
+                              ? _onGridSizeChanged
+                              : null,
+                          onChangeEnd: (amIHost && !_isUpdating)
+                              ? (val) => _updateSettings()
+                              : null,
                         ),
                         const SizedBox(height: 20),
-                        const Text("Fleet Composition:", style: TextStyle(color: Colors.white, fontSize: 18)),
+                        const Text(
+                          "Fleet Composition:",
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
                         const SizedBox(height: 10),
-                        _counterRow("Quad (4)", "4", _fleetCounts["4"]!, amIHost, (delta) => _modifyShipCount("4", delta)),
-                        _counterRow("Triple (3)", "3", _fleetCounts["3"]!, amIHost, (delta) => _modifyShipCount("3", delta)),
-                        _counterRow("Double (2)", "2", _fleetCounts["2"]!, amIHost, (delta) => _modifyShipCount("2", delta)),
-                        _counterRow("Single (1)", "1", _fleetCounts["1"]!, amIHost, (delta) => _modifyShipCount("1", delta)),
+                        _counterRow(
+                          "Quad (4)",
+                          "4",
+                          _fleetCounts["4"]!,
+                          amIHost,
+                          (delta) => _modifyShipCount("4", delta),
+                        ),
+                        _counterRow(
+                          "Triple (3)",
+                          "3",
+                          _fleetCounts["3"]!,
+                          amIHost,
+                          (delta) => _modifyShipCount("3", delta),
+                        ),
+                        _counterRow(
+                          "Double (2)",
+                          "2",
+                          _fleetCounts["2"]!,
+                          amIHost,
+                          (delta) => _modifyShipCount("2", delta),
+                        ),
+                        _counterRow(
+                          "Single (1)",
+                          "1",
+                          _fleetCounts["1"]!,
+                          amIHost,
+                          (delta) => _modifyShipCount("1", delta),
+                        ),
                         if (widget.isMultiplayer) ...[
                           const Divider(color: Colors.white24),
-                          const Text("Power-Ups:", style: TextStyle(color: Colors.white, fontSize: 18)),
+                          const Text(
+                            "Power-Ups:",
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
                           const SizedBox(height: 5),
-                          _counterRow("Octopus", "octopus", _powerUpCounts["octopus"]!, amIHost, (delta) => _modifyPowerUpCount("octopus", delta)),
-                          _counterRow("Triple Shot", "triple", _powerUpCounts["triple"]!, amIHost, (delta) => _modifyPowerUpCount("triple", delta)),
-                          _counterRow("Shark", "shark", _powerUpCounts["shark"]!, amIHost, (delta) => _modifyPowerUpCount("shark", delta)),
+                          _counterRow(
+                            "Octopus",
+                            "octopus",
+                            _powerUpCounts["octopus"]!,
+                            amIHost,
+                            (delta) => _modifyPowerUpCount("octopus", delta),
+                          ),
+                          _counterRow(
+                            "Triple Shot",
+                            "triple",
+                            _powerUpCounts["triple"]!,
+                            amIHost,
+                            (delta) => _modifyPowerUpCount("triple", delta),
+                          ),
+                          _counterRow(
+                            "Shark",
+                            "shark",
+                            _powerUpCounts["shark"]!,
+                            amIHost,
+                            (delta) => _modifyPowerUpCount("shark", delta),
+                          ),
                         ],
                       ],
                     ),
@@ -331,20 +418,34 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
             children: [
               TextButton(
                 onPressed: onLeave,
-                child: const Text('LEAVE', style: TextStyle(color: Colors.redAccent, fontSize: 16)),
+                child: const Text(
+                  'LEAVE',
+                  style: TextStyle(color: Colors.redAccent, fontSize: 16),
+                ),
               ),
               const SizedBox(width: 30),
               if (onStart != null)
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: (p2Name != null) ? Colors.green : Colors.grey,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    backgroundColor: (p2Name != null)
+                        ? Colors.green
+                        : Colors.grey,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 15,
+                    ),
                   ),
                   onPressed: (p2Name != null && !_isUpdating) ? onStart : null,
-                  child: const Text('START GAME', style: TextStyle(fontSize: 20, color: Colors.white)),
+                  child: const Text(
+                    'START GAME',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
                 )
               else
-                const Text("Waiting for host...", style: TextStyle(color: Colors.white54)),
+                const Text(
+                  "Waiting for host...",
+                  style: TextStyle(color: Colors.white54),
+                ),
             ],
           ),
         ),
@@ -352,7 +453,13 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
     );
   }
 
-  Widget _counterRow(String label, String key, int count, bool enabled, Function(int) onModify) {
+  Widget _counterRow(
+    String label,
+    String key,
+    int count,
+    bool enabled,
+    Function(int) onModify,
+  ) {
     bool isEnabled = enabled && !_isUpdating;
 
     return Padding(
@@ -360,22 +467,38 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
+          ),
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.remove_circle, color: Colors.redAccent, size: 20),
+                icon: const Icon(
+                  Icons.remove_circle,
+                  color: Colors.redAccent,
+                  size: 20,
+                ),
                 onPressed: isEnabled ? () => onModify(-1) : null,
               ),
               SizedBox(
                 width: 30,
-                child: Text('$count',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)
+                child: Text(
+                  '$count',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.add_circle, color: Colors.greenAccent, size: 20),
+                icon: const Icon(
+                  Icons.add_circle,
+                  color: Colors.greenAccent,
+                  size: 20,
+                ),
                 onPressed: isEnabled ? () => onModify(1) : null,
               ),
             ],
@@ -388,9 +511,19 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
   Widget _playerInfo(String name, bool isActive) {
     return Column(
       children: [
-        Icon(Icons.person, size: 40, color: isActive ? Colors.lightBlueAccent : Colors.grey),
+        Icon(
+          Icons.person,
+          size: 40,
+          color: isActive ? Colors.lightBlueAccent : Colors.grey,
+        ),
         const SizedBox(height: 5),
-        Text(name, style: TextStyle(color: isActive ? Colors.white : Colors.white54, fontWeight: FontWeight.bold)),
+        Text(
+          name,
+          style: TextStyle(
+            color: isActive ? Colors.white : Colors.white54,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }

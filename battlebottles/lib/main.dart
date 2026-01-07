@@ -13,9 +13,7 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await AudioManager.init();
 
@@ -49,62 +47,62 @@ class BattleBottlesApp extends StatelessWidget {
               ),
             ),
 
-            Positioned.fill(
-              child: Container(
-                color: const Color(0x1f0a0a0a),
-              ),
-            ),
+            Positioned.fill(child: Container(color: const Color(0x1f0a0a0a))),
             LayoutBuilder(
               builder: (context, constraints) {
                 return GameWidget(
                   game: game,
                   overlayBuilderMap: {
-                    'MultiplayerLobby': (BuildContext context, BattleShipsGame game) {
-                      return AnimatedOverlay(
-                        child: MultiplayerLobby(
-                          game: game,
-                          onClose: () => game.overlays.remove('MultiplayerLobby'),
-                        ),
-                      );
-                    },
-                    'GameOptionsScreen': (BuildContext context, BattleShipsGame game) {
-                      return AnimatedOverlay(
-                        child: GameOptionsScreen(
-                          game: game,
-                          isMultiplayer: game.tempIsMultiplayer,
-                          gameId: game.tempGameId,
-                        ),
-                      );
-                    },
-                    'GameOverMenu': (BuildContext context, BattleShipsGame game) {
-                      return AnimatedOverlay(
-                        child: GameOverMenu(
-                          game: game,
-                          overlayId: 'GameOverMenu',
-                        ),
-                      );
-                    },
+                    'MultiplayerLobby':
+                        (BuildContext context, BattleShipsGame game) {
+                          return AnimatedOverlay(
+                            child: MultiplayerLobby(
+                              game: game,
+                              onClose: () =>
+                                  game.overlays.remove('MultiplayerLobby'),
+                            ),
+                          );
+                        },
+                    'GameOptionsScreen':
+                        (BuildContext context, BattleShipsGame game) {
+                          return AnimatedOverlay(
+                            child: GameOptionsScreen(
+                              game: game,
+                              isMultiplayer: game.tempIsMultiplayer,
+                              gameId: game.tempGameId,
+                            ),
+                          );
+                        },
+                    'GameOverMenu':
+                        (BuildContext context, BattleShipsGame game) {
+                          return AnimatedOverlay(
+                            child: GameOverMenu(
+                              game: game,
+                              overlayId: 'GameOverMenu',
+                            ),
+                          );
+                        },
                     'HelpScreen': (BuildContext context, BattleShipsGame game) {
-                      return AnimatedOverlay(
-                        child: HelpScreen(game: game),
-                      );
+                      return AnimatedOverlay(child: HelpScreen(game: game));
                     },
-                    'WinnerConfetti': (BuildContext context, BattleShipsGame game) {
-                      return IgnorePointer(
-                        child: Lottie.asset(
-                          'assets/images/confetti.json',
-                          fit: BoxFit.cover,
-                          repeat: false,
-                        ),
-                      );
-                    },
+                    'WinnerConfetti':
+                        (BuildContext context, BattleShipsGame game) {
+                          return IgnorePointer(
+                            child: Lottie.asset(
+                              'assets/images/confetti.json',
+                              fit: BoxFit.cover,
+                              repeat: false,
+                            ),
+                          );
+                        },
                   },
                 );
               },
             ),
           ],
         ),
-      ), );
+      ),
+    );
   }
 }
 
@@ -116,15 +114,22 @@ class AnimatedOverlay extends StatefulWidget {
   State<AnimatedOverlay> createState() => _AnimatedOverlayState();
 }
 
-class _AnimatedOverlayState extends State<AnimatedOverlay> with SingleTickerProviderStateMixin {
+class _AnimatedOverlayState extends State<AnimatedOverlay>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
     _controller.forward();
   }
 
@@ -136,9 +141,6 @@ class _AnimatedOverlayState extends State<AnimatedOverlay> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: widget.child,
-    );
+    return ScaleTransition(scale: _scaleAnimation, child: widget.child);
   }
 }

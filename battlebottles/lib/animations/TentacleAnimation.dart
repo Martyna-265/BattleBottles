@@ -1,7 +1,8 @@
 import 'package:flame/components.dart';
 import '../BattleShipsGame.dart';
 
-class TentacleAnimation extends SpriteAnimationComponent with HasGameReference<BattleShipsGame> {
+class TentacleAnimation extends SpriteAnimationComponent
+    with HasGameReference<BattleShipsGame> {
   final Vector2 targetPosition;
   final double cellSize;
   final bool flip;

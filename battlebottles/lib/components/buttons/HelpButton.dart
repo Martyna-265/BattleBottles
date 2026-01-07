@@ -5,13 +5,12 @@ import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
 import '../../services/AudioManager.dart';
 
-class HelpButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
-
+class HelpButton extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   static const double _baseFontSize = 60.0;
 
   HelpButton({double sideLength = 30.0})
-      : super(size: Vector2(sideLength, sideLength)) {
-
+    : super(size: Vector2(sideLength, sideLength)) {
     _textPaint = TextPaint(
       style: const TextStyle(
         fontSize: _baseFontSize,
@@ -45,12 +44,7 @@ class HelpButton extends PositionComponent with HasGameReference<BattleShipsGame
     canvas.translate(size.x / 2, size.y / 2);
     canvas.scale(scaleFactor);
 
-    _textPaint.render(
-      canvas,
-      '?',
-      Vector2.zero(),
-      anchor: Anchor.center,
-    );
+    _textPaint.render(canvas, '?', Vector2.zero(), anchor: Anchor.center);
 
     canvas.restore();
   }

@@ -3,9 +3,15 @@ import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import '../../BattleShipsGame.dart';
 
-class RoundInfo extends PositionComponent with HasGameReference<BattleShipsGame> {
+class RoundInfo extends PositionComponent
+    with HasGameReference<BattleShipsGame> {
   RoundInfo()
-      : super(size: Vector2(BattleShipsGame.squareLength * 7, BattleShipsGame.squareLength));
+    : super(
+        size: Vector2(
+          BattleShipsGame.squareLength * 7,
+          BattleShipsGame.squareLength,
+        ),
+      );
 
   final _backgroundPaint = Paint()..color = const Color(0xff003366);
   final _borderPaint = Paint()
@@ -25,8 +31,8 @@ class RoundInfo extends PositionComponent with HasGameReference<BattleShipsGame>
   @override
   void render(Canvas canvas) {
     RRect rrect = RRect.fromRectAndRadius(
-        size.toRect(),
-        const Radius.circular(0.4)
+      size.toRect(),
+      const Radius.circular(0.4),
     );
 
     canvas.drawRRect(rrect, _backgroundPaint);

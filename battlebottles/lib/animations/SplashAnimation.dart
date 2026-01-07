@@ -1,14 +1,13 @@
 import 'package:flame/components.dart';
 import '../BattleShipsGame.dart';
 
-class SplashAnimation extends SpriteAnimationComponent with HasGameReference<BattleShipsGame> {
+class SplashAnimation extends SpriteAnimationComponent
+    with HasGameReference<BattleShipsGame> {
   final Vector2 targetPosition;
   final double cellSize;
 
-  SplashAnimation({
-    required this.targetPosition,
-    required this.cellSize,
-  }) : super(priority: 300);
+  SplashAnimation({required this.targetPosition, required this.cellSize})
+    : super(priority: 300);
 
   @override
   Future<void> onLoad() async {

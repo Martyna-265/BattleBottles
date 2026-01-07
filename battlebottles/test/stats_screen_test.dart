@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('StatsDialog displays correct data and labels', (WidgetTester tester) async {
+  testWidgets('StatsDialog displays correct data and labels', (
+    WidgetTester tester,
+  ) async {
     final mockStats = {
       'wins': 5,
       'losses': 2,
@@ -20,9 +22,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: StatsDialog(stats: mockStats),
-        ),
+        home: Scaffold(body: StatsDialog(stats: mockStats)),
       ),
     );
 

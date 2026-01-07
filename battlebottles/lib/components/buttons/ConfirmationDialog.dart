@@ -12,7 +12,7 @@ class DialogButton extends PositionComponent with TapCallbacks {
   final Color color;
 
   DialogButton(this.text, this.color, this.onTapAction)
-      : super(size: Vector2(6, 2.5));
+    : super(size: Vector2(6, 2.5));
 
   late final Paint _bgPaint = Paint()..color = color;
   final Paint _borderPaint = Paint()
@@ -22,7 +22,10 @@ class DialogButton extends PositionComponent with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
-    RRect rrect = RRect.fromRectAndRadius(size.toRect(), Radius.circular(size.y / 2));
+    RRect rrect = RRect.fromRectAndRadius(
+      size.toRect(),
+      Radius.circular(size.y / 2),
+    );
     canvas.drawRRect(rrect, _bgPaint);
     canvas.drawRRect(rrect, _borderPaint);
 
@@ -34,10 +37,10 @@ class DialogButton extends PositionComponent with TapCallbacks {
         fontWeight: FontWeight.bold,
       ),
     ).render(
-        canvas,
-        text,
-        Vector2(size.x / 2, size.y / 2),
-        anchor: Anchor.center
+      canvas,
+      text,
+      Vector2(size.x / 2, size.y / 2),
+      anchor: Anchor.center,
     );
   }
 
@@ -48,16 +51,14 @@ class DialogButton extends PositionComponent with TapCallbacks {
   }
 }
 
-class ConfirmationDialog extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
+class ConfirmationDialog extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   final String message;
   final VoidCallback onConfirm;
 
   final Vector2 _boxSize = Vector2(20, 8);
 
-  ConfirmationDialog({
-    required this.message,
-    required this.onConfirm,
-  });
+  ConfirmationDialog({required this.message, required this.onConfirm});
 
   final _overlayPaint = Paint()..color = const Color(0xAA000000);
   final _bgPaint = Paint()..color = const Color(0xFF003366);
@@ -91,19 +92,21 @@ class ConfirmationDialog extends PositionComponent with HasGameReference<BattleS
     final buttonY = center.y + boxHalfHeight - 2.5;
     const buttonOffsetX = 4.5;
 
-    add(DialogButton('YES', const Color(0xFF4CAF50), () {
-      onConfirm();
-      removeFromParent();
-    })
-      ..position = Vector2(center.x - buttonOffsetX, buttonY)
-      ..anchor = Anchor.center
+    add(
+      DialogButton('YES', const Color(0xFF4CAF50), () {
+          onConfirm();
+          removeFromParent();
+        })
+        ..position = Vector2(center.x - buttonOffsetX, buttonY)
+        ..anchor = Anchor.center,
     );
 
-    add(DialogButton('NO', const Color(0xFFF44336), () {
-      removeFromParent();
-    })
-      ..position = Vector2(center.x + buttonOffsetX, buttonY)
-      ..anchor = Anchor.center
+    add(
+      DialogButton('NO', const Color(0xFFF44336), () {
+          removeFromParent();
+        })
+        ..position = Vector2(center.x + buttonOffsetX, buttonY)
+        ..anchor = Anchor.center,
     );
   }
 
@@ -113,22 +116,18 @@ class ConfirmationDialog extends PositionComponent with HasGameReference<BattleS
 
     final center = size.toOffset() / 2;
     final boxRect = RRect.fromRectAndRadius(
-        Rect.fromCenter(
-            center: center,
-            width: _boxSize.x,
-            height: _boxSize.y
-        ),
-        const Radius.circular(2.0)
+      Rect.fromCenter(center: center, width: _boxSize.x, height: _boxSize.y),
+      const Radius.circular(2.0),
     );
 
     canvas.drawRRect(boxRect, _bgPaint);
     canvas.drawRRect(boxRect, _borderPaint);
 
     _textPaint.render(
-        canvas,
-        message,
-        Vector2(center.dx, center.dy - _boxSize.y / 2 + 2.5),
-        anchor: Anchor.center
+      canvas,
+      message,
+      Vector2(center.dx, center.dy - _boxSize.y / 2 + 2.5),
+      anchor: Anchor.center,
     );
   }
 

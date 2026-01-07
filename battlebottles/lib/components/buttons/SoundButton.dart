@@ -4,13 +4,15 @@ import 'package:flame/events.dart';
 import '../../BattleShipsGame.dart';
 import '../../services/AudioManager.dart';
 
-class SoundButton extends PositionComponent with HasGameReference<BattleShipsGame>, TapCallbacks {
-
+class SoundButton extends PositionComponent
+    with HasGameReference<BattleShipsGame>, TapCallbacks {
   SoundButton({double sideLength = 30.0})
-      : super(size: Vector2(sideLength, sideLength));
+    : super(size: Vector2(sideLength, sideLength));
 
   final Paint _bgPaint = Paint()..color = const Color(0xff004488);
-  final Paint _iconPaint = Paint()..color = const Color(0xFFFFFFFF)..style = PaintingStyle.fill;
+  final Paint _iconPaint = Paint()
+    ..color = const Color(0xFFFFFFFF)
+    ..style = PaintingStyle.fill;
 
   final Paint _borderPaint = Paint()
     ..color = const Color(0xFFFFFFFF)
@@ -53,8 +55,20 @@ class SoundButton extends PositionComponent with HasGameReference<BattleShipsGam
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2;
 
-      canvas.drawArc(const Rect.fromLTWH(-4, -6, 12, 12), -0.7, 1.4, false, wavePaint);
-      canvas.drawArc(const Rect.fromLTWH(-4, -8, 16, 16), -0.7, 1.4, false, wavePaint);
+      canvas.drawArc(
+        const Rect.fromLTWH(-4, -6, 12, 12),
+        -0.7,
+        1.4,
+        false,
+        wavePaint,
+      );
+      canvas.drawArc(
+        const Rect.fromLTWH(-4, -8, 16, 16),
+        -0.7,
+        1.4,
+        false,
+        wavePaint,
+      );
     }
 
     if (!AudioManager.sfxOn) {

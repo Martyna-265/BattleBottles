@@ -13,7 +13,6 @@ class FakeBattleShipsGame extends Fake implements BattleShipsGame {
 
 void main() {
   group('TurnManager Tests', () {
-
     test('reset() should set currentPlayer to 0', () {
       final game = FakeBattleShipsGame();
       final turnManager = TurnManager(2, game);
@@ -36,6 +35,5 @@ void main() {
 
       expect(turnManager.currentPlayer, 1);
     });
-
   });
 }
