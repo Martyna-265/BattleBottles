@@ -12,7 +12,7 @@ class DialogButton extends PositionComponent with TapCallbacks {
   final Color color;
 
   DialogButton(this.text, this.color, this.onTapAction)
-    : super(size: Vector2(6, 2.5));
+      : super(size: Vector2(6, 2.5));
 
   late final Paint _bgPaint = Paint()..color = color;
   final Paint _borderPaint = Paint()
@@ -94,17 +94,17 @@ class ConfirmationDialog extends PositionComponent
 
     add(
       DialogButton('YES', const Color(0xFF4CAF50), () {
-          onConfirm();
-          removeFromParent();
-        })
+        onConfirm();
+        removeFromParent();
+      })
         ..position = Vector2(center.x - buttonOffsetX, buttonY)
         ..anchor = Anchor.center,
     );
 
     add(
       DialogButton('NO', const Color(0xFFF44336), () {
-          removeFromParent();
-        })
+        removeFromParent();
+      })
         ..position = Vector2(center.x + buttonOffsetX, buttonY)
         ..anchor = Anchor.center,
     );

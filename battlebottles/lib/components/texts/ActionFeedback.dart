@@ -7,12 +7,12 @@ import '../../BattleShipsGame.dart';
 class ActionFeedback extends PositionComponent
     with HasGameReference<BattleShipsGame> {
   ActionFeedback()
-    : super(
-        size: Vector2(
-          BattleShipsGame.squareLength * 7,
-          BattleShipsGame.squareLength * 1.3,
-        ),
-      );
+      : super(
+          size: Vector2(
+            BattleShipsGame.squareLength * 7,
+            BattleShipsGame.squareLength * 1.3,
+          ),
+        );
 
   late TextPaint _mainTextPaint;
   late TextPaint _subTextPaint;

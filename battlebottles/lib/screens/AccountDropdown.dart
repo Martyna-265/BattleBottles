@@ -15,7 +15,7 @@ class DropdownOption extends PositionComponent with TapCallbacks {
   final bool isLast;
 
   DropdownOption(this.text, this.onTapAction, {this.isLast = false})
-    : super(size: Vector2(140, 35));
+      : super(size: Vector2(140, 35));
 
   final _bgPaint = Paint()..color = const Color(0xFF004488);
   final _hoverPaint = Paint()..color = const Color(0xFF0055AA);
@@ -88,20 +88,19 @@ class AccountDropdown extends PositionComponent
       if (_isExpanded) _toggleMenu();
     });
 
-    _label =
-        TextComponent(
-            text: 'Sign in',
-            textRenderer: TextPaint(
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFFFFFFFF),
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Awesome Font',
-              ),
-            ),
-          )
-          ..anchor = Anchor.center
-          ..position = size / 2;
+    _label = TextComponent(
+      text: 'Sign in',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          fontSize: 14,
+          color: Color(0xFFFFFFFF),
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Awesome Font',
+        ),
+      ),
+    )
+      ..anchor = Anchor.center
+      ..position = size / 2;
 
     add(_label);
   }
@@ -149,7 +148,8 @@ class AccountDropdown extends PositionComponent
               showAnimatedDialog(game.buildContext!, StatsDialog(stats: stats));
             }
           }
-        }, isLast: false)..position = Vector2(0, startY),
+        }, isLast: false)
+          ..position = Vector2(0, startY),
       );
 
       double currentY = startY + optionHeight;
@@ -175,7 +175,8 @@ class AccountDropdown extends PositionComponent
                 );
               }
             }
-          }, isLast: false)..position = Vector2(0, currentY),
+          }, isLast: false)
+            ..position = Vector2(0, currentY),
         );
 
         currentY += optionHeight;
@@ -200,7 +201,8 @@ class AccountDropdown extends PositionComponent
                 },
               );
             }
-          }, isLast: true)..position = Vector2(0, currentY),
+          }, isLast: true)
+            ..position = Vector2(0, currentY),
         );
       } else {
         // LOGGED IN
@@ -214,7 +216,8 @@ class AccountDropdown extends PositionComponent
                     FriendsScreen(onClose: () => Navigator.of(context).pop()),
               );
             }
-          }, isLast: false)..position = Vector2(0, currentY),
+          }, isLast: false)
+            ..position = Vector2(0, currentY),
         );
 
         currentY += optionHeight;
@@ -223,7 +226,8 @@ class AccountDropdown extends PositionComponent
           DropdownOption('Logout', () {
             _auth.logout();
             _toggleMenu();
-          }, isLast: true)..position = Vector2(0, currentY),
+          }, isLast: true)
+            ..position = Vector2(0, currentY),
         );
       }
     }

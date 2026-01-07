@@ -8,7 +8,7 @@ import '../../services/AudioManager.dart';
 
 class Water extends GridElement {
   Water(super.gridX, super.gridY, super.opponent)
-    : super(condition: Condition.fromInt(3)) {
+      : super(condition: Condition.fromInt(3)) {
     sprite = opponent ? Condition.fromInt(5).sprite : condition.sprite;
   }
 

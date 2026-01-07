@@ -35,7 +35,6 @@ class BattleBottlesApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
         backgroundColor: Colors.transparent,
-
         body: Stack(
           children: [
             Positioned.fill(
@@ -46,7 +45,6 @@ class BattleBottlesApp extends StatelessWidget {
                 filterQuality: FilterQuality.none,
               ),
             ),
-
             Positioned.fill(child: Container(color: const Color(0x1f0a0a0a))),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -55,46 +53,46 @@ class BattleBottlesApp extends StatelessWidget {
                   overlayBuilderMap: {
                     'MultiplayerLobby':
                         (BuildContext context, BattleShipsGame game) {
-                          return AnimatedOverlay(
-                            child: MultiplayerLobby(
-                              game: game,
-                              onClose: () =>
-                                  game.overlays.remove('MultiplayerLobby'),
-                            ),
-                          );
-                        },
+                      return AnimatedOverlay(
+                        child: MultiplayerLobby(
+                          game: game,
+                          onClose: () =>
+                              game.overlays.remove('MultiplayerLobby'),
+                        ),
+                      );
+                    },
                     'GameOptionsScreen':
                         (BuildContext context, BattleShipsGame game) {
-                          return AnimatedOverlay(
-                            child: GameOptionsScreen(
-                              game: game,
-                              isMultiplayer: game.tempIsMultiplayer,
-                              gameId: game.tempGameId,
-                            ),
-                          );
-                        },
+                      return AnimatedOverlay(
+                        child: GameOptionsScreen(
+                          game: game,
+                          isMultiplayer: game.tempIsMultiplayer,
+                          gameId: game.tempGameId,
+                        ),
+                      );
+                    },
                     'GameOverMenu':
                         (BuildContext context, BattleShipsGame game) {
-                          return AnimatedOverlay(
-                            child: GameOverMenu(
-                              game: game,
-                              overlayId: 'GameOverMenu',
-                            ),
-                          );
-                        },
+                      return AnimatedOverlay(
+                        child: GameOverMenu(
+                          game: game,
+                          overlayId: 'GameOverMenu',
+                        ),
+                      );
+                    },
                     'HelpScreen': (BuildContext context, BattleShipsGame game) {
                       return AnimatedOverlay(child: HelpScreen(game: game));
                     },
                     'WinnerConfetti':
                         (BuildContext context, BattleShipsGame game) {
-                          return IgnorePointer(
-                            child: Lottie.asset(
-                              'assets/images/confetti.json',
-                              fit: BoxFit.cover,
-                              repeat: false,
-                            ),
-                          );
-                        },
+                      return IgnorePointer(
+                        child: Lottie.asset(
+                          'assets/images/confetti.json',
+                          fit: BoxFit.cover,
+                          repeat: false,
+                        ),
+                      );
+                    },
                   },
                 );
               },

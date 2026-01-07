@@ -267,7 +267,6 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
           ),
         ),
         const Divider(color: Colors.white54, indent: 50, endIndent: 50),
-
         Expanded(
           child: SingleChildScrollView(
             child: Row(
@@ -410,7 +409,6 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
             ),
           ),
         ),
-
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: Row(
@@ -427,9 +425,8 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
               if (onStart != null)
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: (p2Name != null)
-                        ? Colors.green
-                        : Colors.grey,
+                    backgroundColor:
+                        (p2Name != null) ? Colors.green : Colors.grey,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 15,

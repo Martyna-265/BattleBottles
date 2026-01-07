@@ -8,7 +8,7 @@ class Condition {
   }
 
   Condition._(this.value, this.label, double x, double y, double w, double h)
-    : sprite = GridElementSprite(x, y, w, h);
+      : sprite = GridElementSprite(x, y, w, h);
 
   final int value;
   final String label;

@@ -31,9 +31,8 @@ class Ship {
       'typeId': type.id,
       'x': x,
       'y': y,
-      'relPoints': type.relativePositions
-          .map((p) => {'x': p.x, 'y': p.y})
-          .toList(),
+      'relPoints':
+          type.relativePositions.map((p) => {'x': p.x, 'y': p.y}).toList(),
     };
   }
 

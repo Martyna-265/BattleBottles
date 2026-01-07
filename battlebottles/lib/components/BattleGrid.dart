@@ -52,9 +52,8 @@ class BattleGrid extends PositionComponent
 
     fleetConfig.forEach((sizeKey, count) {
       int size = int.parse(sizeKey);
-      List<ShipType> availableTypes = ShipType.all
-          .where((t) => t.size == size)
-          .toList();
+      List<ShipType> availableTypes =
+          ShipType.all.where((t) => t.size == size).toList();
 
       if (availableTypes.isNotEmpty) {
         Random r = Random();
@@ -227,8 +226,7 @@ class BattleGrid extends PositionComponent
       if (p.x < 0 ||
           p.x >= game.squaresInGrid ||
           p.y < 0 ||
-          p.y >= game.squaresInGrid)
-        return false;
+          p.y >= game.squaresInGrid) return false;
       if (!_isValidCell(p.x, p.y, ship)) return false;
       List<Point<int>> neighbors = [
         Point(p.x, p.y - 1),

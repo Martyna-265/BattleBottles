@@ -526,7 +526,7 @@ class BattleShipsGame extends FlameGame
       // Narrow
       bool showOpponent =
           (!isGameRunning && !isInMenu && visibleCurrentPlayer != 0) ||
-          (visibleCurrentPlayer == 1);
+              (visibleCurrentPlayer == 1);
 
       if (showOpponent) {
         // Show opponent
@@ -712,85 +712,83 @@ class BattleShipsGame extends FlameGame
         .doc(multiplayerGameId)
         .snapshots()
         .listen((snapshot) async {
-          if (!snapshot.exists) return;
-          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      if (!snapshot.exists) return;
+      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-          if (data['player1Id'] == myUserId) {
-            amIHost = true;
-          } else {
-            amIHost = false;
+      if (data['player1Id'] == myUserId) {
+        amIHost = true;
+      } else {
+        amIHost = false;
+      }
+
+      String p1Name = data['player1Name'] ?? 'Player 1';
+      String p2Name = data['player2Name'] ?? 'Player 2';
+
+      if (amIHost) {
+        opponentName = p2Name;
+      } else {
+        opponentName = p1Name;
+      }
+
+      if (playerLabel.isMounted) {
+        if (amIHost) {
+          playerLabel.text = "You ($p1Name)";
+        } else {
+          playerLabel.text = "You ($p2Name)";
+        }
+      }
+
+      bool p1Ready = data['player1Ready'] ?? false;
+      bool p2Ready = data['player2Ready'] ?? false;
+
+      if (p1Ready && p2Ready) {
+        if (!turnManager.hasShipsSynced) {
+          List<dynamic> enemyShipsPositions =
+              amIHost ? (data['ships_p2'] ?? []) : (data['ships_p1'] ?? []);
+          if (enemyShipsPositions.isNotEmpty) {
+            opponentsGrid.setEnemyShips(enemyShipsPositions);
+            turnManager.hasShipsSynced = true;
+            isGameRunning = true;
           }
+        }
+        if (startButton.isMounted) world.remove(startButton);
 
-          String p1Name = data['player1Name'] ?? 'Player 1';
-          String p2Name = data['player2Name'] ?? 'Player 2';
+        _syncShots(data);
 
-          if (amIHost) {
-            opponentName = p2Name;
-          } else {
-            opponentName = p1Name;
+        if (data.containsKey('lastSpecialAttack')) {
+          var attackData = data['lastSpecialAttack'] as Map<String, dynamic>;
+          String attackId = attackData['id'];
+          String attackerId = attackData['attacker'];
+
+          if (attackId != lastSpecialAttackId && attackerId != myUserId) {
+            lastSpecialAttackId = attackId;
+            _playEnemySpecialAnimation(
+              attackData['type'],
+              attackData['target'],
+            );
           }
+        }
 
-          if (playerLabel.isMounted) {
-            if (amIHost) {
-              playerLabel.text = "You ($p1Name)";
-            } else {
-              playerLabel.text = "You ($p2Name)";
-            }
-          }
+        String currentTurnUserId = data['currentTurn'];
+        int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
 
-          bool p1Ready = data['player1Ready'] ?? false;
-          bool p2Ready = data['player2Ready'] ?? false;
+        if (turnManager.currentPlayer != newPlayerState &&
+            turnManager.currentPlayer != -1 &&
+            isGameRunning) {
+          await Future.delayed(const Duration(seconds: delay));
+        }
+        turnManager.currentPlayer = newPlayerState;
+      } else {
+        String myReadyField = amIHost ? 'player1Ready' : 'player2Ready';
+        bool amIReady = data[myReadyField] ?? false;
 
-          if (p1Ready && p2Ready) {
-            if (!turnManager.hasShipsSynced) {
-              List<dynamic> enemyShipsPositions = amIHost
-                  ? (data['ships_p2'] ?? [])
-                  : (data['ships_p1'] ?? []);
-              if (enemyShipsPositions.isNotEmpty) {
-                opponentsGrid.setEnemyShips(enemyShipsPositions);
-                turnManager.hasShipsSynced = true;
-                isGameRunning = true;
-              }
-            }
-            if (startButton.isMounted) world.remove(startButton);
+        if (amIReady && turnManager.currentPlayer == 0) {
+          turnManager.currentPlayer = -1; // Waiting state
+        }
+      }
 
-            _syncShots(data);
-
-            if (data.containsKey('lastSpecialAttack')) {
-              var attackData =
-                  data['lastSpecialAttack'] as Map<String, dynamic>;
-              String attackId = attackData['id'];
-              String attackerId = attackData['attacker'];
-
-              if (attackId != lastSpecialAttackId && attackerId != myUserId) {
-                lastSpecialAttackId = attackId;
-                _playEnemySpecialAnimation(
-                  attackData['type'],
-                  attackData['target'],
-                );
-              }
-            }
-
-            String currentTurnUserId = data['currentTurn'];
-            int newPlayerState = (currentTurnUserId == myUserId) ? 1 : 2;
-
-            if (turnManager.currentPlayer != newPlayerState &&
-                turnManager.currentPlayer != -1 &&
-                isGameRunning) {
-              await Future.delayed(const Duration(seconds: delay));
-            }
-            turnManager.currentPlayer = newPlayerState;
-          } else {
-            String myReadyField = amIHost ? 'player1Ready' : 'player2Ready';
-            bool amIReady = data[myReadyField] ?? false;
-
-            if (amIReady && turnManager.currentPlayer == 0) {
-              turnManager.currentPlayer = -1; // Waiting state
-            }
-          }
-
-          updateView();
-        });
+      updateView();
+    });
   }
 
   void _playEnemySpecialAnimation(String type, int target) {
@@ -860,9 +858,8 @@ class BattleShipsGame extends FlameGame
     if (multiplayerGameId == null) return;
 
     String fieldToUpdate = amIHost ? 'shots_p1' : 'shots_p2';
-    final gameRef = FirebaseFirestore.instance
-        .collection('battles')
-        .doc(multiplayerGameId);
+    final gameRef =
+        FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(gameRef);
@@ -890,9 +887,8 @@ class BattleShipsGame extends FlameGame
   Future<void> sendMoveToFirebase(int index) async {
     if (multiplayerGameId == null) return;
     String fieldToUpdate = amIHost ? 'shots_p1' : 'shots_p2';
-    final gameRef = FirebaseFirestore.instance
-        .collection('battles')
-        .doc(multiplayerGameId);
+    final gameRef =
+        FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
     int gridY = index ~/ squaresInGrid;
     int gridX = index % squaresInGrid;
     bool isHit = false;
@@ -923,9 +919,8 @@ class BattleShipsGame extends FlameGame
   Future<void> sendSpecialEffect(String type, int indexOrRow) async {
     if (multiplayerGameId == null) return;
 
-    final gameRef = FirebaseFirestore.instance
-        .collection('battles')
-        .doc(multiplayerGameId);
+    final gameRef =
+        FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
 
     String attackId = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -1015,9 +1010,8 @@ class BattleShipsGame extends FlameGame
   Future<void> sendSharkAttack(int rowY, bool keepTurn) async {
     if (multiplayerGameId == null) return;
 
-    final gameRef = FirebaseFirestore.instance
-        .collection('battles')
-        .doc(multiplayerGameId);
+    final gameRef =
+        FirebaseFirestore.instance.collection('battles').doc(multiplayerGameId);
 
     List<int> rowIndices = List.generate(
       squaresInGrid,
@@ -1064,8 +1058,8 @@ class PlayerLabel extends PositionComponent {
     ..strokeWidth = 0.05;
 
   PlayerLabel({required TextPaint textRenderer})
-    : _textPaint = textRenderer,
-      super(priority: 10);
+      : _textPaint = textRenderer,
+        super(priority: 10);
 
   set text(String value) {
     _text = value;

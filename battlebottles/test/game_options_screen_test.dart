@@ -69,6 +69,6 @@ void setupFirebaseAuthMocks() {
 
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(authChannel, (MethodCall methodCall) async {
-        return null;
-      });
+    return null;
+  });
 }

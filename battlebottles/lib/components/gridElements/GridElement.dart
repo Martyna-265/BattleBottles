@@ -23,13 +23,12 @@ abstract class GridElement extends PositionComponent
   final bool opponent;
 
   GridElement(this.gridX, this.gridY, this.opponent, {required this.condition})
-    : bombable =
-          (condition.label == 'down' ||
-              condition.label == 'water_down' ||
-              condition.label == 'hurt')
-          ? false
-          : true,
-      super(size: BattleShipsGame.squareSize);
+      : bombable = (condition.label == 'down' ||
+                condition.label == 'water_down' ||
+                condition.label == 'hurt')
+            ? false
+            : true,
+        super(size: BattleShipsGame.squareSize);
 
   @override
   void render(Canvas canvas) {
@@ -120,9 +119,8 @@ abstract class GridElement extends PositionComponent
       game.tripleShotsLeft--;
 
       if (game.tripleShotsLeft > 0) {
-        String shotsText = game.tripleShotsLeft == 1
-            ? "shot left"
-            : "shots left";
+        String shotsText =
+            game.tripleShotsLeft == 1 ? "shot left" : "shots left";
         game.actionFeedback.setMessage(
           'miss',
           false,

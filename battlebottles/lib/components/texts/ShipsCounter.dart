@@ -88,8 +88,7 @@ class ShipsCounter extends PositionComponent {
     double getGroupWidth(int shipSize) =>
         (shipSize * baseIconSize) + gapBetweenIconAndText + 1.2;
 
-    double totalContentWidth =
-        getGroupWidth(4) +
+    double totalContentWidth = getGroupWidth(4) +
         getGroupWidth(3) +
         getGroupWidth(2) +
         getGroupWidth(1) +

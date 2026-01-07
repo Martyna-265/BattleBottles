@@ -37,7 +37,6 @@ class GameOverMenu extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-
             ElevatedButton(
               onPressed: () {
                 game.overlays.remove(overlayId);

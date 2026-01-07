@@ -6,12 +6,12 @@ import '../../BattleShipsGame.dart';
 class RoundInfo extends PositionComponent
     with HasGameReference<BattleShipsGame> {
   RoundInfo()
-    : super(
-        size: Vector2(
-          BattleShipsGame.squareLength * 7,
-          BattleShipsGame.squareLength,
-        ),
-      );
+      : super(
+          size: Vector2(
+            BattleShipsGame.squareLength * 7,
+            BattleShipsGame.squareLength,
+          ),
+        );
 
   final _backgroundPaint = Paint()..color = const Color(0xff003366);
   final _borderPaint = Paint()

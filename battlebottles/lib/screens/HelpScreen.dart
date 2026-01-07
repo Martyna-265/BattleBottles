@@ -49,7 +49,6 @@ class HelpScreen extends StatelessWidget {
                 ],
               ),
               const Divider(color: Colors.white),
-
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -59,7 +58,6 @@ class HelpScreen extends StatelessWidget {
                       _buildText(
                         "Take command of miniature crews navigating tiny bottles across dynamic battlefields. The seas may be small, but the strategy runs deep as you outmaneuver opponents in a test of wits and luck. Will your fleet survive the storm, or will your hopes end up shattered at the bottom of the ocean?",
                       ),
-
                       const SizedBox(height: 15),
                       _buildHeader("How to play"),
                       _buildListItem(
@@ -90,7 +88,6 @@ class HelpScreen extends StatelessWidget {
                         "7. After Action Report:",
                         "Even if you lose, you can reveal the battlefield to see the enemy's formation and discover exactly where those elusive ships were hiding.",
                       ),
-
                       const SizedBox(height: 15),
                       _buildHeader("Power-ups"),
                       _buildListItem(
@@ -105,7 +102,6 @@ class HelpScreen extends StatelessWidget {
                         "• Shark:",
                         "High risk, high reward. Select a row on the enemy grid to sink it entirely. But beware - the Shark bites back, destroying the corresponding line on your own grid as well!",
                       ),
-
                       const SizedBox(height: 15),
                       _buildHeader("Multiplayer"),
                       _buildText(

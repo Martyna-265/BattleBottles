@@ -7,7 +7,7 @@ class OctopusHeadAnimation extends SpriteAnimationComponent
   final double cellSize;
 
   OctopusHeadAnimation({required this.targetPosition, required this.cellSize})
-    : super(priority: 200);
+      : super(priority: 200);
 
   @override
   Future<void> onLoad() async {

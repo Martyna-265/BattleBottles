@@ -7,7 +7,7 @@ class ExplosionAnimation extends SpriteAnimationComponent
   final double cellSize;
 
   ExplosionAnimation({required this.targetPosition, required this.cellSize})
-    : super(priority: 300);
+      : super(priority: 300);
 
   @override
   Future<void> onLoad() async {

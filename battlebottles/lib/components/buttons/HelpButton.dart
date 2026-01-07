@@ -10,7 +10,7 @@ class HelpButton extends PositionComponent
   static const double _baseFontSize = 60.0;
 
   HelpButton({double sideLength = 30.0})
-    : super(size: Vector2(sideLength, sideLength)) {
+      : super(size: Vector2(sideLength, sideLength)) {
     _textPaint = TextPaint(
       style: const TextStyle(
         fontSize: _baseFontSize,

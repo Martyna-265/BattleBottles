@@ -242,8 +242,7 @@ class FirestoreService {
         losses == 0 &&
         gamesSingle == 0 &&
         gamesMulti == 0 &&
-        puTotal == 0)
-      return;
+        puTotal == 0) return;
 
     final userRef = _db.collection('users').doc(user.uid);
 

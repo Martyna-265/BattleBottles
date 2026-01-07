@@ -8,7 +8,7 @@ class MultiplayerLobby extends StatelessWidget {
   final VoidCallback onClose;
 
   MultiplayerLobby({Key? key, required this.game, required this.onClose})
-    : super(key: key);
+      : super(key: key);
 
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -61,8 +61,7 @@ class MultiplayerLobby extends StatelessWidget {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    final List<String> friendIds =
-                        friendsSnapshot.data?.docs
+                    final List<String> friendIds = friendsSnapshot.data?.docs
                             .map((doc) => doc.id)
                             .toList() ??
                         [];

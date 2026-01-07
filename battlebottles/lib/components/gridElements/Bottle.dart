@@ -15,14 +15,13 @@ import 'Water.dart';
 
 class Bottle extends GridElement with DragCallbacks {
   Bottle(super.gridX, super.gridY, int intSize, super.opponent, this.parentShip)
-    : super(condition: Condition.fromInt(0)) {
+      : super(condition: Condition.fromInt(0)) {
     sprite = opponent ? Condition.fromInt(5).sprite : condition.sprite;
   }
 
   final Ship parentShip;
-  late final BattleGrid battleGrid = opponent
-      ? game.opponentsGrid
-      : game.playersGrid;
+  late final BattleGrid battleGrid =
+      opponent ? game.opponentsGrid : game.playersGrid;
 
   late Vector2 _positionDelta = Vector2(0, 0);
   late Vector2 _startPosition;
