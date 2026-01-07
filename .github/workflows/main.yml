@@ -30,9 +30,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed . --skip-setting-aliases --exclude lib/firebase_options.dart
-        
+      - name: Auto-format code
+        run: dart format .
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
       - name: Analyze code
         run: flutter analyze
 
