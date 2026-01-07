@@ -242,7 +242,9 @@ class FirestoreService {
         losses == 0 &&
         gamesSingle == 0 &&
         gamesMulti == 0 &&
-        puTotal == 0) return;
+        puTotal == 0) {
+      return;
+    }
 
     final userRef = _db.collection('users').doc(user.uid);
 
@@ -321,11 +323,15 @@ class FirestoreService {
 
     Map<String, dynamic> updates = {'powerups_total': FieldValue.increment(1)};
 
-    if (type == 'octopus')
+    if (type == 'octopus') {
       updates['powerups_octopus'] = FieldValue.increment(1);
-    if (type == 'triple_shot')
+    }
+    if (type == 'triple_shot') {
       updates['powerups_triple_shot'] = FieldValue.increment(1);
-    if (type == 'shark') updates['powerups_shark'] = FieldValue.increment(1);
+    }
+    if (type == 'shark') {
+      updates['powerups_shark'] = FieldValue.increment(1);
+    }
 
     await userRef.update(updates);
   }

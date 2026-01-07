@@ -169,8 +169,9 @@ class _GameOptionsScreenState extends State<GameOptionsScreen> {
           .doc(widget.gameId)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
         if (!snapshot.data!.exists) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (widget.game.overlays.isActive('GameOptionsScreen')) {

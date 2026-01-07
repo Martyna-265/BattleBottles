@@ -226,8 +226,12 @@ class BattleGrid extends PositionComponent
       if (p.x < 0 ||
           p.x >= game.squaresInGrid ||
           p.y < 0 ||
-          p.y >= game.squaresInGrid) return false;
-      if (!_isValidCell(p.x, p.y, ship)) return false;
+          p.y >= game.squaresInGrid) {
+        return false;
+      }
+      if (!_isValidCell(p.x, p.y, ship)) {
+        return false;
+      }
       List<Point<int>> neighbors = [
         Point(p.x, p.y - 1),
         Point(p.x, p.y + 1),
