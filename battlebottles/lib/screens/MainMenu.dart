@@ -97,7 +97,7 @@ class GameTitle extends PositionComponent
   void _buildText(Vector2 screenSize) {
     bool isNarrow = screenSize.x < screenSize.y * 0.8;
 
-    double fontSize = isNarrow ? 42.0 : 60.0;
+    double fontSize = isNarrow ? 36.0 : 60.0;
     _borderPaint.strokeWidth = isNarrow ? 2.0 : 3.0;
 
     _titlePaint = TextPaint(
@@ -106,6 +106,7 @@ class GameTitle extends PositionComponent
         fontFamily: 'Awesome Font',
         color: Colors.white,
         fontWeight: FontWeight.bold,
+        letterSpacing: isNarrow ? -1.0 : 2.0,
         shadows: const [
           Shadow(offset: Offset(3, 3), color: Colors.black, blurRadius: 5),
         ],
@@ -120,8 +121,8 @@ class GameTitle extends PositionComponent
     );
     textPainter.layout();
 
-    double paddingX = fontSize * 0.8;
-    double paddingY = fontSize * 0.3;
+    double paddingX = isNarrow ? fontSize * 0.8 : fontSize * 0.8;
+    double paddingY = fontSize * 0.8;
 
     size = Vector2(textPainter.width + paddingX, textPainter.height + paddingY);
   }
